@@ -4,12 +4,15 @@ SERVER=eplapp.library.ualberta.ca
 USER=sirsi
 REMOTE=~/Unicorn/EPLwork/anisbet/
 LOCAL=~/projects/notices/
-APP=notice.pl
+APP=notice.py
+ARGS= --oFile=myOutFile --iFile=myInFile 
 
+
+run:
+	clear
+	python ${LOCAL}${APP} ${ARGS}
+test:
+	clear
+	python ${LOCAL}${APP} -v
 put: test 
 	scp ${LOCAL}${APP} ${USER}@${SERVER}:${REMOTE}
-get:
-	scp ${USER}@${SERVER}:${REMOTE}${APP} ${LOCAL}
-test:
-	perl -c ${LOCAL}${APP}
-
