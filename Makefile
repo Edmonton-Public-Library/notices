@@ -3,9 +3,9 @@
 SERVER=eplapp.library.ualberta.ca
 USER=sirsi
 REMOTE=~/Unicorn/EPLwork/anisbet/
-LOCAL=~/projects/notices/
+LOCAL=./
 APP=notice.py
-ARGS= --oFile=myOutFile --iFile=myInFile 
+ARGS= -h --ifile=testdata/Gen_bills.prn 
 
 
 run:

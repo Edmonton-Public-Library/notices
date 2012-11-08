@@ -1,3 +1,4 @@
 rawcooked.data.zip
-\*.docx
+*.docx
 testdata
+*.pyc
