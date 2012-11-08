@@ -4,15 +4,23 @@ SERVER=eplapp.library.ualberta.ca
 USER=sirsi
 REMOTE=~/Unicorn/EPLwork/anisbet/
 LOCAL=./
-APP=notice.py
+APP=prepareprintnotices.py
+RELATED=customer.py notice.py
 ARGS= -h --ifile=testdata/Gen_bills.prn 
 
-
-run:
+run: ${RELATED}
 	clear
-	python ${LOCAL}${APP} ${ARGS}
-test:
+	python ${LOCAL}${APP} -h     -ifile=testdata/Gen_bills.prn
+	#
+	#
+	python ${LOCAL}${APP} -b12.0 -itestdata/Gen_bills.prn
+	#
+	#
+	python ${LOCAL}${APP} -o     -itestdata/Gen_bills.prn
+	#
+	#
+test: ${RELATED}
 	clear
 	python ${LOCAL}${APP} -v
 put: test 
-	scp ${LOCAL}${APP} ${USER}@${SERVER}:${REMOTE}
+	scp ${LOCAL}*.py ${USER}@${SERVER}:${REMOTE}
