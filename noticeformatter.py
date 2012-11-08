@@ -8,13 +8,15 @@
 #          0.0 - Dev.
 ###########################################################################
 
+import page
+
 class Formatter:
 	def __init__( self ):
-		pass
+		self.File = None
 	# outputs border.
 	def __printtest__( self ):
 		pass
-	def open( self, fileName ):
+	def openDocument( self, fileName ):
 		pass
 	def setTitle( self, text ):
 		pass
@@ -22,46 +24,42 @@ class Formatter:
 		pass
 	def setMessage( self, text='GLOBAL' ):
 		pass
-	def setItemText( self, text ):
+	def setCustomer( self, customer ):
 		pass
-	def setFooter( self, text ):
-		pass
-	def setAddress( self, text ):
-		pass
-	def close( self ):
+	def closeDocument( self ):
 		pass
 		
 class PostscriptFormatter( Formatter ):
 	def __init__( self ):
 		Formatter.__init__( self )
+
 	# prints the borders of the ps for registration and proofing.
 	def __printtest__( self ):
-		pass
-		
-	def open( self, fileName ):
-		pass
+		self.File.write('this is a test 2\n')
+	def openDocument( self, fileName ):
+		try:
+			self.File = open( fileName, 'w' );
+		except e:
+			print repr( e )
 	def setTitle( self, text ):
 		pass
 	def setStatementDate( self, text ):
 		pass
 	def setMessage( self, text='GLOBAL' ):
 		pass
-	def setItemText( self, text ):
+	def setCustomer( self, customer ):
 		pass
-	def setFooter( self, text ):
-		pass
-	def setAddress( self, text ):
-		pass
-	def close( self ):
-		pass
+	def closeDocument( self ):
+		# terminate the file and close it.
+		self.File.close()
 		
 		
 
 def main():
 	formatter = PostscriptFormatter()
-	formatter.open( 'test.ps' )
+	formatter.openDocument( 'test.ps' )
 	formatter.__printtest__()
-	formatter.close()
+	formatter.closeDocument()
 	
 # Initial entry point for program
 if __name__ == "__main__":
