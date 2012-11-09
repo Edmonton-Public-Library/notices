@@ -8,32 +8,62 @@
 #          0.0 - Dev.
 ###########################################################################
 
-class Customer:
+class Item:
 	def __init__( self ):
-		self.addressBlock = ''
-		self.items        = []
+		self.itemLines = []
 		
-	def setAddressText( self, text ):
-		pass
-		
-	def setItemText( self, text ):
-		pass
+	def addLine( self, text ):
+		self.itemLines.append( text )
 		
 	def __str__( self ):
-		return ''
+		return '\n'.join( self.itemLines )
+		
+		
+class Customer:
+	def __init__( self ):
+		self.addressBlock = []
+		self.items        = []
+		self.items.append( Item() )
+		
+	def setAddressText( self, text ):
+		self.addressBlock.append( text )
+		
+	def setItemText( self, text ):
+		"""
+		>>> c = Customer()
+		>>> c.setItemText( "  1 this and that" )
+		>>> print c
+		  1 this and that
+		"""
+		# get the first item off the list
+		item = self.items.pop()
+		# Test if the first non-white char is a digit. Thats when to create a new item.
+		if text.lstrip()[0].isdigit():
+			# if we already are working with an item then append it to the array of items
+			self.items.append( item )
+			item = Item()
+		item.addLine( text )
+		# put it back on the stack for next time.
+		self.items.append( item )
+			
+	def __str__( self ):
+		output = ''
+		for item in self.items:
+			output += str( item )
+		return output
 	
 	# Returns true if the customer's email address is complete and valid
-	# and False otherwise.
+	# and False otherwise. The last line of an address must be a postal code.
 	def isWellFormed( self ):
-		return False
+		return len( self.addressBlock[-1].strip() ) == 7 # you can think of a better regex for a postal code.
 		
 def main():
 	customer = Customer()
-	print customer
-	customer.setAddress('some address')
-	print customer
-	customer.setItemText('text')
-	print customer
+	# print customer
+	# customer.setAddressText('some address')
+	# print customer
+	# customer.setItemText('text')
+	# print customer
 	
 # Initial entry point for program
 if __name__ == "__main__":

@@ -94,22 +94,59 @@ class Bill( Notice ):
 	# Reads the report and parses it into customer related notices.
 	# Returns number of pages that will be printed.
 	def parseReport( self, suppress_malformed_customer=True ):
+		# .block
+		# Luckie Luke
+		# 12345 120 Street
+		# Edmonton, AB
+		# T5X 5N8
+		# .endblock
+		# .read /s/sirsi/Unicorn/Notices/blankmessage
+		# .block
+		# 1   A woman betrayed / Barbara Delinsky.
+		# Delinsky, Barbara.
+		# $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
+		# .endblock
+		# .block
+		# 2   Jump! / Jilly Cooper.
+		# Cooper, Jilly.
+		# $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
+		# .endblock
+		# .block
+		# 3   A perfect proposal / Katie Fforde.
+		# Fforde, Katie.
+		# $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
+		# .endblock
+		# .block
+		# 4   Looking for Peyton Place : a novel / Barbara Delinsky.
+		# Delinsky, Barbara.
+		# $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
+		# .endblock
+		# .block
+		# =======================================================================
+		#
+		#					 $<total_fines_bills:3>     $3.00
+		# .endblock
+		# .block
+		# .read /s/sirsi/Unicorn/Notices/eclosing
+		# .endblock
 		# read in the report and parse it.
 		lines = self.__get_lines__()
 		# now pop off each line from the file and form it into a block of data
+		customer = Customer()
 		while( len( lines ) > 0 ):
 			line = lines.pop()
-			if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
-				print 'found new customer'
-			elif line.startswith( '.block' ):
-				print 'block detected'
+			if line.startswith( '.block' ):
 				while( len( lines ) > 0  ):
 					line = lines.pop()
 					if line.startswith( '.endblock' ):
 						break
-					if line.startswith( '.read' ): # closing message and end of customer.
-						print 'found end of customer'
+					elif line.startswith( '.read' ): # closing message and end of customer.
+						print 'found end message and end of customer'
 						break
-					print line
-				
+					elif line.find( '=====' ) > 0: # summary block.
+						print 'found summary'
+					print line,
+			elif line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
+				print 'opening message and customer items'
+			# ignore everything else it's just dross.
 		return True
