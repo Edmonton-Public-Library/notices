@@ -10,7 +10,7 @@ ARGS= -h --ifile=testdata/Gen_bills.prn
 
 run: ${RELATED}
 	clear
-	python ${LOCAL}${APP} -h     -ifile=testdata/Gen_bills.prn
+	python ${LOCAL}${APP} -h     -itestdata/Gen_bills.prn
 	#
 	#
 	python ${LOCAL}${APP} -b12.0 -itestdata/Gen_bills.prn

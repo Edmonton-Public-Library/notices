@@ -73,9 +73,10 @@ def main( argv ):
 	if notice.parseReport() == False:
 		print 'error: unable to parse the report'
 		sys.exit()
-	notice.setOutputFormat( PostscriptFormatter() )
-	notice.paginate()
-	notice.write()
+	# TODO: allow report to be written to an independant directory.
+	psFormatter = PostscriptFormatter( notice.getOutFileBaseName() )
+	notice.setOutputFormat( psFormatter )
+	notice.writeToFile()
 
 # Initial entry point for program
 if __name__ == "__main__":
