@@ -8,7 +8,7 @@
 #          0.0 - Dev.
 ###########################################################################
 
-import customer
+from customer import Customer
 from datetime import date
 from noticeformatter import NoticeFormatter
 
