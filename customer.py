@@ -67,6 +67,24 @@ class Customer:
 	# Returns true if the customer's email address is complete and valid
 	# and False otherwise. The last line of an address must be a postal code.
 	def isWellFormed( self ):
+		"""
+		>>> c = Customer()
+		>>> c.setAddressText( "  Funky Monkey" )
+		>>> print c.isWellFormed()
+		False
+		>>> c.setAddressText( "  12345 123 Street" )
+		>>> print c.isWellFormed()
+		False
+		>>> c.setAddressText( "  Edmonton, Alberta" )
+		>>> print c.isWellFormed()
+		False
+		>>> c.setAddressText( "  TgG jkl" )
+		>>> print c.isWellFormed()
+		False
+		>>> c.setAddressText( "  T6G 0KY" )
+		>>> print c.isWellFormed()
+		True
+		"""
 		return len( self.addressBlock[-1].strip() ) == 7 # you can think of a better regex for a postal code.
 		
 def main():
