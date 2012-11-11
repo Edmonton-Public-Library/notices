@@ -13,12 +13,15 @@ import re
 
 # Items are blocks of text information destined for the notice. An item 
 # is starts with a number that enumerates a list of a patron's items.
-class Item:
+class ItemBlock:
 	def __init__( self ):
 		self.itemLines = []
 		
 	def addLine( self, text ):
 		self.itemLines.append( text )
+		
+	def getLastLine( self ):
+		return self.itemLines[-1]
 		
 	def __str__( self ):
 		return '\n'.join( self.itemLines )
@@ -28,13 +31,18 @@ class Item:
 # question 'can a printed notice for this customer be processed by Canada Post?'
 class Customer:
 	def __init__( self ):
-		self.addressBlock = []
+		self.addressBlock = ItemBlock()
 		self.items        = []
+		self.summaryBlock = ItemBlock()
 		self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z]\s{1}\d[a-z]\d(\s+)?", re.IGNORECASE )
 		
 	# Adds text to an address block. 
 	def setAddressText( self, text ):
-		self.addressBlock.append( text )
+		self.addressBlock.addLine( text )
+		
+	# Adds text to an summary block. 
+	def setSummaryText( self, text ):
+		self.summaryBlock.addLine( text )
 		
 	# Sets the customer item text. Item text is added one line at-a-time
 	# but items are packaged individually within this class.
@@ -57,7 +65,7 @@ class Customer:
 		item = None
 		# Test if the first non-white char is a digit. Thats when to create a new item.
 		if text.lstrip()[0].isdigit():
-			item = Item()
+			item = ItemBlock()
 		else:
 			# get the first item off the list
 			item = self.items.pop()
@@ -96,7 +104,7 @@ class Customer:
 		True
 		"""
 		# check if the matcher returned a non-None object when compared to the last line of the address block
-		return not isinstance( self.postalCode.match( self.addressBlock[-1] ), type( None ) ) # you can think of a better regex for a postal code.
+		return not isinstance( self.postalCode.match( self.addressBlock.getLastLine() ), type( None ) )
 	
 # Initial entry point for program
 if __name__ == "__main__":

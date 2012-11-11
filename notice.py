@@ -25,6 +25,7 @@ class Notice:
 		self.pagesPrinted  = 0
 		self.noticeCount   = 0  # number of customers notices processed.
 		self.incorrectAddress = []  # number of notices that couldn't be printed because customer data was malformed.
+		self.customers     = []
 		
 	# Reads the report and parses it into customer related notices.
 	# Returns number of pages that will be printed.
@@ -49,6 +50,27 @@ class Notice:
 		blocks = []
 		lines.reverse()
 		return lines
+		
+	# Adds item text from the report to the customer.
+	# def __set_customer_items__( self, lines, customer ):
+		# pass
+		
+	# def __set_customer_address__( self, lines, customer ):
+		# pass
+		
+	# def __set_customer_summary__( self, lines, customer ):
+		# while( len( lines ) > 0  ):
+			# line = lines.pop()
+			# if line.startswith( '.endblock' ):
+				# return
+			# customer.setAddressText( line )
+			
+	def __set_customer_data__( self, lines, customerFunc ):
+		while( len( lines ) > 0  ):
+			line = lines.pop()
+			if line.startswith( '.endblock' ):
+				return
+			customer.customerFunc( line )
 		
 	def __str__( self ):
 		return ' input file = ' + self.iFileName
@@ -136,17 +158,27 @@ class Bill( Notice ):
 		while( len( lines ) > 0 ):
 			line = lines.pop()
 			if line.startswith( '.block' ):
-				while( len( lines ) > 0  ):
+				# grab lines of the stack until the block ends.
+				while( len( lines ) > 0 ):
 					line = lines.pop()
 					if line.startswith( '.endblock' ):
 						break
 					elif line.startswith( '.read' ): # closing message and end of customer.
 						print 'found end message and end of customer'
+						# get the message and pass it to the noticeFormatter.
+						self.customers.append( customer )
+						customer = Customer()
 						break
 					elif line.find( '=====' ) > 0: # summary block.
 						print 'found summary'
+						self.__set_customer_data__( lines, customer.setSummaryText )
 					print line,
 			elif line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
 				print 'opening message and customer items'
 			# ignore everything else it's just dross.
 		return True
+		
+# Initial entry point for program
+if __name__ == "__main__":
+	import doctest
+	doctest.testmod()
