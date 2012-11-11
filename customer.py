@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 ###########################################################################
-# Purpose: Customer objects.
+# Purpose: Customer objects. Customers have a number of items (to be notified
+# about), and an address block.
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
-# Date:    November 7, 2012
+# Date:    November 9, 2012
 # Rev:     
 #          0.0 - Dev.
 ###########################################################################
 
+import re
+
+# Items are blocks of text information destined for the notice. An item 
+# is starts with a number that enumerates a list of a patron's items.
 class Item:
 	def __init__( self ):
 		self.itemLines = []
@@ -25,7 +30,9 @@ class Customer:
 	def __init__( self ):
 		self.addressBlock = []
 		self.items        = []
+		self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z]\s{1}\d[a-z]\d(\s+)?", re.IGNORECASE )
 		
+	# Adds text to an address block. 
 	def setAddressText( self, text ):
 		self.addressBlock.append( text )
 		
@@ -83,20 +90,15 @@ class Customer:
 		False
 		>>> c.setAddressText( "  T6G 0KY" )
 		>>> print c.isWellFormed()
+		False
+		>>> c.setAddressText( "  T6G 0g4" )
+		>>> print c.isWellFormed()
 		True
 		"""
-		return len( self.addressBlock[-1].strip() ) == 7 # you can think of a better regex for a postal code.
-		
-def main():
-	customer = Customer()
-	# print customer
-	# customer.setAddressText('some address')
-	# print customer
-	# customer.setItemText('text')
-	# print customer
+		# check if the matcher returned a non-None object when compared to the last line of the address block
+		return not isinstance( self.postalCode.match( self.addressBlock[-1] ), type( None ) ) # you can think of a better regex for a postal code.
 	
 # Initial entry point for program
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()
-	main()
