@@ -24,3 +24,5 @@ test: ${RELATED}
 	python ${LOCAL}${APP} -v
 put: test 
 	scp ${LOCAL}*.py ${USER}@${SERVER}:${REMOTE}
+page:
+	python ${LOCAL}page.py
