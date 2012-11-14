@@ -97,19 +97,21 @@ class PostscriptPage( Page ):
         if centre == True:
             midPage = 4.25 * POINTS
             x = midPage - ( len( text ) * 8 ) / 2
-        x_s = self.__to_points__( x )
+            x_s = str( x )
+        else:
+            x_s = self.__to_points__( x )
         y_s = self.__to_points__( y )
         self.page += 'newpath\n'
         self.page += x_s + ' ' + y_s + ' moveto\n'
         self.page += '(' + text + ') show\n'
     def setHeadMessages( self, text ):
         pass
-    def setItems( self, text ):
-        pass
+    def setItem( self, text ):
+        return True
     def setFootMessages( self, text ):
         pass
-    def setAddress( self, text, x, y, m=0.25 ):
-        return self.__set_text_block__( text, x, y, m )
+    def setAddress( self, block, x, y, m=0.25 ):
+        return self.__set_text_block__( block, x, y, m )
     def __str__( self ):
 		self.page += 'showpage\n'
 		return self.page
@@ -122,6 +124,7 @@ if __name__ == "__main__":
     doctest.testmod()
     page = PostscriptPage( 1, True )
     print page.setAddress( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
+    page.setTitle('Test Title', 4.25, 10.1875 )
     f = open( 'test.ps', 'w' )
     f.write( str(page) )
     f.close()
