@@ -8,135 +8,120 @@
 #          0.0 - Dev.
 ###########################################################################
 
+POINTS = 72.0
 class Page:
     def __init__( self ):
         self.page = ''
-    def setHeadMessages( text ):
+    def setTitle( self ):
         pass
-    def setItems( text ):
+    def setHeadMessages( self, text ):
         pass
-    def setFootMessages( text ):
+    def setItems( self, text ):
         pass
-    def setAddress( text ):
+    def setFootMessages( self, text ):
+        pass
+    def setAddress( self, text ):
         pass
     def __str__( self ):
         return self.page
         
 class PostscriptPage( Page ):
-    def __init__( self, pageNumber, debug=False ):
-		if debug == True:
-			self.page  = '%!PS-Adobe-2.0\n\n/inch {\n\t72 mul\n} def\n'
-			self.page += '/perfline {\n'
-			self.page += '[6 3] 3 setdash\n'
-			self.page += 'stroke\n'
-			self.page += 'newpath\n'
-			self.page += '} def\n'
-			self.page += '/fineperfline {\n'
-			self.page += 'gsave\n'
-			self.page += '0.5 setgray\n'
-			self.page += '[4 2] 0 setdash\n'
-			self.page += 'stroke\n'
-			self.page += 'grestore\n'
-			self.page += 'newpath\n'
-			self.page += '} def\n'
-			self.page += '/pageborder{\n'
-			self.page += '0.5 inch 0  inch moveto\n'
-			self.page += '0.5 inch 11 inch lineto\n'
-			self.page += '8   inch 0  inch moveto\n'
-			self.page += '8   inch 11 inch lineto\n'
-			self.page += '0.5 setlinewidth\n'
-			self.page += 'perfline\n'
-			self.page += '0   inch 3.15625 inch moveto\n'
-			self.page += '8.5 inch 3.15625 inch lineto\n'
-			self.page += '0.25 setlinewidth\n'
-			self.page += 'fineperfline\n'
-			self.page += '0   inch 3.625 inch moveto\n'
-			self.page += '8.5 inch 3.625 inch lineto\n'
-			self.page += 'fineperfline\n'
-			self.page += '0   inch 4.15625 inch moveto\n'
-			self.page += '8.5 inch 4.15625 inch lineto\n'
-			self.page += 'fineperfline\n'
-			self.page += '0   inch 6.90625 inch moveto\n'
-			self.page += '8.5 inch 6.90625 inch lineto\n'
-			self.page += 'fineperfline\n'
-			self.page += '0   inch 7.3125  inch moveto\n'
-			self.page += '8.5 inch 7.3125  inch lineto\n'
-			self.page += 'fineperfline\n'
-			self.page += '0   inch 10.5    inch moveto\n'
-			self.page += '8.5 inch 10.5    inch lineto\n'
-			self.page += 'fineperfline\n'
-			self.page += '} def\n'
-			self.page += '/Times-Roman findfont\n11 scalefont\nsetfont\n'
-			self.page += '%%Pages: 1\n'
-		self.page += '%%Page: 1 1\n'
-		if debug == True:
-			self.page += 'pageborder\n'
-		self.page += self.__next_line__( 4, 100, ['Name Here', 'Address line one', 'Address line two'], 12 )
-		# self.page += '/ppi 100 def\n'
-		# self.page += 'newpath\n'
-		# self.page += '4 inch ppi moveto\n'
-		# self.page += '(Balzac Billy) show\n'
-		# self.page += 'newpath\n'
-		# self.page += '/ppi ppi 20 sub def\n'
-		# self.page += '4 inch ppi moveto\n'
-		# self.page += '(12345 123 Street) show\n'
+    def __init__( self, pageNumber, debug=False, font='Times-Roman', fontsize=12.0, kerning=14.0 ):
+        self.page     = ''
+        self.font     = font
+        self.fontSize = fontsize
+        self.kerning  = kerning
+        if debug == True:
+            self.page  = '%!PS-Adobe-2.0\n\n/inch {\n\t72 mul\n} def\n'
+            self.page += '/perfline {\n'
+            self.page += '[6 3] 3 setdash\n'
+            self.page += 'stroke\n'
+            self.page += 'newpath\n'
+            self.page += '} def\n'
+            self.page += '/fineperfline {\n'
+            self.page += 'gsave\n'
+            self.page += '0.5 setgray\n'
+            self.page += '[4 2] 0 setdash\n'
+            self.page += 'stroke\n'
+            self.page += 'grestore\n'
+            self.page += 'newpath\n'
+            self.page += '} def\n'
+            self.page += '/pageborder{\n'
+            self.page += '0.5 inch 0  inch moveto\n'
+            self.page += '0.5 inch 11 inch lineto\n'
+            self.page += '8   inch 0  inch moveto\n'
+            self.page += '8   inch 11 inch lineto\n'
+            self.page += '0.5 setlinewidth\n'
+            self.page += 'perfline\n'
+            self.page += '0   inch 3.15625 inch moveto\n'
+            self.page += '8.5 inch 3.15625 inch lineto\n'
+            self.page += '0.25 setlinewidth\n'
+            self.page += 'fineperfline\n'
+            self.page += '0   inch 3.625 inch moveto\n'
+            self.page += '8.5 inch 3.625 inch lineto\n'
+            self.page += 'fineperfline\n'
+            self.page += '0   inch 4.15625 inch moveto\n'
+            self.page += '8.5 inch 4.15625 inch lineto\n'
+            self.page += 'fineperfline\n'
+            self.page += '0   inch 6.90625 inch moveto\n'
+            self.page += '8.5 inch 6.90625 inch lineto\n'
+            self.page += 'fineperfline\n'
+            self.page += '0   inch 7.3125  inch moveto\n'
+            self.page += '8.5 inch 7.3125  inch lineto\n'
+            self.page += 'fineperfline\n'
+            self.page += '0   inch 10.5    inch moveto\n'
+            self.page += '8.5 inch 10.5    inch lineto\n'
+            self.page += 'fineperfline\n'
+            self.page += '} def\n'
+            self.page += '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+            self.page += '%%Pages: 1\n'
+        self.page += '%%Page: 1 1\n'
+        if debug == True:
+            self.page += 'pageborder\n'
 		
-    def __next_line__( self, x, y, lines, ptKerning=20 ):
-		# comment
-		block = '/ppi ' + str(y) + ' def\n'
-		for line in lines:
-			block += 'newpath\n'
-			block += str(x) + ' inch ppi moveto\n'
-			block += '(' + line + ') show\n'
-			block += '/ppi ppi ' + str(ptKerning) + ' sub def\n'
-		return block
+    def __set_text_block__( self, lines, x, y, lowerBound ):
+		# check if you can place all this text before placemnet
+        x_s = self.__to_points__( x )
+        y_s = self.__to_points__( y )
+        if ( y * POINTS - ( len( lines ) * self.kerning )) < ( lowerBound * POINTS ):
+            return False
+        for line in lines:
+            self.page += 'newpath\n'
+            self.page += x_s + ' ' + y_s + ' moveto\n'
+            self.page += '(' + line + ') show\n'
+            y -= (self.kerning / POINTS)
+            y_s = self.__to_points__( y )
+        return True
 		
-		
-    def setHeadMessages( text ):
+    def setTitle( self, text, x, y, centre=True ):
+        if centre == True:
+            midPage = 4.25 * POINTS
+            x = midPage - ( len( text ) * 8 ) / 2
+        x_s = self.__to_points__( x )
+        y_s = self.__to_points__( y )
+        self.page += 'newpath\n'
+        self.page += x_s + ' ' + y_s + ' moveto\n'
+        self.page += '(' + text + ') show\n'
+    def setHeadMessages( self, text ):
         pass
-    def setItems( text ):
+    def setItems( self, text ):
         pass
-    def setFootMessages( text ):
+    def setFootMessages( self, text ):
         pass
-    def setAddress( text ):
-        pass
+    def setAddress( self, text, x, y, m=0.25 ):
+        return self.__set_text_block__( text, x, y, m )
     def __str__( self ):
 		self.page += 'showpage\n'
-		return self.page  
+		return self.page
+    def __to_points__( self, n ):
+        return str( n * POINTS )
+        
+
 if __name__ == "__main__":
-	import doctest
-	doctest.testmod()
-	page = PostscriptPage( 1, True )
-	f = open( 'test.ps', 'w' )
-	f.write( str(page) )
-	f.close()
-
-# /Times-Roman findfont   % Get the basic font
-# 20 scalefont            % Scale the font to 20 points
-# setfont                 % Make it the current font
-
-# newpath                 % Start a new path
-# 72 72 moveto            % Lower left corner of text at (72, 72)
-# (Hello, world!) show    % Typeset "Hello, world!"
-
-# showpage
-
-# %!PS-Adobe-2.0
-
-# %%Pages: 2
-# %%Page: 1 1
-# newpath
-# 100 100 moveto
-# 400 400 lineto
-# closepath 
-# 5 setlinewidth
-# stroke
-# showpage
-# %%Page: 2 2
-# newpath
-# 100 400 moveto
-# 400 100 lineto
-# closepath
-# 10 setlinewidth
-# stroke
-# showpage
+    import doctest
+    doctest.testmod()
+    page = PostscriptPage( 1, True )
+    print page.setAddress( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
+    f = open( 'test.ps', 'w' )
+    f.write( str(page) )
+    f.close()
