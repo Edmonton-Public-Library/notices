@@ -161,6 +161,7 @@ class PostscriptPage( Page ):
     # param:  y - coordinate in inches.
     # param:  size - float of size of text for the title in points.
     # param:  centre - True if the text is to be centered and false otherwise.
+    # return: 
     def setTitle( self, text, x, y, size=18.0, centre=True ):
         if centre == True:
             midPage = 4.25 * POINTS
