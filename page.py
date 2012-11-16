@@ -23,7 +23,7 @@ class Page:
 
         
 class PostscriptPage( Page ):
-    def __init__( self, pageNumber, debug=False, font='Courier', fontsize=12.0, kerning=14.0 ):
+    def __init__( self, pageNumber, debug=False, font='Courier', fontsize=10, kerning=11.0 ):
         self.page     = ''
         self.font     = font
         self.fontSize = fontsize
@@ -85,7 +85,7 @@ class PostscriptPage( Page ):
     # param:  dry run - True if you want the text to appear, false if you want the location of 
     #         where the bottom of the text box would have been if the text was to be laid out.
     # return: float - the y location of the last line printed.
-    def __set_text_block__( self, lines, x, y, bold=False, dryRun=False ):
+    def __set_text_block__( self, lines, x, y, dryRun=False ):
         for line in lines:
             if dryRun == False:
                 self.__set_text__( line, x, y )
@@ -96,11 +96,65 @@ class PostscriptPage( Page ):
     # param:  line - string to be laid out on the page
     # param:  x - x coordinate of the string.
     # param:  y - y coordinate with origin (0,0) at the lower left corner of the page. 
-    def __set_text__( self, line, x, y, bold=False ):
+    def __set_text__( self, line, x, y ):
         x_s = self.__to_points__( x )
         y_s = self.__to_points__( y )
         self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
-		
+    # Default method that stringifies object.
+    # param:  
+    # return: the postscript string of this object.
+    def __str__( self ):
+		self.page += 'showpage\n'
+		return self.page
+        
+    # Converts the argument into points
+    # param:  n float - the value to convert.
+    # return: n * 72 as a string
+    def __to_points__( self, n ):
+        return str( n * POINTS )
+    
+    # Breaks long lines from a block of text into chunks that will fit within
+    # the notice boundaries (line length < 6.5").
+    # param:  block - array of strings.
+    # param:  preserveWhiteSpace - True to keep leading white space before words and False otherwise.
+    # return: New array of strings chopped nearest word boundary fitted to page boundary.
+    def __break_line__( self, block, preserveWhiteSpace ):
+        maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
+        textBlock = []
+        thisLine = ''
+        for line in block:
+            if len( line ) <= maxCharsPerLine:
+                textBlock.append( line )
+                continue
+            words = []
+            # If items don't preserve whitespace they end up looking odd.
+            if preserveWhiteSpace == True:
+                words = self.__split__( line )
+            else: # this is for messages that are just one long line.
+                words = line.split()
+            for word in words:
+                if len( thisLine ) + len( word ) <= maxCharsPerLine:
+                    thisLine += word + ' '
+                else:
+                    textBlock.append( thisLine[:-1] )
+                    thisLine  = word + ' '
+            textBlock.append( thisLine[:-1] )
+        return textBlock
+	
+    # Splits a line into words but keeps the leading spacing.
+    # param:  sentence - string of words
+    # return: array of words with leading spaces intact.
+    def __split__( self, sentence ):
+        words = sentence.split()
+        start   = 0
+        end     = 0
+        spcWords = []
+        for word in words:
+            end = sentence.find( word, start ) + len(word)
+            spcWords.append( sentence[start:end] )
+            start = end
+        return spcWords
+    
     # Sets the title on the page in bold.
     # param:  text - Title string
     # param:  x - coordinate in inches.
@@ -127,52 +181,44 @@ class PostscriptPage( Page ):
     # param:  list of strings of a block
     # param:  x - x coord.
     # param:  y - y coord in inches.
+    # param:  preserverWhiteSpace True to save leading white space on line breaking False will remove it.
     # return: last y coord in inches.
-    def setTextBlock( self, block, x, y, bold=False ):
-        textBlock =  self.__break_line__( block )
-        return self.__set_text_block__( textBlock, x, y )
+    def setTextBlock( self, block, x, y, preserverWhiteSpace, bold=False ):
+        textBlock =  self.__break_line__( block, preserverWhiteSpace )
+        if bold == True:
+            self.page += 'gsave\n'
+            self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+        lastY = self.__set_text_block__( textBlock, x, y )
+        if bold == True:
+            self.page += 'grestore\n'
+        return lastY
         
     # Sets a single line of text.
-    def setLine( self, text, x, y ):
-        return self.__set_text__( text, x, y )
-    def __str__( self ):
-		self.page += 'showpage\n'
-		return self.page
-    def __to_points__( self, n ):
-        return str( n * POINTS )
-    
-    # Breaks long lines from a block of text into chunks that will fit within
-    # the notice boundaries (line length < 6.5"
-    # param:  block - array of strings.
-    # return: array of strings chopped nearest word boundary to fit within said boundary.
-    def __break_line__( self, block ):
-        maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
-        textBlock = []
-        thisLine = ''
-        for line in block:
-            if len( line ) <= maxCharsPerLine:
-                textBlock.append( line )
-                continue
-            words = line.split()
-            for word in words:
-                if len( thisLine ) + len( word ) <= maxCharsPerLine:
-                    thisLine += word + ' '
-                else:
-                    textBlock.append( thisLine[:-1] )
-                    thisLine  = word + ' '
-            textBlock.append( thisLine[:-1] )
-        return textBlock
-        
+    # param:  String to place.
+    # param:  x - x coord.
+    # param:  y - y coord in inches.
+    # return: 
+    def setLine( self, text, x, y, bold=False ):
+        if bold == True:
+            self.page += 'gsave\n'
+            self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+        self.__set_text__( text, x, y )
+        if bold == True:
+            self.page += 'grestore\n'
 
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
     page = PostscriptPage( 1, True )
-    page.setTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
+    page.setTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75, False )
     msg = ['Statement produced: Friday, August 24 2012']
-    nextLine = page.setTextBlock( msg, 0.875, 9.875 )
+    nextLine = page.setTextBlock( msg, 0.875, 9.875, False )
     msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.  This may block your ability to borrow or to place holds or to renew materials online or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
-    page.setTextBlock( msg, 0.875, (nextLine - 0.18) )
+    nextLine = page.setTextBlock( msg, 0.875, (nextLine - 0.18), False )
+    msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
+    '      Raymond, Bradley.',
+    '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
+    nextLine = page.setTextBlock( msg, 0.875, (nextLine - 0.18), True, True )
     page.setTitle('Test Title', 4.25, 10.1875 )
     page.setLine('Statement 1 of 2', 0.875, 4.5 )
     f = open( 'test.ps', 'w' )
