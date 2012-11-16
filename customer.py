@@ -32,7 +32,7 @@ class ItemBlock:
 class Customer:
     def __init__( self ):
         self.addressBlock = ItemBlock()
-        self.items        = []
+        self.items        = [ItemBlock()]
         self.summaryBlock = ItemBlock()
         self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z]\s{1}\d[a-z]\d(\s+)?", re.IGNORECASE )
         self.email        = ''
@@ -40,16 +40,24 @@ class Customer:
     # Adds text to an address block. 
     def setAddressText( self, text ):
         self.addressBlock.addLine( text )
-        
+    
+    # Sets the customer email, which in turn lets the customer object know that it doesn't 
+    # get printed.
+    # param:  text string containing '.email email@address.com'
+    # return: 
     def setEmail( self, text ):
-        self.email = text
-        
+        address = text.split()[1]
+        self.email = address
+    
+    # Answers the question: customer, do you receive printed notices?
+    # param:  
+    # return: True if customer does not have an email address and False otherwise.
     def getsPrintedNotices( self ):
         """
         >>> c = Customer()
         >>> c.getsPrintedNotices()
         True
-        >>> c.setEmail( "ilsteam@epl.ca" )
+        >>> c.setEmail( ".email ilsteam@epl.ca" )
         >>> c.getsPrintedNotices()
         False
         """
@@ -78,6 +86,8 @@ class Customer:
         >>> print len(c.items)
         2
         """
+        if len( text.lstrip() ) < 1:
+            return
         item = None
         # Test if the first non-white char is a digit. Thats when to create a new item.
         if text.lstrip()[0].isdigit():
@@ -93,7 +103,9 @@ class Customer:
         output = ''
         for item in self.items:
             output += str( item )
-        return output
+        output += '\nsummary block: ' + str(self.summaryBlock)
+        output += '\naddress block: ' + str(self.addressBlock)
+        return output + '\n'
     
     # Returns true if the customer's email address is complete and valid
     # and False otherwise. The last line of an address must be a postal code.

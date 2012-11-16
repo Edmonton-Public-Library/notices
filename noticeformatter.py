@@ -20,62 +20,94 @@ WARNING_MSG += "% This information is protected by EPL's FOIP policy, and must N
 WARNING_MSG += "% permission from the management of EPL.\n"
 
 class NoticeFormatter:
-	def __init__( self, fileBaseName ):
-		self.fileName  = fileBaseName
-		self.title     = ''
-		self.header    = ''
-		self.footer    = ''
-		self.today     = date.today().strftime("%A, %B %d, %Y")
+    def __init__( self, fileBaseName ):
+        self.fileName        = fileBaseName
+        self.title           = ''
+        self.header          = ''
+        self.footer          = ''
+        self.today           = date.today().strftime("%A, %B %d, %Y")
+        self.startNoticePath = ''
+        self.endNoticePath   = ''
 
-	# Sets the title of the notice.
-	def setTitle( self, text ):
-		self.title = text
-	
-	# Sets the global header-message string for the notices.
-	def setHeader( self, text ):
-		self.header = text
-	
-	# Sets the footer text (if any).
-	# Normally the footer is reserved for the 'Statement 1 of 1' message
-	# which is added automatically when the customer is formatted.
-	# (See setCustomer()).
-	def setFooters( self, text ):
-		self.footer = text
-		
-	# Sets the customer data to be printed to the final notices.
-	# Formats customers into multi-sheet notices if necessary.
-	def setCustomer( self, customer ):
-		pass
-	
-	# Formats the customers into pages based on the target output
-	# file format.
-	def format( self ):
-		self.File.close()
-		return True
-		
+    # Sets the title of the notice.
+    def setTitle( self, text ):
+        self.title = text
+    
+    # Sets the global header-message string for the notices.
+    def setHeader( self, text ):
+        self.header = text
+    
+    # Sets the footer text (if any).
+    # Normally the footer is reserved for the 'Statement 1 of 1' message
+    # which is added automatically when the customer is formatted.
+    # (See setCustomer()).
+    def setFooter( self, text ):
+        self.footer = text
+    
+    # Sets the closing notice (if any). This message limits the program to run on the
+    # production server.
+    # param:  readTag - path to the file to read, looks like '.read /s/sirsi/Unicorn/Notices/enclose
+    # return: 
+    def setClosingBulletin( self, readTag ):
+        self.footer = readTag
+        
+    # Sets the closing notice (if any). This message limits the program to run on the
+    # production server.
+    # param:  readTag - path to the file to read, looks like '.read /s/sirsi/Unicorn/Notices/enclose
+    # return: 
+    def setOpeningBulletin( self, readTag ):
+        pass
+        
+    # Sets the customer data to be printed to the final notices.
+    # Formats customers into multi-sheet notices if necessary.
+    def setCustomer( self, customer ):
+        pass
+    
+    # Formats the customers into pages based on the target output
+    # file format.
+    def format( self ):
+        self.File.close()
+        return True
+        
 class PostscriptFormatter( NoticeFormatter ):
-	def __init__( self, fileBaseName ):
-		NoticeFormatter.__init__( self, fileBaseName + '.ps' )
-	
-	# this method actually formats the customers data into pages.
-	def format( self ):
-		# Do the formatting then close the file.
-		psText  = '%!PS-Adobe-2.0\n'
-		psText += '% Created for Edmonton Public Library ' + self.today + '\n'
-		psText += WARNING_MSG
-
-# %%Pages: 2'
-		return True
-		
-	def __str__( self ):
-		return 'Postscript formatter: ' + self.fileName
+    def __init__( self, fileBaseName ):
+        NoticeFormatter.__init__( self, fileBaseName + '.ps' )
+    
+    # this method actually formats the customers data into pages.
+    def format( self ):
+        # Do the formatting then close the file.
+        psText  = '%!PS-Adobe-2.0\n'
+        psText += '% Created for Edmonton Public Library ' + self.today + '\n'
+        psText += WARNING_MSG
+        return True
+        
+    # Sets the closing notice (if any). This message limits the program to run on the
+    # production server.
+    # param:  readTag - path to the file to read, looks like '.read /s/sirsi/Unicorn/Notices/enclose
+    # return: 
+    # TODO:  fix so this need not run on just the production server.
+    def setClosingBulletin( self, readTag ):
+        self.endNoticePath = readTag.split()[1]
+        print 'setting end notice to read from path: ' + self.endNoticePath
+        
+    # Sets the open notice. This message limits the program to run on the
+    # production server.
+    # param:  readTag - path to the file to read, looks like '.read /s/sirsi/Unicorn/Notices/enclose
+    # return: 
+    # TODO:  fix so this need not run on just the production server.
+    def setClosingBulletin( self, readTag ):
+        self.startNoticePath = readTag.split()[1]
+        print 'setting end notice to read from path: ' + self.startNoticePath
+        
+    def __str__( self ):
+        return 'Postscript formatter: ' + self.fileName
 
 def main():
-	formatter = PostscriptFormatter( 'test.ps' )
-	formatter.format()
-	
+    formatter = PostscriptFormatter( 'test.ps' )
+    formatter.format()
+    
 # Initial entry point for program
 if __name__ == "__main__":
-	import doctest
-	doctest.testmod()
-	main()
+    import doctest
+    doctest.testmod()
+    main()
