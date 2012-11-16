@@ -23,7 +23,7 @@ class Page:
 
         
 class PostscriptPage( Page ):
-    def __init__( self, pageNumber, debug=False, font='Courir', fontsize=12.0, kerning=14.0 ):
+    def __init__( self, pageNumber, debug=False, font='Courier', fontsize=12.0, kerning=14.0 ):
         self.page     = ''
         self.font     = font
         self.fontSize = fontsize
@@ -117,7 +117,7 @@ class PostscriptPage( Page ):
             x_s = self.__to_points__( x )
         y_s = self.__to_points__( y )
         self.page += 'gsave\n'
-        self.page += '/' + self.font + '-bold findfont\n' + str( size ) + ' scalefont\nsetfont\n'
+        self.page += '/' + self.font + '-Bold findfont\n' + str( size ) + ' scalefont\nsetfont\n'
         self.page += 'newpath\n'
         self.page += x_s + ' ' + y_s + ' moveto\n'
         self.page += '(' + text + ') show\n'

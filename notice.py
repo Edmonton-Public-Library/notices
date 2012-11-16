@@ -70,7 +70,7 @@ class Notice:
 			line = lines.pop()
 			if line.startswith( '.endblock' ):
 				return
-			customer.customerFunc( line )
+			customerFunc( line )
 		
 	def __str__( self ):
 		return ' input file = ' + self.iFileName

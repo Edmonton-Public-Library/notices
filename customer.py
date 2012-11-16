@@ -42,6 +42,7 @@ class Customer:
 		
 	# Adds text to an summary block. 
 	def setSummaryText( self, text ):
+		print '%%%%%%%%%%%% Hey I ran - Nice job! %%%%%%%%%%%%%%%%%'
 		self.summaryBlock.addLine( text )
 		
 	# Sets the customer item text. Item text is added one line at-a-time
