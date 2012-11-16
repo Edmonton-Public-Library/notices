@@ -48,23 +48,13 @@ class Notice:
 		lines = iFile.readlines()
 		iFile.close()
 		blocks = []
+        # reverse the order so we just use 
 		lines.reverse()
 		return lines
 		
 	# Adds item text from the report to the customer.
-	# def __set_customer_items__( self, lines, customer ):
-		# pass
-		
-	# def __set_customer_address__( self, lines, customer ):
-		# pass
-		
-	# def __set_customer_summary__( self, lines, customer ):
-		# while( len( lines ) > 0  ):
-			# line = lines.pop()
-			# if line.startswith( '.endblock' ):
-				# return
-			# customer.setAddressText( line )
-			
+    # param:  the remainder of the lines from the report as a list
+    # param:  function to be called. Data dependant.
 	def __set_customer_data__( self, lines, customerFunc ):
 		while( len( lines ) > 0  ):
 			line = lines.pop()
