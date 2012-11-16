@@ -152,6 +152,7 @@ class Bill( Notice ):
 		# .read /s/sirsi/Unicorn/Notices/eclosing
 		# .endblock
 		# read in the report and parse it.
+		# TODO - add the rest of the blocks to capture customer data. Add test for 'email' tag some have some don't
 		lines = self.__get_lines__()
 		# now pop off each line from the file and form it into a block of data
 		customer = Customer()
