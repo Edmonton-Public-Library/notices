@@ -146,34 +146,38 @@ class Bill( Notice ):
         lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer = Customer()
+        isItemsBlocks = False
         while( len( lines ) > 0 ):
             line = lines.pop()
-            if line.startswith( '.block' ):
-                # grab lines of the stack until the block ends.
-                while( len( lines ) > 0 ):
-                    line = lines.pop()
-                    if line.startswith( '.endblock' ):
-                        break
-                    elif line.startswith( '.read' ): # closing message and end of customer.
-                        print 'found end message and end of customer'
-                        # get the message and pass it to the noticeFormatter.
-                        self.formatter.setClosingBulletin( line )
-                        self.customers.append( customer )
-                        customer = Customer()
-                        break
-                    elif line.find( '=====' ) > 0: # summary block.
-                        print 'found summary'
-                        self.__set_customer_data__( lines, customer.setSummaryText )
-                    print line,
-            elif line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
+            if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
                 print 'opening message and customer items'
+                isItemsBlocks = True
                 self.formatter.setOpeningBulletin( line )
-                self.__set_customer_data__( lines, customer.setItemText )
+            elif line.startswith( '.block' ):
+                line = lines.pop()
+                if line.startswith( '.read' ): # closing message and end of customer.
+                    print 'found end message and end of customer'
+                    # get the message and pass it to the noticeFormatter.
+                    self.formatter.setClosingBulletin( line )
+                    self.customers.append( customer )
+                    customer = Customer()
+                    isItemsBlocks = False
+                    break
+                elif line.find( '=====' ) > 0: # summary block.
+                    print 'found summary'
+                    customer.setSummaryText( line )
+                    self.__set_customer_data__( lines, customer.setSummaryText )
+                elif isItemsBlocks == True:
+                    customer.setItemText( line )
+                    self.__set_customer_data__( lines, customer.setItemText )
+                else:
+                    customer.setAddressText( line )
+                    self.__set_customer_data__( lines, customer.setAddressText )
             elif line.startswith( '.email' ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
         # for testing print out the customers and what you have set.
-        print customer
+        print self.customers[0]
         return True
         
 # Initial entry point for program

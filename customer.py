@@ -23,8 +23,11 @@ class ItemBlock:
     def getLastLine( self ):
         return self.itemLines[-1]
         
+    def isEmpty( self ):
+        return len(self.itemLines) == 0 or len(self.itemLines[0]) == 0
+        
     def __str__( self ):
-        return '\n'.join( self.itemLines )
+        return ' '.join( self.itemLines )
         
 # This class represents a customer who is potentially going to receive a notice from 
 # the library. A Customer knows if its address is well formatted and can answer the 
@@ -32,7 +35,7 @@ class ItemBlock:
 class Customer:
     def __init__( self ):
         self.addressBlock = ItemBlock()
-        self.items        = [ItemBlock()]
+        self.items        = []
         self.summaryBlock = ItemBlock()
         self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z]\s{1}\d[a-z]\d(\s+)?", re.IGNORECASE )
         self.email        = ''
@@ -65,7 +68,6 @@ class Customer:
         
     # Adds text to an summary block. 
     def setSummaryText( self, text ):
-        print '%%%%%%%%%%%% Hey I ran - Nice job! %%%%%%%%%%%%%%%%%'
         self.summaryBlock.addLine( text )
         
     # Sets the customer item text. Item text is added one line at-a-time
@@ -86,7 +88,7 @@ class Customer:
         >>> print len(c.items)
         2
         """
-        if len( text.lstrip() ) < 1:
+        if len( text.strip() ) < 1:
             return
         item = None
         # Test if the first non-white char is a digit. Thats when to create a new item.
@@ -100,11 +102,15 @@ class Customer:
         self.items.append( item )
             
     def __str__( self ):
-        output = ''
+        output = '\nCustomer object\n=========\n'
+        output += 'cutomer receives mail notices: '+str(self.getsPrintedNotices())+'\n'
+        output += 'cutomer\'s email is valid: '+str(self.isWellFormed())+'\n'
+        output += 'Items for this customer include:\n-----------\n'
         for item in self.items:
             output += str( item )
-        output += '\nsummary block: ' + str(self.summaryBlock)
-        output += '\naddress block: ' + str(self.addressBlock)
+            output += '---\n'
+        output += '\n-----------\nsummary block:\n' + str(self.summaryBlock)
+        output += '\n-----------\naddress block:\n' + str(self.addressBlock)
         return output + '\n'
     
     # Returns true if the customer's email address is complete and valid
