@@ -4,8 +4,8 @@ SERVER=eplapp.library.ualberta.ca
 USER=sirsi
 REMOTE=~/Unicorn/EPLwork/anisbet/
 LOCAL=./
-APP=prepareprintnotices.py
-RELATED=customer.py notice.py
+APP=notice.py
+RELATED=customer.py reportreader.py
 ARGS= -h --ifile=testdata/Gen_bills.prn 
 
 run: ${RELATED}
