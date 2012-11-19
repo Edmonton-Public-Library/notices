@@ -14,18 +14,21 @@ from noticeformatter import NoticeFormatter
 
 class Notice:
     def __init__( self, inFile ):
-        self.today         = date.today()
-        self.humanDate     = self.today.strftime("%A, %B %d, %Y")
-        self.iFileName     = inFile
-        self.oFileName     = 'delete_' + str( self.today ) # If we see this file the subclass screwed up.
-        self.oFile         = None
-        self.statementDate = 'Statement produced: ' + self.humanDate
-        self.formatter     = None
+        self.today            = date.today()
+        self.humanDate        = self.today.strftime("%A, %B %d, %Y")
+        self.iFileName        = inFile
+        self.oFileName        = 'delete_' + str( self.today ) # If we see this file the subclass screwed up.
+        self.oFile            = None
+        self.statementDate    = 'Statement produced: ' + self.humanDate
+        self.formatter        = None
+        self.startNoticePath  = '' # path of the open bulletin
+        self.endNoticePath    = '' # path of the close bulletin
         # reporting values
-        self.pagesPrinted  = 0
-        self.noticeCount   = 0  # number of customers notices processed.
+        self.pagesPrinted     = 0
+        self.noticeCount      = 0  # number of customers notices processed.
         self.incorrectAddress = []  # number of notices that couldn't be printed because customer data was malformed.
-        self.customers     = []
+        # All the customers to be contacted by this report.
+        self.customers        = []
         
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
@@ -63,7 +66,12 @@ class Notice:
             customerFunc( line )
         
     def __str__( self ):
-        return ' input file = ' + self.iFileName
+        outstring  = '   report: ' + self.iFileName + '\n'
+        return outstring
+    
+    def __read_Bulletin__( self, path ):
+        # so open the file that should be in the local directory by now so take off the trailing file name and open.
+        pass
         
 class Hold( Notice ):
     def __init__( self, inFile ):
@@ -96,9 +104,9 @@ class Overdue( Notice ):
 class Bill( Notice ):
     def __init__( self, inFile, billLimit=10.0 ):
         Notice.__init__( self, inFile )
-        self.oFileName = 'notices_bills_' + str( self.today )
+        self.oFileName        = 'notices_bills_' + str( self.today )
         self.minimumBillValue = billLimit
-        self.title = 'NEW BILLINGS'
+        self.title            = 'NEW BILLINGS'
         
     def __str__( self ):
         return 'Bill Notice using: ' + self.iFileName + '\nminimum bill value = ' + str( self.minimumBillValue )
@@ -152,17 +160,17 @@ class Bill( Notice ):
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
                 print 'opening message and customer items'
                 isItemsBlocks = True
-                self.formatter.setOpeningBulletin( line )
+                self.startNoticePath = line.split()[1]
             elif line.startswith( '.block' ):
                 line = lines.pop()
                 if line.startswith( '.read' ): # closing message and end of customer.
                     print 'found end message and end of customer'
                     # get the message and pass it to the noticeFormatter.
-                    self.formatter.setClosingBulletin( line )
+                    self.endNoticePath = line.split()[1]
                     self.customers.append( customer )
                     customer = Customer()
                     isItemsBlocks = False
-                    break
+                    # break
                 elif line.find( '=====' ) > 0: # summary block.
                     print 'found summary'
                     customer.setSummaryText( line )
@@ -180,6 +188,19 @@ class Bill( Notice ):
         print self.customers[0]
         return True
         
+    def writeToFile( self ):
+        # get the formatter to set up the postscript
+        # Title
+        self.formatter.setGlobalTitle( self.title )
+        # read the opening bulletin
+        boilerPlateText = self.__read_Bulletin__( self.startNoticePath )
+        self.formatter.setGlobalHeader( boilerPlateText )
+        # read the closing bulletin
+        boilerPlateText = self.__read_Bulletin__( self.endNoticePath )
+        self.formatter.setGlobalFooter( boilerPlateText )
+        # for customer in self.customers:
+            # page = Page()
+            
 # Initial entry point for program
 if __name__ == "__main__":
     import doctest

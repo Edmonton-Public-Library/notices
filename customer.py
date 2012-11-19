@@ -21,6 +21,8 @@ class ItemBlock:
         self.itemLines.append( text )
         
     def getLastLine( self ):
+        if len( self.itemLines ) == 0:
+            return ''
         return self.itemLines[-1]
         
     def isEmpty( self ):
@@ -76,7 +78,7 @@ class Customer:
         """
         >>> c = Customer()
         >>> c.setItemText( "  1 this and that" )
-        >>> print c
+        >>> print c.items[0]
           1 this and that
         >>> print len(c.items)
         1

@@ -22,7 +22,7 @@
 import sys
 import getopt
 import os
-from reportreader import Notice # for base class calls.
+# from reportreader import Notice # for base class calls.
 from reportreader import Hold
 from reportreader import Bill
 from reportreader import Overdue
@@ -58,26 +58,26 @@ def main( argv ):
     if os.path.isfile( inputFile ) == False:
         print 'error: ' + inputFile + ' is empty or does not exist.'
         sys.exit()
-    notice = None
+    noticeReader = None
     if noticeType == 'HOLD':
-        notice = Hold( inputFile )
+        noticeReader = Hold( inputFile )
     elif noticeType == 'BILL':
-        notice = Bill( inputFile, billLimit )
+        noticeReader = Bill( inputFile, billLimit )
     elif noticeType == 'ODUE':
-        notice = Overdue( inputFile )
+        noticeReader = Overdue( inputFile )
     else:
         print 'nothing to do; notice type not selected'
         usage()
         sys.exit()
-    print notice
+    print noticeReader
     # TODO: allow report to be written to an independant directory.
-    psFormatter = PostscriptFormatter( notice.getOutFileBaseName() )
-    notice.setOutputFormat( psFormatter )
-    if notice.parseReport() == False:
+    psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
+    noticeReader.setOutputFormat( psFormatter )
+    if noticeReader.parseReport() == False:
         print 'error: unable to parse the report'
         sys.exit()
-    notice.writeToFile()
+    noticeReader.writeToFile()
 
 # Initial entry point for program
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main( sys.argv[1:] )
