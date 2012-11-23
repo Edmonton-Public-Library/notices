@@ -43,30 +43,59 @@ class NoticeFormatter:
         
 class PostscriptFormatter( NoticeFormatter ):
     def __init__( self, fileBaseName ):
-        self.today = date.today().strftime("%A, %B %d, %Y")
-        self.File = open( fileBaseName + '.ps', 'w' )
+        self.today  = date.today().strftime("%A, %B %d, %Y")
+        self.fontSizeTitle = 18.0    # points
+        self.fontSizeText  = 10.0    # points
+        self.xTitle     = 3.3125  # inches
+        self.yTitle     = 10.1875 # inches
+        self.title  = []
+        self.header = []
+        self.footer = []
+        self.File   = open( fileBaseName + '.ps', 'w' )
         self.File.write( '%!PS-Adobe-2.0\n' )
         self.File.write( '% Created for Edmonton Public Library ' + self.today + '\n' )
         self.File.write( WARNING_MSG )
+        # defining this converts inches to points so all measurements (except font size) can be set in inches.
+        self.File.write( self.__define_function__( 'inch', ['72.0 mul'] ) )
     
     # this method actually formats the customers data into pages.
     def format( self ):
         # Do the formatting then close the file.
+        # First write out the function definitions that we use 
+        # in each page of the Postscript file.
+        # 1) all pages get a header text message.
+        self.File.write( self.__define_function__( 'report_title', self.title ))
         return True
+        
+    def __define_function__( self, fName, fBody ):
+        if len( fBody ) == 0:
+            return ''
+        else:
+            return '/'+fName+' {\n'+'\n'.join( fBody )+'\n} def\n'
     
     # Sets the customer data to be printed to the final notices.
     # Formats customers into multi-sheet notices if necessary.
     def setCustomer( self, customer ):
+        # Each customer is a separate page.
         pass
         
-    def setGlobalTitle( self, title ):
-        pass
+    def setGlobalTitle( self, text ):
+        self.title = [ 
+            'gsave', 
+            '/Courier-Bold findfont', 
+            str( self.fontSizeTitle )+' scalefont', 
+            'setfont', 
+            'newpath', 
+            str( self.xTitle )+' '+str( self.yTitle )+' moveto',
+            '('+str(text)+') show',
+            'grestore' ]
         
     def setGlobalHeader( self, text ):
-        pass
+        # TODO move the break line function to this class.
+        self.header = text
         
     def setGlobalFooter( self, text ):
-        pass
+        self.footer = text
 
     def __str__( self ):
         return 'Postscript formatter: ' + self.fileName
@@ -75,5 +104,6 @@ class PostscriptFormatter( NoticeFormatter ):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    formatter = PostscriptFormatter( 'test.ps' )
+    formatter = PostscriptFormatter( 'testFormatPage' )
+    formatter.setGlobalTitle( 'Test Page' )
     formatter.format()
