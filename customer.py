@@ -28,6 +28,9 @@ class ItemBlock:
     def isEmpty( self ):
         return len(self.itemLines) == 0 or len(self.itemLines[0]) == 0
         
+    def getItem( self ):
+        return self.itemLines
+        
     def __str__( self ):
         return ' '.join( self.itemLines )
         
@@ -72,6 +75,10 @@ class Customer:
     def setSummaryText( self, text ):
         self.summaryBlock.addLine( text )
         
+    # Returns the address block as an array of strings.
+    def getAddress( self ):
+        return self.addressBlock.getItem()
+        
     # Sets the customer item text. Item text is added one line at-a-time
     # but items are packaged individually within this class.
     def setItemText( self, text ):
@@ -102,6 +109,29 @@ class Customer:
         item.addLine( text )
         # put it back on the stack for next time.
         self.items.append( item )
+        
+    # Returns the next item block text as an array or an empty array if there are no more.
+    def getNextItem( self ):
+        """
+        >>> c = Customer()
+        >>> c.setItemText( "1" )
+        >>> c.setItemText( "a" )
+        >>> c.setItemText( "2" )
+        >>> c.setItemText( "b" )
+        >>> print len(c.items)
+        2
+        >>> c.getNextItem()
+        ['1', 'a']
+        >>> print str( len( c.getNextItem() ) )
+        2
+        >>> c.getNextItem()
+        []
+        """
+        try:
+            nextItem = self.items.pop( 0 )
+            return nextItem.getItem()
+        except IndexError:
+            return []
             
     def __str__( self ):
         output = '\nCustomer object\n=========\n'

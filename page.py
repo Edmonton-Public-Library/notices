@@ -215,6 +215,11 @@ class PostscriptPage( Page ):
         self.__set_text__( text, x, y )
         if bold == True:
             self.page += 'grestore\n'
+    
+    # Writes a predefined instruction to the postscript file.
+    def setInstruction( self, instruction ):
+        self.page += instruction + '\n'
+        
 
 if __name__ == "__main__":
     import doctest
