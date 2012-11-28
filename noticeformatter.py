@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python 
 ###########################################################################
 # Purpose: Formatter object. This object brokers information from Customer
 # to a location on a page, dependant on the underlying requirement of 
@@ -13,7 +13,8 @@
 #          0.0 - Dev.
 ###########################################################################
 from datetime import date
-import page
+from page import breakLongLines
+from page import PostscriptPage
 
 WARNING_MSG  = "% This file contains personal information about customers of Edmonton Public Library\n" 
 WARNING_MSG += "% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
@@ -44,14 +45,15 @@ class NoticeFormatter:
 class PostscriptFormatter( NoticeFormatter ):
     def __init__( self, fileBaseName ):
         self.today  = date.today().strftime("%A, %B %d, %Y")
-        self.fontSizeTitle = 18.0    # points
-        self.fontSizeText  = 10.0    # points
-        self.xTitle     = 3.3125  # inches
-        self.yTitle     = 10.1875 # inches
-        self.title  = []
-        self.header = []
-        self.footer = []
-        self.File   = open( fileBaseName + '.ps', 'w' )
+        self.fontSizeTitle   = 18.0    # points
+        self.fontSizeText    = 10.0    # points
+        self.xTitle          = 3.3125  # inches
+        self.yTitle          = 10.1875 # inches
+        self.title           = []
+        self.header          = []
+        self.footer          = []
+        self.fontDescription = ['/Courier findfont', '10 scalefont', 'setfont']
+        self.File            = open( fileBaseName + '.ps', 'w' )
         self.File.write( '%!PS-Adobe-2.0\n' )
         self.File.write( '% Created for Edmonton Public Library ' + self.today + '\n' )
         self.File.write( WARNING_MSG )
@@ -65,6 +67,7 @@ class PostscriptFormatter( NoticeFormatter ):
         # in each page of the Postscript file.
         # 1) all pages get a header text message.
         self.File.write( self.__define_function__( 'report_title', self.title ))
+        self.File.write( self.__define_function__( 'report_title', self.fontDescription ))
         return True
         
     def __define_function__( self, fName, fBody ):
@@ -91,8 +94,10 @@ class PostscriptFormatter( NoticeFormatter ):
             'grestore' ]
         
     def setGlobalHeader( self, text ):
-        # TODO move the break line function to this class.
-        self.header = text
+        # get the page to split the text on the page boundaries for us.
+        self.header = breakLongLines( text )
+        for line in self.header:
+            print line
         
     def setGlobalFooter( self, text ):
         self.footer = text
@@ -105,5 +110,6 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
     formatter = PostscriptFormatter( 'testFormatPage' )
-    formatter.setGlobalTitle( 'Test Page' )
+    # formatter.setGlobalTitle( 'Test Page' )
+    formatter.setGlobalHeader( 'This is a test to see if the page break feature works. This line is far too long to fit on one line and should actually appear on two or more!' )
     formatter.format()

@@ -8,6 +8,15 @@
 #          0.0 - Dev.
 ###########################################################################
 
+# Takes a long string and returns an array of strings broken to fit within 
+# a page boundary.
+# param: text - string
+# param: preserve white space - True keeps leading white space false strips it.
+# return: an array of strings.
+def breakLongLines( text, preserveWhiteSpace=False ):
+    page = PostscriptPage( 0 )
+    return page.__break_line__( [text], preserveWhiteSpace )
+    
 POINTS = 72.0
 class Page:
     def __init__( self ):
