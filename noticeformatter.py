@@ -14,8 +14,9 @@
 ###########################################################################
 from datetime import date
 from page import PostscriptPage
+from page import POINTS
 from customer import Customer
-import sys # testing only
+
 
 class NoticeFormatter:
     def __init__( self ):
@@ -50,39 +51,68 @@ class PostscriptFormatter( NoticeFormatter ):
         self.font            = 'Courier'
         self.fontSize        = 10.0         # points
         self.kerning         = 12.0         # points
-        self.gap             = self.kerning / 72.0
+        self.blockSpacing    = self.kerning / POINTS # inches
         self.leftMargin      = 0.875
             
     # this method actually formats the customers data into pages.
     def format( self, isDebug=True ):
         # now we are ready to output pages.
         customerNotices = []
-        totalPages = 1
+        pageCount = 1
         for customer in self.customers:
-            pageNumber = 1
             customerPages = []
+            ####### This is my start at refactoring.
+            # while( customer.hasMoreItems() ):
+                # page = self.__get_additional_page__( self, pageCount, customer )
+                # customerNotices.append( page )
+                # pageCount += 1
             # create a page for the customer
-            page = PostscriptPage( pageNumber, self.font, self.fontSize, self.kerning )
-            # every page gets a title and statement date and header
+            page = PostscriptPage( pageCount, self.font, self.fontSize, self.kerning )
+            # every page gets these
             page.setTitle( self.title )
+            page.setAddress( customer.getAddress() )
             yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
             if isDebug: print str(yPos) + ' yPos value'
             # Each customer gets only one header message so set that now
             yPos = page.setHeader( self.header )
             if isDebug: print str(yPos) + ' yPos value'
             item = customer.getNextItem()
-            yPos = page.setItem( item, self.leftMargin, ( yPos - self.gap ) )
-            if isDebug: print str(yPos) + ' yPos value'
+            while len( item ) > 0:
+                yPos = page.setItem( item, self.leftMargin, ( yPos - self.blockSpacing ) )
+                if page.isRoomForItem( item, yPos ) == False:
+                    break # we have to make another page to fit it all.
+                item = customer.getNextItem()
             customerPages.append( page )
-            for page in customerPages:
+            # pageCount += 1
+            # add the statement page of pages notice
+            pageNumber = 1
+            pageTotal  = len( customerPages )
+            # for page in customerPages:
                 # now we know the total pages for a customer we can output the statement count
-                # page.setStatementCount( 'Statement ' + str( pageNumber ) + ' of '+ str( len( customerPages ) ) )
-                pageNumber += 1
-                totalPages += 1
-                
+                # page.setStatementCount( 'Statement ' + str( pageNumber ) + ' of '+ str( pageTotal ) )
+                # pageNumber += 1
             # place the customer notice onto the list of notices.
             customerNotices.append( customerPages )
-        self.__finalize_notices__( customerNotices, totalPages, isDebug )
+        self.__finalize_notices__( customerNotices, pageCount, isDebug )
+        
+    def __get_additional_page__( self, pageNumber, customer ):
+        page = PostscriptPage( pageNumber, self.font, self.fontSize, self.kerning )
+        # every page gets these
+        page.setTitle( self.title )
+        page.setAddress( customer.getAddress() )
+        yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
+        if isDebug: print str(yPos) + ' yPos value'
+        # Each customer gets only one header message so set that now
+        yPos = page.setHeader( self.header )
+        if isDebug: print str(yPos) + ' yPos value'
+        item = customer.getNextItem()
+        while len( item ) > 0:
+            yPos = page.setItem( item, self.leftMargin, ( yPos - self.blockSpacing ) )
+            if page.isRoomForItem( item, yPos ) == False:
+                customer.pushItem( item )
+                break # we have to make another page to fit it all.
+            item = customer.getNextItem()
+        return page
         
     def __finalize_notices__( self, customerNotices, totalPages, isDebug ):
         myFile = open( self.fileBaseName + '.ps', 'w' )
@@ -97,12 +127,12 @@ class PostscriptFormatter( NoticeFormatter ):
         if isDebug == True:
             registrationMarkProcedureCall = self.__add_registration_marks__( myFile )
         # Tell the PS file how many pages in total there will be
-        myFile.write( '%%Pages: ' + str( totalPages ) + '\n' ) 
+        myFile.write( '%%Pages: ' + str( totalPages ) + '\n' )
         for customerNotice in customerNotices:
             for page in customerNotice:
+                myFile.write( str( page ) )
                 if isDebug == True:
                     myFile.write( registrationMarkProcedureCall )
-                myFile.write( str( page ) )
         myFile.close()
     
     # Adds the fold lines as dashed lines, for registration comparison during debugging.        

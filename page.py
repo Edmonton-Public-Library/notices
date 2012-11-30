@@ -227,7 +227,7 @@ class PostscriptPage( Page ):
     def isRoomForItem( self, textBlock, lastYPosition ):
         y = self.__set_text_block__( textBlock, self.leftMargin, lastYPosition, True )
         if y >= self.itemYMin:
-            return False
+            return True
         else:
             return False
     

@@ -16,6 +16,9 @@ import re
 class ItemBlock:
     def __init__( self ):
         self.itemLines = []
+    
+    def addAllLines( self, textBlock ):
+        self.itemLines = textBlock
         
     def addLine( self, text ):
         self.itemLines.append( text )
@@ -100,6 +103,32 @@ class Customer:
     # Returns the address block as an array of strings.
     def getAddress( self ):
         return self.addressBlock.getItem()
+        
+    def pushItem( self, textBlock ):
+        """
+        >>> c = Customer()
+        >>> c.setItemText( "1" )
+        >>> c.setItemText( "a" )
+        >>> c.setItemText( "2" )
+        >>> c.setItemText( "b" )
+        >>> print len(c.items)
+        2
+        >>> print str(c.items[0])
+        1 a
+        >>> item = c.getNextItem()
+        >>> print item
+        ['1', 'a']
+        >>> print len(c.items)
+        1
+        >>> c.pushItem( item )
+        >>> print len(c.items)
+        2
+        >>> print str(c.items[0])
+        1 a
+        """
+        replacementItem = ItemBlock()
+        replacementItem.addAllLines( textBlock )
+        self.items.insert( 0, replacementItem )
         
     # Sets the customer item text. Item text is added one line at-a-time
     # but items are packaged individually within this class.
@@ -205,9 +234,10 @@ class Customer:
         c.setAddressText('12345 123 Street')
         c.setAddressText('Edmonton, Alberta')
         c.setAddressText('H0H 0H0')
-        c.setItemText('  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].')
-        c.setItemText('      Raymond, Bradley.')
-        c.setItemText('      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60')
+        for i in range( 1, 8 ):
+            c.setItemText('  '+str(i)+'   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].')
+            c.setItemText('      Raymond, Bradley.')
+            c.setItemText('      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60')
         return c
     
         
