@@ -50,6 +50,7 @@ class PostscriptFormatter( NoticeFormatter ):
         self.font            = 'Courier'
         self.fontSize        = 10.0         # points
         self.kerning         = 11.0
+        self.leftMargin      = 0.875
             
     # this method actually formats the customers data into pages.
     def format( self, isDebug=True ):
@@ -64,11 +65,14 @@ class PostscriptFormatter( NoticeFormatter ):
             # every page gets a title and statement date and header
             page.setTitle( self.title )
             yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
+            if isDebug: print str(yPos) + ' yPos value'
             # Each customer gets only one header message so set that now
-            # page.setHeader( self.header )
-            
-            # item = customer.getNextItem()
-            # page.setItem( item, 0.875, yPos )
+            yPos = page.setHeader( self.header )
+            if isDebug: print str(yPos) + ' yPos value'
+            item = customer.getNextItem()
+            if isDebug: print item
+            # yPos = page.setItem( item, self.leftMargin, (yPos + self.kerning) )
+            # if isDebug: print str(yPos) + ' yPos value'
             customerPages.append( page )
             for page in customerPages:
                 # now we know the total pages for a customer we can output the statement count

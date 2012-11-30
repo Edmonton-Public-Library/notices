@@ -34,8 +34,8 @@ class PostscriptPage( Page ):
         # self.fontSizeText    = 10.0    # points
         self.xTitle          = 3.3125  # inches was 4.25, 10.1875
         self.yTitle          = 10.1875 # inches
-        self.yHeader         = self.leftMargin
-        self.xHeader         = 9.875 #**** wrong
+        self.yHeader         = 9.5625
+        self.xHeader         = self.leftMargin
         self.xDate           = self.leftMargin
         self.yDate           = 9.875
         self.xFooter         = self.leftMargin
@@ -51,8 +51,6 @@ class PostscriptPage( Page ):
             self.page += '%%Pages: 1\n'
         self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
             
-    
-	
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
     # param:  x - x coordinate of the first line of the array of strings. The first
@@ -200,7 +198,8 @@ class PostscriptPage( Page ):
     # Sets the header message of the page.
     # param:  string
     def setHeader( self, text ):
-        return self.setTextBlock( text, self.xHeader, self.yHeader, False )
+        block = [ text ]
+        return self.setTextBlock( block, self.xHeader, self.yHeader, False )
         
     # Sets the block of text as item text.
     # param:  List of strings of an items
