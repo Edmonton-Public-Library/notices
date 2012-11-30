@@ -49,7 +49,8 @@ class PostscriptFormatter( NoticeFormatter ):
         self.fileBaseName    = fileBaseName
         self.font            = 'Courier'
         self.fontSize        = 10.0         # points
-        self.kerning         = 11.0
+        self.kerning         = 12.0         # points
+        self.gap             = self.kerning / 72.0
         self.leftMargin      = 0.875
             
     # this method actually formats the customers data into pages.
@@ -70,9 +71,8 @@ class PostscriptFormatter( NoticeFormatter ):
             yPos = page.setHeader( self.header )
             if isDebug: print str(yPos) + ' yPos value'
             item = customer.getNextItem()
-            if isDebug: print item
-            # yPos = page.setItem( item, self.leftMargin, (yPos + self.kerning) )
-            # if isDebug: print str(yPos) + ' yPos value'
+            yPos = page.setItem( item, self.leftMargin, ( yPos - self.gap ) )
+            if isDebug: print str(yPos) + ' yPos value'
             customerPages.append( page )
             for page in customerPages:
                 # now we know the total pages for a customer we can output the statement count
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     doctest.testmod()
     formatter = PostscriptFormatter( 'testFormatPage' )
     formatter.setGlobalTitle( 'Test Page' )
-    formatter.setGlobalHeader( 'Statement produced: Friday, August 24 2012\nThis is a test to see if the page break feature works. This line is far too long to fit on one line and should actually appear on two or more!' )
+    formatter.setGlobalHeader( 'Our records indicate that the following amount(s) is outstanding by more than 15 days.  This may block your ability to borrow or to place holds or to renew materials online or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.' )
     c = Customer()
     customer = c.__create_customer__()
     formatter.setCustomer( customer )

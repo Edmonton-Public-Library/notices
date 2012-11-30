@@ -27,10 +27,9 @@ class PostscriptPage( Page ):
         self.page            = ''
         self.font            = font
         self.fontSize        = fontsize
-        self.kerning         = kerning
+        self.kerning         = kerning # points.
         self.leftMargin      = 0.875   # inches
         self.fontSizeTitle   = 18.0    # points
-        self.gap             = 0.18    # inches
         # self.fontSizeText    = 10.0    # points
         self.xTitle          = 3.3125  # inches was 4.25, 10.1875
         self.yTitle          = 10.1875 # inches
@@ -64,7 +63,7 @@ class PostscriptPage( Page ):
         for line in lines:
             if dryRun == False:
                 self.__set_text__( line, x, y )
-            y -= ( self.kerning / POINTS )
+            y -= ( self.kerning / POINTS ) # convert points to inches to keep y in sync
         return y
     
     # Writes a line of text to the location given.
@@ -94,29 +93,41 @@ class PostscriptPage( Page ):
     # param:  block - array of strings.
     # param:  preserveWhiteSpace - True to keep leading white space before words and False otherwise.
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
-    def __break_line__( self, block, preserveWhiteSpace ):
-        maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
+    def __break_lines__( self, block, preserveWhiteSpace ):
         textBlock = []
-        thisLine = ''
         for line in block:
-            if len( line ) <= maxCharsPerLine:
-                textBlock.append( line )
-                continue
-            words = []
-            # If items don't preserve whitespace they end up looking odd.
-            if preserveWhiteSpace == True:
-                words = self.__split__( line )
-            else: # this is for messages that are just one long line.
-                words = line.split()
-            for word in words:
-                if len( thisLine ) + len( word ) <= maxCharsPerLine:
-                    thisLine += word + ' '
-                else:
-                    textBlock.append( thisLine[:-1] )
-                    thisLine  = word + ' '
-            textBlock.append( thisLine[:-1] )
+            newLines = self.__break_line__( line, preserveWhiteSpace )
+            for newLine in newLines:
+                textBlock.append( newLine )
         return textBlock
-	
+    
+    # Breaks a single string into an block of text (array) of one element if the 
+    # string didn't need to be split.
+    # param:  text string of text
+    # param:  preserveWhitespace  - if True all white space is presevered, and if False words are separated by a single whitespace.
+    # return: list of split strings.
+    def __break_line__( self, text, preserveWhiteSpace ):
+        maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
+        thisLine = ''
+        textBlock = []
+        if len( text ) <= maxCharsPerLine:
+            textBlock.append( text )
+            return textBlock
+        words = []
+        # If items don't preserve whitespace they end up looking odd.
+        if preserveWhiteSpace == True:
+            words = self.__split__( text )
+        else: # this is for messages that are just one long line.
+            words = text.split()
+        for word in words:
+            if len( thisLine ) + len( word ) <= maxCharsPerLine:
+                thisLine += word + ' '
+            else:
+                textBlock.append( thisLine[:-1] )
+                thisLine  = word + ' '
+        textBlock.append( thisLine[:-1] )
+        return textBlock
+    
     # Splits a line into words but keeps the leading spacing.
     # param:  sentence - string of words
     # return: array of words with leading spaces intact.
@@ -161,11 +172,10 @@ class PostscriptPage( Page ):
     # param:  preserverWhiteSpace True to save leading white space on line breaking False will remove it.
     # return: last y coord in inches.
     def setTextBlock( self, block, x, y, preserverWhiteSpace, bold=False ):
-        textBlock =  self.__break_line__( block, preserverWhiteSpace )
         if bold == True:
             self.page += 'gsave\n'
             self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
-        lastY = self.__set_text_block__( textBlock, x, y )
+        lastY = self.__set_text_block__( block, x, y )
         if bold == True:
             self.page += 'grestore\n'
         return lastY
@@ -198,14 +208,17 @@ class PostscriptPage( Page ):
     # Sets the header message of the page.
     # param:  string
     def setHeader( self, text ):
-        block = [ text ]
+        block = self.__break_line__( text, False )
         return self.setTextBlock( block, self.xHeader, self.yHeader, False )
         
     # Sets the block of text as item text.
     # param:  List of strings of an items
     # return: True if the item could fit on the page and False otherwise.
     def setItem( self, textBlock, x, y ):
-        return self.setTextBlock( textBlock, x, y, True, True )
+        block = []
+        for line in textBlock:
+            block.extend( self.__break_line__( line, True ) )
+        return self.setTextBlock( block, x, y, True, True )
     
     # This page returns True if the argument item can be fit on this page and False
     # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
@@ -228,8 +241,8 @@ if __name__ == "__main__":
     page.setTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75, False )
     msg = ['Statement produced: Friday, August 24 2012']
     nextLine = page.setTextBlock( msg, 0.875, 9.875, False )
-    msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.  This may block your ability to borrow or to place holds or to renew materials online or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
-    nextLine = page.setTextBlock( msg, 0.875, (nextLine - 0.18), False )
+    msg = 'Our records indicate that the following amount(s) is outstanding by more than 15 days.  This may block your ability to borrow or to place holds or to renew materials online or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.'
+    nextLine = page.setHeader( msg )#, 0.875, (nextLine - 0.18), False )
     msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
     '      Raymond, Bradley.',
     '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
