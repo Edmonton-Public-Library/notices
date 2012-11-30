@@ -26,4 +26,12 @@ put: test
 	scp ${LOCAL}*.py ${USER}@${SERVER}:${REMOTE}
 page:
 	python ${LOCAL}page.py
-# cat test.ps | gs -sDEVICE=pdfwrite -sOutputFile=test.pdf
+format:
+	python ${LOCAL}noticeformatter.py
+customer:
+	python ${LOCAL}customer.py
+
+
+
+clean:
+	-rm *.pyc

@@ -25,11 +25,14 @@ class ItemBlock:
             return ''
         return self.itemLines[-1]
         
-    def isEmpty( self ):
-        return len(self.itemLines) == 0 or len(self.itemLines[0]) == 0
+    # def isEmpty( self ):
+        # return len(self.itemLines) == 0 or len(self.itemLines[0]) == 0
         
     def getItem( self ):
         return self.itemLines
+        
+    def getSize( self ):
+        return len( self.itemLines )
         
     def __str__( self ):
         return ' '.join( self.itemLines )
@@ -44,6 +47,25 @@ class Customer:
         self.summaryBlock = ItemBlock()
         self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z]\s{1}\d[a-z]\d(\s+)?", re.IGNORECASE )
         self.email        = ''
+        self.pagesPrinted = 0
+    
+    # Returns True if the customer has more items and False otherwise.
+    def hasMoreItems( self ):
+        """
+        >>> c = Customer()
+        >>> print c.hasMoreItems()
+        False
+        >>> c.setItemText( "1" )
+        >>> c.setItemText( "a" )
+        >>> print c.hasMoreItems()
+        True
+        """
+        return len( self.items ) > 0
+    
+    # Sets the pages printed for a customer for reporting.
+    # param:  Number of pages printed.
+    def setPagesPrinted( self, count ):
+        self.pagesPrinted = count
         
     # Adds text to an address block. 
     def setAddressText( self, text ):
@@ -136,7 +158,7 @@ class Customer:
     def __str__( self ):
         output = '\nCustomer object\n=========\n'
         output += 'cutomer receives mail notices: '+str(self.getsPrintedNotices())+'\n'
-        output += 'cutomer\'s email is valid: '+str(self.isWellFormed())+'\n'
+        output += 'cutomer\'s mail address is valid: '+str(self.isWellFormed())+'\n'
         output += 'Items for this customer include:\n-----------\n'
         for item in self.items:
             output += str( item )
@@ -172,6 +194,23 @@ class Customer:
         # check if the matcher returned a non-None object when compared to the last line of the address block
         return not isinstance( self.postalCode.match( self.addressBlock.getLastLine() ), type( None ) )
     
+    # Creates a customer with bogus data for testing.
+    def __create_customer__( self ):
+        """
+        >>> c = Customer()
+        >>> customer = c.__create_customer__()
+        """
+        c = Customer()
+        c.setAddressText('Balzac Billy')
+        c.setAddressText('12345 123 Street')
+        c.setAddressText('Edmonton, Alberta')
+        c.setAddressText('H0H 0H0')
+        c.setItemText('  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].')
+        c.setItemText('      Raymond, Bradley.')
+        c.setItemText('      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60')
+        return c
+    
+        
 # Initial entry point for program
 if __name__ == "__main__":
     import doctest

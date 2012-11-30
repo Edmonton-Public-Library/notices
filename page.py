@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 ###########################################################################
 # Purpose: Notice object.
 #
@@ -8,15 +8,6 @@
 #          0.0 - Dev.
 ###########################################################################
 
-# Takes a long string and returns an array of strings broken to fit within 
-# a page boundary.
-# param: text - string
-# param: preserve white space - True keeps leading white space false strips it.
-# return: an array of strings.
-def breakLongLines( text, preserveWhiteSpace=False ):
-    page = PostscriptPage( 0 )
-    return page.__break_line__( [text], preserveWhiteSpace )
-    
 POINTS = 72.0
 class Page:
     def __init__( self ):
@@ -32,58 +23,35 @@ class Page:
 
         
 class PostscriptPage( Page ):
-    def __init__( self, pageNumber, debug=False, font='Courier', fontsize=10, kerning=11.0 ):
-        self.page     = ''
-        self.font     = font
-        self.fontSize = fontsize
-        self.kerning  = kerning
+    def __init__( self, pageNumber, font, fontsize, kerning, debug=False):
+        self.page            = ''
+        self.font            = font
+        self.fontSize        = fontsize
+        self.kerning         = kerning
+        self.leftMargin      = 0.875   # inches
+        self.fontSizeTitle   = 18.0    # points
+        self.gap             = 0.18    # inches
+        # self.fontSizeText    = 10.0    # points
+        self.xTitle          = 3.3125  # inches was 4.25, 10.1875
+        self.yTitle          = 10.1875 # inches
+        self.yHeader         = self.leftMargin
+        self.xHeader         = 9.875 #**** wrong
+        self.xDate           = self.leftMargin
+        self.yDate           = 9.875
+        self.xFooter         = self.leftMargin
+        self.yFooter         = 4.5
+        self.xAddressBlock   = 4.0
+        self.yAddressBlock   = 1.75
+        self.itemYMin        = 5.0
+        # The first page is set to the bottom of the header, the second page will print just below the statement
+        self.nextLine        = self.yDate
         if debug == True:
-            self.page  = '%!PS-Adobe-2.0\n\n/inch {\n\t72 mul\n} def\n'
-            self.page += '/perfline {\n'
-            self.page += '[6 3] 3 setdash\n'
-            self.page += 'stroke\n'
-            self.page += 'newpath\n'
-            self.page += '} def\n'
-            self.page += '/fineperfline {\n'
-            self.page += 'gsave\n'
-            self.page += '0.5 setgray\n'
-            self.page += '[4 2] 0 setdash\n'
-            self.page += 'stroke\n'
-            self.page += 'grestore\n'
-            self.page += 'newpath\n'
-            self.page += '} def\n'
-            self.page += '/pageborder{\n'
-            self.page += '0.5 inch 0  inch moveto\n'
-            self.page += '0.5 inch 11 inch lineto\n'
-            self.page += '8   inch 0  inch moveto\n'
-            self.page += '8   inch 11 inch lineto\n'
-            self.page += '0.5 setlinewidth\n'
-            self.page += 'perfline\n'
-            self.page += '0   inch 3.15625 inch moveto\n'
-            self.page += '8.5 inch 3.15625 inch lineto\n'
-            self.page += '0.25 setlinewidth\n'
-            self.page += 'fineperfline\n'
-            self.page += '0   inch 3.625 inch moveto\n'
-            self.page += '8.5 inch 3.625 inch lineto\n'
-            self.page += 'fineperfline\n'
-            self.page += '0   inch 4.15625 inch moveto\n'
-            self.page += '8.5 inch 4.15625 inch lineto\n'
-            self.page += 'fineperfline\n'
-            self.page += '0   inch 6.90625 inch moveto\n'
-            self.page += '8.5 inch 6.90625 inch lineto\n'
-            self.page += 'fineperfline\n'
-            self.page += '0   inch 7.3125  inch moveto\n'
-            self.page += '8.5 inch 7.3125  inch lineto\n'
-            self.page += 'fineperfline\n'
-            self.page += '0   inch 10.5    inch moveto\n'
-            self.page += '8.5 inch 10.5    inch lineto\n'
-            self.page += 'fineperfline\n'
-            self.page += '} def\n'
-            self.page += '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+            self.page  = '%!PS-Adobe-2.0\n'
+            self.page  = '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
             self.page += '%%Pages: 1\n'
-        self.page += '%%Page: 1 1\n'
-        if debug == True:
-            self.page += 'pageborder\n'
+        self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
+            
+    
 	
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
@@ -109,6 +77,7 @@ class PostscriptPage( Page ):
         x_s = self.__to_points__( x )
         y_s = self.__to_points__( y )
         self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
+        
     # Default method that stringifies object.
     # param:  
     # return: the postscript string of this object.
@@ -171,14 +140,14 @@ class PostscriptPage( Page ):
     # param:  size - float of size of text for the title in points.
     # param:  centre - True if the text is to be centered and false otherwise.
     # return: 
-    def setTitle( self, text, x, y, size=18.0, centre=True ):
-        if centre == True:
-            midPage = 4.25 * POINTS
-            # this is a loosy-goosy method of centring the string.
-            x = midPage - ( len( text ) * ( size * 0.75 ) ) / 2.0
-            x_s = str( x )
-        else:
-            x_s = self.__to_points__( x )
+    def setTitle( self, text ):
+        x      = self.xTitle
+        y      = self.yTitle
+        size   = self.fontSizeTitle
+        midPage = 4.25 * POINTS
+        # this is a loosy-goosy method of centring the string.
+        x = midPage - ( len( text ) * ( size * 0.75 ) ) / 2.0
+        x_s = str( x )
         y_s = self.__to_points__( y )
         self.page += 'gsave\n'
         self.page += '/' + self.font + '-Bold findfont\n' + str( size ) + ' scalefont\nsetfont\n'
@@ -215,16 +184,48 @@ class PostscriptPage( Page ):
         self.__set_text__( text, x, y )
         if bold == True:
             self.page += 'grestore\n'
-    
-    # Writes a predefined instruction to the postscript file.
-    def setInstruction( self, instruction ):
-        self.page += instruction + '\n'
+       
+    # Returns the height of the block of text in inches.
+    # param:  list of lines of text.
+    # return: total height in inches.
+    def setAddress( self, textBlock ):
+        self.nextLine = self.setTextBlock( textBlock, self.xAddressBlock, self.yAddressBlock, False )
         
+    # Prints the argument text at the appropriate position
+    # param:  text - single string.
+    def setStatementDate( self, text ):
+        self.setLine( text, self.xDate, self.yDate, False )
+        return self.yDate
+    
+    # Sets the header message of the page.
+    # param:  string
+    def setHeader( self, text ):
+        return self.setTextBlock( text, self.xHeader, self.yHeader, False )
+        
+    # Sets the block of text as item text.
+    # param:  List of strings of an items
+    # return: True if the item could fit on the page and False otherwise.
+    def setItem( self, textBlock, x, y ):
+        return self.setTextBlock( textBlock, x, y, True, True )
+    
+    # This page returns True if the argument item can be fit on this page and False
+    # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
+    # to zero y gets the closer to the bottom of the page. Items can't print below 
+    # the itemYMin which is currently set to 5.0 inches from the bottom of the form.
+    def isRoomForItem( self, textBlock, lastYPosition ):
+        y = self.__set_text_block__( textBlock, self.leftMargin, lastYPosition, True )
+        if y >= self.itemYMin:
+            return False
+        else:
+            return False
+    
+    def setStatementCount( self, text ):
+        self.setLine( text, self.xFooter, self.yFooter )
 
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    page = PostscriptPage( 1, True )
+    page = PostscriptPage( 1, 'Courier', 10.0, 11.0, True )
     page.setTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75, False )
     msg = ['Statement produced: Friday, August 24 2012']
     nextLine = page.setTextBlock( msg, 0.875, 9.875, False )
@@ -234,7 +235,7 @@ if __name__ == "__main__":
     '      Raymond, Bradley.',
     '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
     nextLine = page.setTextBlock( msg, 0.875, (nextLine - 0.18), True, True )
-    page.setTitle('Test Title', 4.25, 10.1875 )
+    page.setTitle( 'Test Title' )
     page.setLine('Statement 1 of 2', 0.875, 4.5 )
     f = open( 'test.ps', 'w' )
     f.write( str(page) )

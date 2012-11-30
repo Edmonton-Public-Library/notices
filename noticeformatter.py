@@ -13,13 +13,9 @@
 #          0.0 - Dev.
 ###########################################################################
 from datetime import date
-from page import breakLongLines
 from page import PostscriptPage
 from customer import Customer
-
-WARNING_MSG  = "% This file contains personal information about customers of Edmonton Public Library\n" 
-WARNING_MSG += "% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
-WARNING_MSG += "% permission from the management of EPL.\n"
+import sys # testing only
 
 class NoticeFormatter:
     def __init__( self ):
@@ -45,80 +41,115 @@ class NoticeFormatter:
         
 class PostscriptFormatter( NoticeFormatter ):
     def __init__( self, fileBaseName ):
-        self.today  = date.today().strftime("%A, %B %d, %Y")
-        self.leftMargin      = 0.875   # inches
-        self.fontSizeTitle   = 18.0    # points
-        self.fontSizeText    = 10.0    # points
-        self.xTitle          = 3.3125  # inches
-        self.yTitle          = 10.1875 # inches
-        self.yHeader         = self.leftMargin
-        self.xHeader         = 9.875
-        self.yHeaderEnd      = 8.0
-        self.xHeaderEnd      = self.leftMargin
-        self.xFooter         = self.leftMargin
-        self.yFooter         = 4.5
-        self.xAddressBlock   = 4
-        self.yAddressBlock   = 1.75
-        self.yItemLimit      = 4.68
-        self.title           = []
-        self.header          = []
-        self.footer          = []
-        self.fontDescription = ['/Courier findfont', '10 scalefont', 'setfont']
+        self.today           = date.today().strftime("%A, %B %d, %Y")
+        self.title           = '' # text string for title
+        self.header          = '' # text string for header
+        self.footer          = '' # text strings for footer
         self.customers       = []
-        self.File            = open( fileBaseName + '.ps', 'w' )
-        self.File.write( '%!PS-Adobe-2.0\n' )
-        self.File.write( '% Created for Edmonton Public Library ' + self.today + '\n' )
-        self.File.write( WARNING_MSG )
-        # defining this converts inches to points so all measurements (except font size) can be set in inches.
-        self.File.write( self.__define_function__( 'inch', ['72.0 mul'] ) )
-    
+        self.fileBaseName    = fileBaseName
+        self.font            = 'Courier'
+        self.fontSize        = 10.0         # points
+        self.kerning         = 11.0
+            
     # this method actually formats the customers data into pages.
-    def format( self ):
-        # Do the formatting then close the file.
-        # First write out the function definitions that we use 
-        # in each page of the Postscript file.
-        # 1) all pages get a header text message.
-        if len( self.title ) > 0:
-            self.File.write( self.__define_function__( 'report_title', self.title ))
-        self.File.write( self.__define_function__( 'report_font', self.fontDescription ))
-        if len( self.header ) > 0:
-            self.File.write( self.__define_function__( 'report_header', self.header ))
+    def format( self, isDebug=True ):
         # now we are ready to output pages.
-        count = 1
+        customerNotices = []
+        totalPages = 1
         for customer in self.customers:
+            pageNumber = 1
+            customerPages = []
             # create a page for the customer
-            page = PostscriptPage( count, True )
-            count += self.__format_customer__( customer, page )
-        return True
+            page = PostscriptPage( pageNumber, self.font, self.fontSize, self.kerning )
+            # every page gets a title and statement date and header
+            page.setTitle( self.title )
+            yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
+            # Each customer gets only one header message so set that now
+            # page.setHeader( self.header )
+            
+            # item = customer.getNextItem()
+            # page.setItem( item, 0.875, yPos )
+            customerPages.append( page )
+            for page in customerPages:
+                # now we know the total pages for a customer we can output the statement count
+                # page.setStatementCount( 'Statement ' + str( pageNumber ) + ' of '+ str( len( customerPages ) ) )
+                pageNumber += 1
+                totalPages += 1
+                
+            # place the customer notice onto the list of notices.
+            customerNotices.append( customerPages )
+        self.__finalize_notices__( customerNotices, totalPages, isDebug )
         
-    def __format_customer__( self, customer, page ):
-        # these don't have to be in order, address can be output first since PS plots by absolute x,y positions.
-        # tell the page to add the title and header function to itself so they print on this page.
-        page.setInstruction( 'report_title' )
-        page.setInstruction( 'report_header' )
-        page.setTextBlock( customer.getAddress(), self.xAddressBlock, self.yAddressBlock, False )
-        pageCount = 1
-        itemBlock = customer.getNextItem()
-        nextLine = self.yHeaderEnd ############ TODO find where the header ended adn fix this ##############
-        while len( itemBlock ) > 0:
-            # msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
-            # '      Raymond, Bradley.',
-            # '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
-            nextLine = page.setTextBlock( itemBlock, self.leftMargin, ( nextLine - 0.18 ), True, True )
-            #test if we are at the bottom of the page and if yes print out the page statement.
-            if nextLine < self.yItemLimit:
-                page.setLine('Statement 1 of 2', 0.875, 4.5 ) ######### TODO fix this ########
-                nextLine = self.yHeaderEnd
-                self.File.write( page )
-                ######### TODO create new page and call recursively ?????   
-        self.File.write( page )
-        return pageCount
+    def __finalize_notices__( self, customerNotices, totalPages, isDebug ):
+        myFile = open( self.fileBaseName + '.ps', 'w' )
+        myFile.write( '%!PS-Adobe-2.0\n' )
+        myFile.write( '% Created for Edmonton Public Library ' + str( self.today ) + '\n' )
+        WARNING_MSG  = "% This file contains personal information about customers of Edmonton Public Library\n" 
+        WARNING_MSG += "% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
+        WARNING_MSG += "% permission from the management of EPL.\n"
+        myFile.write( WARNING_MSG )
+        myFile.write( '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n' )
+        registrationMarkProcedureCall = ''
+        if isDebug == True:
+            registrationMarkProcedureCall = self.__add_registration_marks__( myFile )
+        # Tell the PS file how many pages in total there will be
+        myFile.write( '%%Pages: ' + str( totalPages ) + '\n' ) 
+        for customerNotice in customerNotices:
+            for page in customerNotice:
+                if isDebug == True:
+                    myFile.write( registrationMarkProcedureCall )
+                myFile.write( str( page ) )
+        myFile.close()
+    
+    # Adds the fold lines as dashed lines, for registration comparison during debugging.        
+    def __add_registration_marks__( self, myFile ):
+        myFile.write( '/inch {\n\t72.0 mul\n} def\n' )
+        myFile.write( '/perfline {\n' )
+        myFile.write( '[6 3] 3 setdash\n' )
+        myFile.write( 'stroke\n' )
+        myFile.write( 'newpath\n' )
+        myFile.write( '} def\n' )
+        myFile.write( '/fineperfline {\n' )
+        myFile.write( 'gsave\n' )
+        myFile.write( '0.5 setgray\n' )
+        myFile.write( '[4 2] 0 setdash\n' )
+        myFile.write( 'stroke\n' )
+        myFile.write( 'grestore\n' )
+        myFile.write( 'newpath\n' )
+        myFile.write( '} def\n' )
+        myFile.write( '/pageborder{\n' )
+        myFile.write( '0.5 inch 0  inch moveto\n' )
+        myFile.write( '0.5 inch 11 inch lineto\n' )
+        myFile.write( '8   inch 0  inch moveto\n' )
+        myFile.write( '8   inch 11 inch lineto\n' )
+        myFile.write( '0.5 setlinewidth\n' )
+        myFile.write( 'perfline\n' )
+        myFile.write( '0   inch 3.15625 inch moveto\n' )
+        myFile.write( '8.5 inch 3.15625 inch lineto\n' )
+        myFile.write( '0.25 setlinewidth\n' )
+        myFile.write( 'fineperfline\n' )
+        myFile.write( '0   inch 3.625 inch moveto\n' )
+        myFile.write( '8.5 inch 3.625 inch lineto\n' )
+        myFile.write( 'fineperfline\n' )
+        myFile.write( '0   inch 4.15625 inch moveto\n' )
+        myFile.write( '8.5 inch 4.15625 inch lineto\n' )
+        myFile.write( 'fineperfline\n' )
+        myFile.write( '0   inch 6.90625 inch moveto\n' )
+        myFile.write( '8.5 inch 6.90625 inch lineto\n' )
+        myFile.write( 'fineperfline\n' )
+        myFile.write( '0   inch 7.3125  inch moveto\n' )
+        myFile.write( '8.5 inch 7.3125  inch lineto\n' )
+        myFile.write( 'fineperfline\n' )
+        myFile.write( '0   inch 10.5    inch moveto\n' )
+        myFile.write( '8.5 inch 10.5    inch lineto\n' )
+        myFile.write( 'fineperfline\n' )
+        myFile.write( '} def\n' )
+        return 'pageborder\n'
         
-    def __define_function__( self, fName, fBody ):
-        if len( fBody ) == 0:
-            return ''
-        else:
-            return '/'+fName+' {\n'+'\n'.join( fBody )+'\n} def\n'
+    # def __define_procedure__( self, fName, fBody ):
+        # if len( fBody ) == 0:
+            # return ''
+        # return '/'+fName+' {\n'+'\n'.join( fBody )+'\n} def\n'
     
     # Sets the customer data to be printed to the final notices.
     # Formats customers into multi-sheet notices if necessary.
@@ -127,27 +158,10 @@ class PostscriptFormatter( NoticeFormatter ):
         self.customers.append( customer )
         
     def setGlobalTitle( self, text ):
-        self.title = [ 
-            'gsave', 
-            '/Courier-Bold findfont', 
-            str( self.fontSizeTitle )+' scalefont', 
-            'setfont', 
-            'newpath', 
-            str( self.xTitle )+' '+str( self.yTitle )+' moveto',
-            '('+str(text)+') show',
-            'grestore' ]
+        self.title = text
         
     def setGlobalHeader( self, text ):
-        # get the page to split the text on the page boundaries for us.
-        # only do this for global text. Use page's setTextBlock() otherwise.
-        block = breakLongLines( text )
-        yPos  = self.yHeader
-        for line in block:
-            self.header.append( 'newpath' )
-            self.header.append( str( self.xHeader )+' '+str( yPos )+' moveto' )
-            self.header.append( '('+str( line )+') show' )
-            # calculate the position of the next line
-            yPos -= 0.18 ###### TODO fix this so its not hard coded #########
+        self.header = text
         
     def setGlobalFooter( self, text ):
         self.footer = text
@@ -160,7 +174,9 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
     formatter = PostscriptFormatter( 'testFormatPage' )
-    # formatter.setGlobalTitle( 'Test Page' )
+    formatter.setGlobalTitle( 'Test Page' )
     formatter.setGlobalHeader( 'Statement produced: Friday, August 24 2012\nThis is a test to see if the page break feature works. This line is far too long to fit on one line and should actually appear on two or more!' )
-    
-    formatter.format()
+    c = Customer()
+    customer = c.__create_customer__()
+    formatter.setCustomer( customer )
+    formatter.format( True )
