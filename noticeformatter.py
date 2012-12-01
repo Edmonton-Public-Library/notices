@@ -100,6 +100,8 @@ class PostscriptFormatter( NoticeFormatter ):
     def __finalize_notices__( self, customerNotices, isDebug ):
         myFile = open( self.fileBaseName + '.ps', 'w' )
         myFile.write( '%!PS-Adobe-2.0\n\n' )
+        # Tell the PS file how many pages in total there will be
+        myFile.write( '%%Pages: ' + str( len( customerNotices ) ) + '\n' )
         myFile.write( '% Created for Edmonton Public Library ' + str( self.today ) + '\n' )
         WARNING_MSG  = "% This file contains personal information about customers of Edmonton Public Library\n" 
         WARNING_MSG += "% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
@@ -109,8 +111,6 @@ class PostscriptFormatter( NoticeFormatter ):
         registrationMarkProcedureCall = ''
         if isDebug == True:
             registrationMarkProcedureCall = self.__add_registration_marks__( myFile )
-        # Tell the PS file how many pages in total there will be
-        myFile.write( '%%Pages: ' + str( len( customerNotices ) ) + '\n' )
         for page in customerNotices:
             if isDebug == True:
                 page.setInstruction( registrationMarkProcedureCall )
