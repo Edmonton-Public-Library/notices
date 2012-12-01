@@ -45,7 +45,7 @@ class PostscriptPage( Page ):
         # The first page is set to the bottom of the header, the second page will print just below the statement
         self.nextLine        = self.yDate
         if debug == True:
-            self.page  = '%!PS-Adobe-2.0\n'
+            self.page  = '%!PS-Adobe-2.0\n\n'
             self.page  = '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
             self.page += '%%Pages: 1\n'
         self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
@@ -164,6 +164,12 @@ class PostscriptPage( Page ):
         self.page += x_s + ' ' + y_s + ' moveto\n'
         self.page += '(' + text + ') show\n'
         self.page += 'grestore\n'
+    
+    # Sets a page specific instruction.
+    # param:  instruction - make sure it has been predefined in the head of the PS file.
+    # return: 
+    def setInstruction( self, instruction ):
+        self.page += instruction + '\n'
     
     # Sets a block of text returning the y location of the last line in inches.
     # param:  list of strings of a block

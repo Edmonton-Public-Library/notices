@@ -58,53 +58,36 @@ class PostscriptFormatter( NoticeFormatter ):
     def format( self, isDebug=True ):
         # now we are ready to output pages.
         customerNotices = []
-        pageCount = 1
+        totalPageCount = 1
         for customer in self.customers:
             customerPages = []
-            ####### This is my start at refactoring.
-            # while( customer.hasMoreItems() ):
-                # page = self.__get_additional_page__( self, pageCount, customer )
-                # customerNotices.append( page )
-                # pageCount += 1
-            # create a page for the customer
-            page = PostscriptPage( pageCount, self.font, self.fontSize, self.kerning )
-            # every page gets these
-            page.setTitle( self.title )
-            page.setAddress( customer.getAddress() )
-            yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
-            if isDebug: print str(yPos) + ' yPos value'
-            # Each customer gets only one header message so set that now
-            yPos = page.setHeader( self.header )
-            if isDebug: print str(yPos) + ' yPos value'
-            item = customer.getNextItem()
-            while len( item ) > 0:
-                yPos = page.setItem( item, self.leftMargin, ( yPos - self.blockSpacing ) )
-                if page.isRoomForItem( item, yPos ) == False:
-                    break # we have to make another page to fit it all.
-                item = customer.getNextItem()
-            customerPages.append( page )
-            # pageCount += 1
+            isFirstPage = True
+            while( customer.hasMoreItems() ):
+                page = self.__get_additional_page__( totalPageCount, customer, isFirstPage )
+                if isFirstPage == True: # First page needs a header, 
+                    isFirstPage = False
+                customerPages.append( page )
+                totalPageCount += 1
             # add the statement page of pages notice
-            pageNumber = 1
-            pageTotal  = len( customerPages )
-            # for page in customerPages:
+            pageTotal           = len( customerPages )
+            customersPageNumber = 1
+            for page in customerPages:
                 # now we know the total pages for a customer we can output the statement count
-                # page.setStatementCount( 'Statement ' + str( pageNumber ) + ' of '+ str( pageTotal ) )
-                # pageNumber += 1
-            # place the customer notice onto the list of notices.
-            customerNotices.append( customerPages )
-        self.__finalize_notices__( customerNotices, pageCount, isDebug )
+                page.setStatementCount( 'Statement ' + str( customersPageNumber ) + ' of '+ str( pageTotal ) )
+                customersPageNumber += 1
+                # place the customer notice onto the list of notices.
+                customerNotices.append( page )
+        self.__finalize_notices__( customerNotices, isDebug )
         
-    def __get_additional_page__( self, pageNumber, customer ):
+    def __get_additional_page__( self, pageNumber, customer, isFirstPage=False ):
         page = PostscriptPage( pageNumber, self.font, self.fontSize, self.kerning )
         # every page gets these
         page.setTitle( self.title )
         page.setAddress( customer.getAddress() )
         yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
-        if isDebug: print str(yPos) + ' yPos value'
         # Each customer gets only one header message so set that now
-        yPos = page.setHeader( self.header )
-        if isDebug: print str(yPos) + ' yPos value'
+        if isFirstPage:
+            yPos = page.setHeader( self.header )
         item = customer.getNextItem()
         while len( item ) > 0:
             yPos = page.setItem( item, self.leftMargin, ( yPos - self.blockSpacing ) )
@@ -114,9 +97,9 @@ class PostscriptFormatter( NoticeFormatter ):
             item = customer.getNextItem()
         return page
         
-    def __finalize_notices__( self, customerNotices, totalPages, isDebug ):
+    def __finalize_notices__( self, customerNotices, isDebug ):
         myFile = open( self.fileBaseName + '.ps', 'w' )
-        myFile.write( '%!PS-Adobe-2.0\n' )
+        myFile.write( '%!PS-Adobe-2.0\n\n' )
         myFile.write( '% Created for Edmonton Public Library ' + str( self.today ) + '\n' )
         WARNING_MSG  = "% This file contains personal information about customers of Edmonton Public Library\n" 
         WARNING_MSG += "% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
@@ -127,12 +110,12 @@ class PostscriptFormatter( NoticeFormatter ):
         if isDebug == True:
             registrationMarkProcedureCall = self.__add_registration_marks__( myFile )
         # Tell the PS file how many pages in total there will be
-        myFile.write( '%%Pages: ' + str( totalPages ) + '\n' )
-        for customerNotice in customerNotices:
-            for page in customerNotice:
-                myFile.write( str( page ) )
-                if isDebug == True:
-                    myFile.write( registrationMarkProcedureCall )
+        myFile.write( '%%Pages: ' + str( len( customerNotices ) ) + '\n' )
+        for page in customerNotices:
+            if isDebug == True:
+                page.setInstruction( registrationMarkProcedureCall )
+            myFile.write( str( page ) )
+            
         myFile.close()
     
     # Adds the fold lines as dashed lines, for registration comparison during debugging.        
@@ -180,11 +163,6 @@ class PostscriptFormatter( NoticeFormatter ):
         myFile.write( '} def\n' )
         return 'pageborder\n'
         
-    # def __define_procedure__( self, fName, fBody ):
-        # if len( fBody ) == 0:
-            # return ''
-        # return '/'+fName+' {\n'+'\n'.join( fBody )+'\n} def\n'
-    
     # Sets the customer data to be printed to the final notices.
     # Formats customers into multi-sheet notices if necessary.
     # Customers must be valid customers.
