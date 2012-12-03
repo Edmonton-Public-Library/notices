@@ -8,9 +8,11 @@
 #          0.0 - Dev.
 ###########################################################################
 
+import os  # for os specific file bulletin reading.
+import sys # for exit
 from customer import Customer
 from datetime import date
-from noticeformatter import NoticeFormatter
+from noticeformatter import PostscriptFormatter
 
 class Notice:
     def __init__( self, inFile ):
@@ -38,7 +40,7 @@ class Notice:
     def setOutputFormat( self, formatter ):
         self.formatter = formatter
         
-    def writeToFile( self ):
+    def writeToFile( self, debug=False ):
         self.formatter.format()
         
     def getOutFileBaseName( self ):
@@ -69,9 +71,23 @@ class Notice:
         outstring  = '   report: ' + self.iFileName + '\n'
         return outstring
     
-    def __read_Bulletin__( self, path ):
-        # so open the file that should be in the local directory by now so take off the trailing file name and open.
-        pass
+    # Reads a bulletin to be used as a header or footer for a notice.
+    # param:  path - path to file (see useLocalFile)
+    # param:  useLocalFile - True to use a file in the local directory.
+    #         example: /foo/bar.txt with useLocalFile=True will open ./bar.txt, False opens /foo/bar.txt.
+    # return: Message from file as a single string.
+    def __read_Bulletin__( self, path, useLocalFile=False ):
+        newPath = path
+        if useLocalFile == True:
+            newPath = path.split( os.sep )[-1]
+        try:
+            with open( path, 'r' ) as f:
+                bulletin = f.readlines()
+                f.close()
+                return ''.join( bulletin )
+        except IOError as e:
+            sys.stderr.write( repr( e ) + ' "' + path + '"' )
+            sys.exit( 2 ) 
         
 class Hold( Notice ):
     def __init__( self, inFile ):
@@ -188,18 +204,20 @@ class Bill( Notice ):
         print self.customers[0]
         return True
         
-    def writeToFile( self ):
+    def writeToFile( self, debug=False ):
         # get the formatter to set up the postscript
+        formatter = PostscriptFormatter( self.oFileName )
         # Title
-        self.formatter.setGlobalTitle( self.title )
+        formatter.setGlobalTitle( self.title )
         # read the opening bulletin
         boilerPlateText = self.__read_Bulletin__( self.startNoticePath )
-        self.formatter.setGlobalHeader( boilerPlateText )
+        formatter.setGlobalHeader( boilerPlateText )
         # read the closing bulletin
         boilerPlateText = self.__read_Bulletin__( self.endNoticePath )
-        self.formatter.setGlobalFooter( boilerPlateText )
-        # for customer in self.customers:
-            # page = Page()
+        formatter.setGlobalFooter( boilerPlateText )
+        for customer in self.customers:
+            formatter.setCustomer( customer )
+        formatter.format( debug )
             
 # Initial entry point for program
 if __name__ == "__main__":
