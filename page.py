@@ -209,7 +209,7 @@ class PostscriptPage( Page ):
     # param:  text - single string.
     def setStatementDate( self, text ):
         self.setLine( text, self.xDate, self.yDate, False )
-        return self.yDate
+        return self.yDate - ( self.kerning/POINTS )
     
     # Sets the header message of the page.
     # param:  string
