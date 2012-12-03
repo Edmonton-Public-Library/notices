@@ -87,7 +87,7 @@ class Notice:
                 return ''.join( bulletin )
         except IOError as e:
             sys.stderr.write( repr( e ) + ' "' + path + '"' )
-            sys.exit( 2 ) 
+            sys.exit( 2 )
         
 class Hold( Notice ):
     def __init__( self, inFile ):
@@ -210,11 +210,11 @@ class Bill( Notice ):
         # Title
         formatter.setGlobalTitle( self.title )
         # read the opening bulletin
-        boilerPlateText = self.__read_Bulletin__( self.startNoticePath )
-        formatter.setGlobalHeader( boilerPlateText )
+        boilerPlateHeaderText = self.__read_Bulletin__( self.startNoticePath )
+        formatter.setGlobalHeader( boilerPlateHeaderText )
         # read the closing bulletin
-        boilerPlateText = self.__read_Bulletin__( self.endNoticePath )
-        formatter.setGlobalFooter( boilerPlateText )
+        boilerPlateFooterText = self.__read_Bulletin__( self.endNoticePath )
+        formatter.setGlobalFooter( boilerPlateFooterText )
         for customer in self.customers:
             formatter.setCustomer( customer )
         formatter.format( debug )
