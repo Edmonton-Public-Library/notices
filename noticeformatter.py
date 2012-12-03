@@ -79,6 +79,30 @@ class PostscriptFormatter( NoticeFormatter ):
                 customerNotices.append( page )
         self.__finalize_notices__( customerNotices, isDebug )
         
+    # Returns a minimized string of the first characters an ellipsis and last 10 characters
+    # of a line like: 'This is how a very long line would be printed ... end of the line.'
+    # param:  string text to shorten
+    # param:  Maximum number of characters allowed - default 83. 
+    # return: string text shortened
+    def __minimize_line__( self, text, maxCharacters=83 ):
+        """
+        >>> nf = PostscriptFormatter('someFileName')
+        >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 40) + '"'
+        "1234567890123456789012345 ... 1234567890"
+        >>> print '"' + nf.__minimize_line__('1234567890123456789012345678901234567890', 40) + '"'
+        "1234567890123456789012345678901234567890"
+        >>> print '"' + nf.__minimize_line__('123456789012345678901234567890123456789', 40) + '"'
+        "123456789012345678901234567890123456789"
+        >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901', 40) + '"'
+        "1234567890123456789012345 ... 2345678901"
+        """
+        if len( text ) <= maxCharacters:
+            return text
+        ellipsis = len( ' ... ' )
+        endLine = 10
+        beginLine = maxCharacters - (endLine + ellipsis)
+        return text[0:beginLine] + ' ... ' + text[-endLine:]
+        
     def __get_additional_page__( self, pageNumber, customer, isFirstPage=False ):
         page = PostscriptPage( pageNumber, self.font, self.fontSize, self.kerning )
         # every page gets these
