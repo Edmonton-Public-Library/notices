@@ -52,6 +52,12 @@ class Customer:
         self.email        = ''
         self.pagesPrinted = 0
     
+    # Sets the total pages printed for this customer.
+    # param:  count - integer number of pages printed for customer.
+    # return: 
+    def setPageTotal( self, count ):
+        self.pagesPrinted = count
+    
     # Returns True if the customer has more items and False otherwise.
     def hasMoreItems( self ):
         """

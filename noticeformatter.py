@@ -77,6 +77,7 @@ class PostscriptFormatter( NoticeFormatter ):
                 customersPageNumber += 1
                 # place the customer notice onto the list of notices.
                 customerNotices.append( page )
+            customer.setPageTotal( customersPageNumber );
         self.__finalize_notices__( customerNotices, isDebug )
         
     # Returns a minimized string of the first characters an ellipsis and last 10 characters
@@ -102,7 +103,12 @@ class PostscriptFormatter( NoticeFormatter ):
         endLine = 10
         beginLine = maxCharacters - (endLine + ellipsis)
         return text[0:beginLine] + ' ... ' + text[-endLine:]
-        
+    
+    # Creates additional pages of a customer notice.
+    # param:  pageNumber - Integer, over-all page number used by PS and PDF to deliniate pages.
+    # param:  Customer object - is valid and gets printed notices.
+    # param:  isFirstPage - True if the call is for the first page of multi-page customer notice and False otherwise.
+    # return: A Page object in valid Postscript.
     def __get_additional_page__( self, pageNumber, customer, isFirstPage=False ):
         page = PostscriptPage( pageNumber, self.font, self.fontSize, self.kerning )
         # every page gets these
@@ -120,7 +126,10 @@ class PostscriptFormatter( NoticeFormatter ):
                 break # we have to make another page to fit it all.
             item = customer.getNextItem()
         return page
-        
+    
+    # Finalizes all the pages into a single PS file.
+    # param:  customerNotices - array of pages all notice pages.
+    # return: 
     def __finalize_notices__( self, customerNotices, isDebug ):
         myFile = open( self.fileBaseName + '.ps', 'w' )
         myFile.write( '%!PS-Adobe-3.0\n' )
@@ -139,8 +148,7 @@ class PostscriptFormatter( NoticeFormatter ):
         for page in customerNotices:
             if isDebug == True:
                 page.setInstruction( registrationMarkProcedureCall )
-            myFile.write( str( page ) )
-            
+            myFile.write( str( page ) )  
         myFile.close()
     
     # Adds the fold lines as dashed lines, for registration comparison during debugging.        
