@@ -30,8 +30,7 @@ format:
 	python ${LOCAL}noticeformatter.py
 customer:
 	python ${LOCAL}customer.py
-
-
-
+convert:
+	ps2pdf14 testFormatPage.ps test.pdf
 clean:
 	-rm *.pyc
