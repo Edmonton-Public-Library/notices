@@ -123,14 +123,15 @@ class PostscriptFormatter( NoticeFormatter ):
         
     def __finalize_notices__( self, customerNotices, isDebug ):
         myFile = open( self.fileBaseName + '.ps', 'w' )
-        myFile.write( '%!PS-Adobe-2.0\n\n' )
+        myFile.write( '%!PS-Adobe-3.0\n' )
         # Tell the PS file how many pages in total there will be
         myFile.write( '%%Pages: ' + str( len( customerNotices ) ) + '\n' )
-        myFile.write( '% Created for Edmonton Public Library ' + str( self.today ) + '\n' )
-        WARNING_MSG  = "% This file contains personal information about customers of Edmonton Public Library\n" 
-        WARNING_MSG += "% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
-        WARNING_MSG += "% permission from the management of EPL.\n"
+        myFile.write( '%% Created for Edmonton Public Library ' + str( self.today ) + '\n' )
+        WARNING_MSG  = "%% This file contains personal information about customers of Edmonton Public Library\n" 
+        WARNING_MSG += "%% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
+        WARNING_MSG += "%% permission from the management of EPL.\n"
         myFile.write( WARNING_MSG )
+        myFile.write( '%%EndComments\n' )
         myFile.write( '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n' )
         registrationMarkProcedureCall = ''
         if isDebug == True:
