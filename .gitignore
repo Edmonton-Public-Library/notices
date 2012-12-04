@@ -7,3 +7,6 @@ notices_*
 test.pdf
 testFormatPage.ps
 bulletins
+reports/*.prn
+print/*.ps
+print/*.pdf
