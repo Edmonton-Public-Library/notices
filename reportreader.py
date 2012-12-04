@@ -14,6 +14,8 @@ from customer import Customer
 from datetime import date
 from noticeformatter import PostscriptFormatter
 
+LOCAL_NOTICE_FOLDER = 'notices'
+
 class Notice:
     def __init__( self, inFile ):
         self.today            = date.today()
@@ -79,7 +81,7 @@ class Notice:
     def __read_Bulletin__( self, path, useLocalFile=False ):
         newPath = path
         if useLocalFile == True:
-            newPath = path.split( os.sep )[-1]
+            newPath = LOCAL_NOTICE_FOLDER + os.sep + path.split( os.sep )[-1]
         try:
             with open( path, 'r' ) as f:
                 bulletin = f.readlines()
