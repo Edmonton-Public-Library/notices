@@ -10,3 +10,5 @@ bulletins
 reports/*.prn
 print/*.ps
 print/*.pdf
+print/
+reports/
