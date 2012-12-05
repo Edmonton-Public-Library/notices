@@ -28,17 +28,14 @@ ARGS= -h --ifile=${BILLS}
 
 run: ${RELATED}
 	clear
-	cd ${PRINT_DIR}
-	make proper
-	cd ${LOCAL}
+	# -rm ${PRINT_DIR}/*.ps
+	# -rm ${PRINT_DIR}/*.pdf
+	-rm ${REPORT_DIR}/*.prn
 	${LOCAL}/report.sh   # getting today's reports
 	${LOCAL}/bulletin.sh # getting Notices for today's reports.
 	# python ${LOCAL}/${APP} -h     -i${HOLDS}
 	# python ${LOCAL}/${APP} -b12.0 -i${BILLS}
 	# python ${LOCAL}/${APP} -o     -i${OVERDUES}
-	cd ${PRINT_DIR}
-	tar xvfz *.tgz
-	cd ${LOCAL} 
 	${LOCAL}/pstopdf.sh
 test: ${RELATED}
 	clear
