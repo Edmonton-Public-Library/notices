@@ -72,8 +72,13 @@ def main( argv ):
             inputFile = arg
     print 'Input file is = ', inputFile
     if os.path.isfile( inputFile ) == False:
-        print 'error: ' + inputFile + ' is empty or does not exist.'
+        sys.stderr.write( 'error: input report file ' + inputFile + ' does not exist. Did the report run?' )
         sys.exit()
+    if os.path.getsize( inputFile ) == 0:
+        sys.stderr.write( 'error: input report file ' + inputFile + ' is empty. Did the report run?' )
+        sys.exit()
+    
+    # basic checks done, let's get down to business.
     noticeReader = None
     if noticeType == 'HOLD':
         noticeReader = Hold( inputFile )
@@ -82,15 +87,14 @@ def main( argv ):
     elif noticeType == 'ODUE':
         noticeReader = Overdue( inputFile )
     else:
-        print 'nothing to do; notice type not selected'
+        sys.stderr.write( 'nothing to do; notice type not selected' )
         usage()
         sys.exit()
     print noticeReader
-    # TODO: allow report to be written to an independant directory.
     psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
     noticeReader.setOutputFormat( psFormatter )
     if noticeReader.parseReport() == False:
-        print 'error: unable to parse the report'
+        sys.stderr.write( 'error: unable to parse the report' )
         sys.exit()
     noticeReader.writeToFile()
 
