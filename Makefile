@@ -15,39 +15,39 @@
 # MA 02110-1301, USA.
 #
 
-
-# SERVER=edpl-t.library.ualberta.ca
-SERVER=eplapp.library.ualberta.ca
-USER=sirsi
-REMOTE=~/Unicorn/EPLwork/anisbet/
-LOCAL=./
+LOCAL=/home/ilsdev/projects/notices
 APP=notice.py
-RELATED=customer.py reportreader.py
-ARGS= -h --ifile=testdata/Gen_bills.prn 
+RELATED=customer.py reportreader.py page.py noticeformatter.py
+PRINT_DIR=${LOCAL}/print
+REPORT_DIR=${LOCAL}/reports
+BILLS=${REPORT_DIR}/bills.prn
+HOLDS=${REPORT_DIR}/holds.prn
+OVERDUES=${REPORT_DIR}/overdues.prn
+ARGS= -h --ifile=${BILLS}
+
 
 run: ${RELATED}
 	clear
-	python ${LOCAL}${APP} -h     -itestdata/Gen_bills.prn
-	#
-	#
-	python ${LOCAL}${APP} -b12.0 -itestdata/Gen_bills.prn
-	#
-	#
-	python ${LOCAL}${APP} -o     -itestdata/Gen_bills.prn
-	#
-	#
+	cd ${PRINT_DIR}
+	make proper
+	cd ${LOCAL}
+	${LOCAL}/report.sh   # getting today's reports
+	${LOCAL}/bulletin.sh # getting Notices for today's reports.
+	# python ${LOCAL}/${APP} -h     -i${HOLDS}
+	# python ${LOCAL}/${APP} -b12.0 -i${BILLS}
+	# python ${LOCAL}/${APP} -o     -i${OVERDUES}
+	cd ${PRINT_DIR}
+	tar xvfz *.tgz
+	cd ${LOCAL} 
+	${LOCAL}/pstopdf.sh
 test: ${RELATED}
 	clear
-	python ${LOCAL}${APP} -v
-put: test 
-	scp ${LOCAL}*.py ${USER}@${SERVER}:${REMOTE}
+	python ${LOCAL}/${APP} -v
 page:
-	python ${LOCAL}page.py
+	python ${LOCAL}/page.py
 format:
-	python ${LOCAL}noticeformatter.py
+	python ${LOCAL}/noticeformatter.py
 customer:
-	python ${LOCAL}customer.py
-convert:
-	ps2pdf14 testFormatPage.ps test.pdf
+	python ${LOCAL}/customer.py
 clean:
 	-rm *.pyc

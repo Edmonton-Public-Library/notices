@@ -14,17 +14,16 @@ from customer import Customer
 from datetime import date
 from noticeformatter import PostscriptFormatter
 
-LOCAL_NOTICE_FOLDER = 'notices'
+LOCAL_BULLETIN_FOLDER = 'bulletins'
+LOCAL_PRINT_FOLDER    = 'print'
 
 class Notice:
     def __init__( self, inFile ):
         self.today            = date.today()
         self.humanDate        = self.today.strftime("%A, %B %d, %Y")
         self.iFileName        = inFile
-        self.oFileName        = 'delete_' + str( self.today ) # If we see this file the subclass screwed up.
-        self.oFile            = None
+        self.oFileName        = LOCAL_PRINT_FOLDER + os.sep + 'delete_' + str( self.today ) # If we see this file the subclass screwed up.
         self.statementDate    = 'Statement produced: ' + self.humanDate
-        self.formatter        = None
         self.startNoticePath  = '' # path of the open bulletin
         self.endNoticePath    = '' # path of the close bulletin
         # reporting values
@@ -43,7 +42,19 @@ class Notice:
         self.formatter = formatter
         
     def writeToFile( self, debug=False ):
-        self.formatter.format()
+        # get the formatter to set up the postscript
+        formatter = PostscriptFormatter( self.oFileName )
+        # Title
+        formatter.setGlobalTitle( self.title )
+        # read the opening bulletin
+        boilerPlateHeaderText = self.__read_Bulletin__( self.startNoticePath )
+        formatter.setGlobalHeader( boilerPlateHeaderText )
+        # read the closing bulletin
+        boilerPlateFooterText = self.__read_Bulletin__( self.endNoticePath )
+        formatter.setGlobalFooter( boilerPlateFooterText )
+        for customer in self.customers:
+            formatter.setCustomer( customer )
+        formatter.format( debug )
         
     def getOutFileBaseName( self ):
         return self.oFileName
@@ -81,7 +92,7 @@ class Notice:
     def __read_Bulletin__( self, path, useLocalFile=False ):
         newPath = path
         if useLocalFile == True:
-            newPath = LOCAL_NOTICE_FOLDER + os.sep + path.split( os.sep )[-1]
+            newPath = LOCAL_BULLETIN_FOLDER + os.sep + path.split( os.sep )[-1]
         try:
             with open( path, 'r' ) as f:
                 bulletin = f.readlines()
@@ -122,9 +133,9 @@ class Overdue( Notice ):
 class Bill( Notice ):
     def __init__( self, inFile, billLimit=10.0 ):
         Notice.__init__( self, inFile )
-        self.oFileName        = 'notices_bills_' + str( self.today )
+        self.oFileName        = LOCAL_PRINT_FOLDER + os.sep + 'notices_bills_' + str( self.today )
         self.minimumBillValue = billLimit
-        self.title            = 'NEW BILLINGS'
+        self.title            = 'NEW BILLINGS' # we set this since the report doesn't have it explicitely.
         
     def __str__( self ):
         return 'Bill Notice using: ' + self.iFileName + '\nminimum bill value = ' + str( self.minimumBillValue )
@@ -206,20 +217,20 @@ class Bill( Notice ):
         print self.customers[0]
         return True
         
-    def writeToFile( self, debug=False ):
+    # def writeToFile( self, debug=False ):
         # get the formatter to set up the postscript
-        formatter = PostscriptFormatter( self.oFileName )
+        # formatter = PostscriptFormatter( self.oFileName )
         # Title
-        formatter.setGlobalTitle( self.title )
+        # formatter.setGlobalTitle( self.title )
         # read the opening bulletin
-        boilerPlateHeaderText = self.__read_Bulletin__( self.startNoticePath )
-        formatter.setGlobalHeader( boilerPlateHeaderText )
+        # boilerPlateHeaderText = self.__read_Bulletin__( self.startNoticePath )
+        # formatter.setGlobalHeader( boilerPlateHeaderText )
         # read the closing bulletin
-        boilerPlateFooterText = self.__read_Bulletin__( self.endNoticePath )
-        formatter.setGlobalFooter( boilerPlateFooterText )
-        for customer in self.customers:
-            formatter.setCustomer( customer )
-        formatter.format( debug )
+        # boilerPlateFooterText = self.__read_Bulletin__( self.endNoticePath )
+        # formatter.setGlobalFooter( boilerPlateFooterText )
+        # for customer in self.customers:
+            # formatter.setCustomer( customer )
+        # formatter.format( debug )
             
 # Initial entry point for program
 if __name__ == "__main__":
