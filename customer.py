@@ -48,7 +48,7 @@ class Customer:
         self.addressBlock = ItemBlock()
         self.items        = []
         self.summaryBlock = ItemBlock()
-        self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z]\s{1}\d[a-z]\d(\s+)?", re.IGNORECASE )
+        self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z](\s+)?\d[a-z]\d(\s+)?", re.IGNORECASE )
         self.email        = ''
         self.pagesPrinted = 0
     
@@ -216,16 +216,11 @@ class Customer:
             return []
             
     def __str__( self ):
-        output = '\nCustomer object\n=========\n'
-        output += 'cutomer receives mail notices: '+str(self.getsPrintedNotices())+'\n'
+        output =  '[CUSTOMER\ncutomer receives mail notices: '+str(self.getsPrintedNotices())+'\n'
         output += 'cutomer\'s mail address is valid: '+str(self.isWellFormed())+'\n'
-        output += 'Items for this customer include:\n-----------\n'
-        for item in self.items:
-            output += str( item )
-            output += '---\n'
-        output += '\n-----------\nsummary block:\n' + str(self.summaryBlock)
-        output += '\n-----------\naddress block:\n' + str(self.addressBlock)
-        return output + '\n'
+        output += 'items for this customer include: %d\n' % len( self.items )
+        output += 'address block: \n' + str(self.addressBlock)
+        return output + 'COSTOMER]\n'
     
     # Returns true if the customer's email address is complete and valid
     # and False otherwise. The last line of an address must be a postal code.
@@ -252,7 +247,7 @@ class Customer:
         True
         """
         # check if the matcher returned a non-None object when compared to the last line of the address block
-        return not isinstance( self.postalCode.match( self.addressBlock.getLastLine() ), type( None ) )
+        return not isinstance( self.postalCode.match( self.addressBlock.getLastLine().strip() ), type( None ) )
     
     # Creates a customer with bogus data for testing.
     def __create_customer__( self ):

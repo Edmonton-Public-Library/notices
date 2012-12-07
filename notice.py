@@ -96,7 +96,8 @@ def main( argv ):
     print noticeReader
     psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
     noticeReader.setOutputFormat( psFormatter )
-    if noticeReader.parseReport() == False:
+    # Don't suppress customers even if their address is bad.
+    if noticeReader.parseReport( False ) == False:
         sys.stderr.write( 'error: unable to parse report' )
         sys.exit()
     noticeReader.writeToFile()

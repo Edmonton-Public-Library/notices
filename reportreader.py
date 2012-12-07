@@ -160,7 +160,7 @@ class Bill( Notice ):
         
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
-    def parseReport( self, suppress_malformed_customer=True ):
+    def parseReport( self, suppressMalformedCustomer=False ):
         # .block
         # Luckie Luke
         # 12345 120 Street
@@ -218,9 +218,12 @@ class Bill( Notice ):
                     if customer.isWellFormed() == False:
                         # save these to report to staff for corrective action.
                         self.customersWithBadAddress.append( customer )
-                    elif customer.getsPrintedNotices() and customer.getTotalBills() >= self.minimumBillValue:
-                        print '$' + str( customer.getTotalBills() ) + ' <cmp> ' + str( self.minimumBillValue )
-                        self.customers.append( customer )
+                    if customer.getsPrintedNotices() and customer.getTotalBills() >= self.minimumBillValue:
+                        if customer.isWellFormed():
+                            self.customers.append( customer )
+                        # The customer has a bad postal code but do we care? Can we mail it anyway?
+                        elif suppressMalformedCustomer == False: 
+                            self.customers.append( customer )
                     customer = Customer()
                     isItemsBlocks = False
                     # break

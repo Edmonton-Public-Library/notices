@@ -71,13 +71,15 @@ class PostscriptFormatter( NoticeFormatter ):
             # add the statement page of pages notice
             pageTotal           = len( customerPages )
             customersPageNumber = 1
+            customersPageCount  = 0
             for page in customerPages:
                 # now we know the total pages for a customer we can output the statement count
                 page.setStatementCount( 'Statement ' + str( customersPageNumber ) + ' of '+ str( pageTotal ) )
                 customersPageNumber += 1
+                customersPageCount  += 1
                 # place the customer notice onto the list of notices.
                 customerNotices.append( page )
-            customer.setPageTotal( customersPageNumber );
+            customer.setPageTotal( customersPageCount );
         self.__finalize_notices__( customerNotices, isDebug )
         
     # Returns a minimized string of the first characters an ellipsis and last 10 characters
@@ -232,3 +234,4 @@ if __name__ == "__main__":
     customer = c.__create_customer__()
     formatter.setCustomer( customer )
     formatter.format( True )
+    print '=>' + str(customer.getPagesPrinted())
