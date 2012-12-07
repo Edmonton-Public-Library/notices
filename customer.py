@@ -57,6 +57,9 @@ class Customer:
     # return: 
     def setPageTotal( self, count ):
         self.pagesPrinted = count
+        
+    def getPagesPrinted( self ):
+        return self.pagesPrinted
     
     # Returns True if the customer has more items and False otherwise.
     def hasMoreItems( self ):
@@ -102,9 +105,31 @@ class Customer:
         """
         return len( self.email ) == 0
         
-    # Adds text to an summary block. 
+    # Adds text to a summary block.
     def setSummaryText( self, text ):
         self.summaryBlock.addLine( text )
+        
+    # This method returns the total bills for the customer. If this customer was created
+    # for a holds or overdue report the return value is 0.0. If the customer was invoked
+    # by a bills report then the method returns the customers total bills.
+    def getTotalBills( self ):
+        """
+        >>> c = Customer()
+        >>> c.setSummaryText( '      =======================================================================' )
+        >>> c.setSummaryText( '                                  TOTAL FINES/FEES AND UNPAID BILLS:     $2.00' )
+        >>> print str( c.getTotalBills() )
+        2.0
+        >>> c.setSummaryText( '                                  some accidental line with no dollar value mentioned. ' )
+        >>> print str( c.getTotalBills() )
+        0.0
+        """
+        lastLine = self.summaryBlock.getLastLine()
+        if lastLine == '':
+            return 0.0
+        try:
+            return (float)(lastLine.split( '$' )[1].rstrip())
+        except IndexError:
+            return 0.0
         
     # Returns the address block as an array of strings.
     def getAddress( self ):
