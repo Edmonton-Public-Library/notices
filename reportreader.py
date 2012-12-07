@@ -14,24 +14,39 @@ from customer import Customer
 from datetime import date
 from noticeformatter import PostscriptFormatter
 
-LOCAL_BULLETIN_FOLDER = 'bulletins'
-LOCAL_PRINT_FOLDER    = 'print'
-
 class Notice:
-    def __init__( self, inFile ):
+    def __init__( self, inFile, bulletinDir, printDir, outFilePrefix ):
         self.today            = date.today()
         self.humanDate        = self.today.strftime("%A, %B %d, %Y")
         self.iFileName        = inFile
-        self.oFileName        = LOCAL_PRINT_FOLDER + os.sep + 'delete_' + str( self.today ) # If we see this file the subclass screwed up.
+        self.oFileName        = printDir + os.sep + outFilePrefix + str( self.today ) # If we see this file the subclass screwed up.
         self.statementDate    = 'Statement produced: ' + self.humanDate
-        self.startNoticePath  = '' # path of the open bulletin
-        self.endNoticePath    = '' # path of the close bulletin
-        # reporting values
-        self.pagesPrinted     = 0
-        self.noticeCount      = 0  # number of customers notices processed.
-        self.incorrectAddress = []  # number of notices that couldn't be printed because customer data was malformed.
+        self.bulletinDir      = bulletinDir # path of the open bulletin  
+        self.printDir         = printDir
         # All the customers to be contacted by this report.
         self.customers        = []
+        self.pagesPrinted     = 0
+        self.customersWithBadAddress = []
+    
+    # Prints out key information about the running report such as total pages printed
+    # number of customers mailed and outputs a list of customers that need to have 
+    # street addresses corrected.
+    # param:  
+    # return:
+    def outputReport( self ):
+        print '========='
+        print 'notice report for ' + self.iFileName + ' for ' + self.humanDate
+        # output the results
+        print 'total pages printed: %d' % self.pagesPrinted
+        print 'customers mailed:    %d' % len( self.customers )
+        print 'bad addresses:       %d' % len( self.customersWithBadAddress )
+        if len( self.customersWithBadAddress ) == 0:
+            return
+        # f = open( 'malformed_addr.lst', 'w+' )
+        f = open( 'malformed_addr.lst', 'w' )  # for testing clobber the old list.
+        for c in self.customersWithBadAddress:
+            f.write( str( c ) )
+        f.close()  
         
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
@@ -52,10 +67,14 @@ class Notice:
         # read the closing bulletin
         boilerPlateFooterText = self.__read_Bulletin__( self.endNoticePath )
         formatter.setGlobalFooter( boilerPlateFooterText )
+        self.totalCustomers   = len( self.customers )
         for customer in self.customers:
             formatter.setCustomer( customer )
         formatter.format( debug )
-        
+        # after formatting we collect pages printed.
+        for customer in self.customers:
+            self.pagesPrinted += customer.getPagesPrinted()
+    
     def getOutFileBaseName( self ):
         return self.oFileName
         
@@ -84,28 +103,29 @@ class Notice:
         outstring  = '   report: ' + self.iFileName + '\n'
         return outstring
     
-    # Reads a bulletin to be used as a header or footer for a notice.
-    # param:  path - path to file (see useLocalFile)
-    # param:  useLocalFile - True to use a file in the local directory.
-    #         example: /foo/bar.txt with useLocalFile=True will open ./bar.txt, False opens /foo/bar.txt.
+    # Reads a bulletin, or Notice, to be used as a header or footer for a notice.
+    # param:  path - path to file. Looks in the local bulletin directory.
     # return: Message from file as a single string.
-    def __read_Bulletin__( self, path, useLocalFile=False ):
-        newPath = path
-        if useLocalFile == True:
-            newPath = LOCAL_BULLETIN_FOLDER + os.sep + path.split( os.sep )[-1]
+    def __read_Bulletin__( self, path ):
+        """
+        >>> n = Bill( 'some_file', 'bulletins', 'print' )
+        >>> print n.__read_Bulletin__( '/s/sirsi/Unicorn/Notices/testfile' )
+        Test test test
+        <BLANKLINE>
+        """
+        newPath = self.bulletinDir + os.sep + path.split( os.sep )[-1]
         try:
-            with open( path, 'r' ) as f:
+            with open( newPath, 'r' ) as f:
                 bulletin = f.readlines()
                 f.close()
                 return ''.join( bulletin )
-        except IOError as e:
-            sys.stderr.write( repr( e ) + ' "' + path + '"' )
+        except IOError:
+            sys.stderr.write( 'error: failed to find Notice file: "' + newPath + '".' )
             sys.exit( 2 )
         
 class Hold( Notice ):
-    def __init__( self, inFile ):
-        Notice.__init__( self, inFile )
-        self.oFileName = 'notices_hold_' + str( self.today ) 
+    def __init__( self, inFile, bulletinDir, printDir ):
+        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_holds_' )
         self.title = 'PICKUP NOTICE'
         
     def __str__( self ):
@@ -117,9 +137,8 @@ class Hold( Notice ):
         return False
         
 class Overdue( Notice ):
-    def __init__( self, inFile ):
-        Notice.__init__( self, inFile )
-        self.oFileName = 'notices_overdue_' + str( self.today )
+    def __init__( self, inFile, bulletinDir, printDir ):
+        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
         self.title = 'OVERDUE NOTICE'
         
     def __str__( self ):
@@ -131,9 +150,8 @@ class Overdue( Notice ):
         return False
         
 class Bill( Notice ):
-    def __init__( self, inFile, billLimit=10.0 ):
-        Notice.__init__( self, inFile )
-        self.oFileName        = LOCAL_PRINT_FOLDER + os.sep + 'notices_bills_' + str( self.today )
+    def __init__( self, inFile, bulletinDir, printDir, billLimit=10.0 ):
+        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_bills_' )
         self.minimumBillValue = billLimit
         self.title            = 'NEW BILLINGS' # we set this since the report doesn't have it explicitely.
         
@@ -196,7 +214,13 @@ class Bill( Notice ):
                     print 'found end message and end of customer'
                     # get the message and pass it to the noticeFormatter.
                     self.endNoticePath = line.split()[1]
-                    self.customers.append( customer )
+                    # Test if the customer should even receive mailed notices.
+                    if customer.isWellFormed() == False:
+                        # save these to report to staff for corrective action.
+                        self.customersWithBadAddress.append( customer )
+                    elif customer.getsPrintedNotices() and customer.getTotalBills() >= self.minimumBillValue:
+                        print '$' + str( customer.getTotalBills() ) + ' <cmp> ' + str( self.minimumBillValue )
+                        self.customers.append( customer )
                     customer = Customer()
                     isItemsBlocks = False
                     # break

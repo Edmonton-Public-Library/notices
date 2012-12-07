@@ -44,6 +44,9 @@ from reportreader import Bill
 from reportreader import Overdue
 from noticeformatter import PostscriptFormatter
 
+LOCAL_BULLETIN_FOLDER = 'bulletins'
+LOCAL_PRINT_FOLDER    = 'print'
+
 def usage():
     print 'Usage:'
     print '  notice.py [-b[10]dh] -i <inputfile> -o <outputfile>'
@@ -66,7 +69,7 @@ def main( argv ):
             # overdues
             noticeType = 'ODUE' # overdues.
         elif opt in ( "-b", "--dollars" ): # bills
-            billLimit = arg 
+            billLimit = float( arg )
             noticeType = 'BILL' # bills.
         elif opt in ( "-i", "--ifile" ):
             inputFile = arg
@@ -81,11 +84,11 @@ def main( argv ):
     # basic checks done, let's get down to business.
     noticeReader = None
     if noticeType == 'HOLD':
-        noticeReader = Hold( inputFile )
+        noticeReader = Hold( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     elif noticeType == 'BILL':
-        noticeReader = Bill( inputFile, billLimit )
+        noticeReader = Bill( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER, billLimit )
     elif noticeType == 'ODUE':
-        noticeReader = Overdue( inputFile )
+        noticeReader = Overdue( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     else:
         sys.stderr.write( 'nothing to do; notice type not selected' )
         usage()
@@ -94,9 +97,10 @@ def main( argv ):
     psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
     noticeReader.setOutputFormat( psFormatter )
     if noticeReader.parseReport() == False:
-        sys.stderr.write( 'error: unable to parse the report' )
+        sys.stderr.write( 'error: unable to parse report' )
         sys.exit()
     noticeReader.writeToFile()
+    noticeReader.outputReport()
 
 # Initial entry point for program
 if __name__ == "__main__":

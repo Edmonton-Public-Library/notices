@@ -23,9 +23,11 @@ REPORT_DIR=${LOCAL}/reports
 BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
-ARGS= -h --ifile=${BILLS}
+ARGS= -b 10.0 --ifile=${BILLS}
 
-
+test: ${RELATED}
+	clear
+	python ${LOCAL}/${APP} ${ARGS}
 run: ${RELATED}
 	clear
 	# -rm ${PRINT_DIR}/*.ps
@@ -37,9 +39,7 @@ run: ${RELATED}
 	# python ${LOCAL}/${APP} -b12.0 -i${BILLS}
 	# python ${LOCAL}/${APP} -o     -i${OVERDUES}
 	${LOCAL}/pstopdf.sh
-test: ${RELATED}
-	clear
-	python ${LOCAL}/${APP} -v
+
 page:
 	python ${LOCAL}/page.py
 format:
