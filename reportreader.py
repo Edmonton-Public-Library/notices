@@ -194,12 +194,11 @@ class Hold( Notice ):
                     isAddress = False
                     isItemBlock = True
                 elif isPickupLocation:
-                    #### TODO: Add customer pickup location somehow.
-                    print 'pickup location is ' + line
+                    customer.setHeader( line )
                     isPickupLocation = False
                     isAddress = True
                 elif isItemsBlocks:
-                    self.__set_customer_data__( lines, customer.setItemText )
+                    self.__set_customer_data__( lines, customer.setItemText, True )
                     isItemsBlocks = False
             elif line.startswith( '.report' ):
                 if customer != None:

@@ -17,6 +17,7 @@ from page import PostscriptPage
 from page import POINTS
 from customer import Customer
 
+SENTINAL = '#PICKUP_LIBRARY#'
 
 class NoticeFormatter:
     def __init__( self ):
@@ -119,7 +120,12 @@ class PostscriptFormatter( NoticeFormatter ):
         yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
         # Each customer gets only one header message so set that now
         if isFirstPage:
-            yPos = page.setHeader( self.header )
+            header = ''
+            if len( customer.header ) > 0:
+                header = self.header.replace( SENTINAL, customer.header )
+            else:
+                header = self.header
+            yPos = page.setHeader( header )
         item = customer.getNextItem()
         while len( item ) > 0:
             yPos = page.setItem( item, self.leftMargin, ( yPos - self.blockSpacing ) )

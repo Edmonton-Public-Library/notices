@@ -46,6 +46,7 @@ class ItemBlock:
 class Customer:
     def __init__( self ):
         self.addressBlock = ItemBlock()
+        self.header       = ''
         self.items        = []
         self.summaryBlock = ItemBlock()
         self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z](\s+)?\d[a-z]\d(\s+)?", re.IGNORECASE )
@@ -57,6 +58,9 @@ class Customer:
     # return: 
     def setPageTotal( self, count ):
         self.pagesPrinted = count
+        
+    def setHeader( self, text ):
+        self.header = text
         
     def getPagesPrinted( self ):
         return self.pagesPrinted
