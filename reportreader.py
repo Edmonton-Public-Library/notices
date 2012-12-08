@@ -23,6 +23,8 @@ class Notice:
         self.statementDate    = 'Statement produced: ' + self.humanDate
         self.bulletinDir      = bulletinDir # path of the open bulletin  
         self.printDir         = printDir
+        self.startNoticePath  = ''
+        self.endNoticePath    = ''
         # All the customers to be contacted by this report.
         self.customers        = []
         self.pagesPrinted     = 0
@@ -92,11 +94,18 @@ class Notice:
     # Adds item text from the report to the customer.
     # param:  the remainder of the lines from the report as a list
     # param:  function to be called. Data dependant.
-    def __set_customer_data__( self, lines, customerFunc ):
+    def __set_customer_data__( self, lines, customerFunc, ignoreFirstEndblock=False ):
+        haveSeenFirstEndblock = False
         while( len( lines ) > 0  ):
             line = lines.pop()
             if line.startswith( '.endblock' ):
-                return
+                if ignoreFirstEndblock:
+                    if haveSeenFirstEndblock == True:
+                        return
+                    haveSeenFirstEndblock = True
+                    continue
+                else:
+                    return
             customerFunc( line )
         
     def __str__( self ):
@@ -113,6 +122,8 @@ class Notice:
         Test test test
         <BLANKLINE>
         """
+        if len( path ) == 0: # This happens if there is no footertext mentioned in the report.
+            return ''
         newPath = self.bulletinDir + os.sep + path.split( os.sep )[-1]
         try:
             with open( newPath, 'r' ) as f:
@@ -134,7 +145,69 @@ class Hold( Notice ):
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppress_malformed_customer=True ):
-        return False
+        # .folddata
+        # .report
+        # .language ENGLISH
+        # .col 5l,1,73
+        # Friday, December 7, 2012
+        # .block
+        # Whitemud Crossing Branch
+        # .endblock
+        # .block
+                  # Georgia I Grant
+                  # 11227 58 Avenue
+                  # Edmonton, AB
+                  # T6H 1C3
+        # .endblock
+        # .read /s/sirsi/Unicorn/Notices/1stpickup
+        # .block
+        # .block
+          # 1   Bobby Flay's mesa grill cookbook : explosive flavors from the
+              # Southwestern kitchen / by Bobby Flay with Stephanie Banyas and Sally
+              # Jackson ; photographs by Ben Fink.
+              # Flay, Bobby.
+        # .endblock
+              # call number:641.5784 FLA                                copy:1    
+                # Pickup by:12/13/2012
+        # .endblock
+        # .report
+        # ...
+        #
+        lines = self.__get_lines__()
+        # now pop off each line from the file and form it into a block of data
+        customer = None
+        isItemsBlocks = False
+        isPickupLocation = False
+        isAddress = False
+        while( len( lines ) > 0 ):
+            line = lines.pop()
+            if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
+                print 'opening message and customer items'
+                isItemsBlocks = True
+                self.startNoticePath = line.split()[1]
+                print self.startNoticePath
+            elif line.startswith( '.block' ):
+                line = lines.pop()
+                if isAddress:
+                    customer.setAddressText( line )
+                    self.__set_customer_data__( lines, customer.setAddressText )
+                    isAddress = False
+                    isItemBlock = True
+                elif isPickupLocation:
+                    #### TODO: Add customer pickup location somehow.
+                    print 'pickup location is ' + line
+                    isPickupLocation = False
+                    isAddress = True
+                elif isItemsBlocks:
+                    self.__set_customer_data__( lines, customer.setItemText )
+                    isItemsBlocks = False
+            elif line.startswith( '.report' ):
+                if customer != None:
+                    self.customers.append( customer )
+                customer = Customer()
+                isPickupLocation = True
+        print self.customers[0]
+        return True
         
 class Overdue( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
