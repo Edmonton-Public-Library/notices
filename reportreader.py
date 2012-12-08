@@ -251,6 +251,7 @@ class Overdue( Notice ):
                 self.__set_customer_data__( lines, customer.setItemText, '.report' )
                 if hasEmail == False:
                     self.customers.append( customer )
+                hasEmail = False
                 customer = Customer()
             elif line.startswith( '.block' ):
                 self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
