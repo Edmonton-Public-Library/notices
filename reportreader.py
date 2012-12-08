@@ -94,11 +94,11 @@ class Notice:
     # Adds item text from the report to the customer.
     # param:  the remainder of the lines from the report as a list
     # param:  function to be called. Data dependant.
-    def __set_customer_data__( self, lines, customerFunc, ignoreFirstEndblock=False ):
+    def __set_customer_data__( self, lines, customerFunc, endBlockTag, ignoreFirstEndblock=False ):
         haveSeenFirstEndblock = False
         while( len( lines ) > 0  ):
             line = lines.pop()
-            if line.startswith( '.endblock' ):
+            if line.startswith( endBlockTag ):
                 if ignoreFirstEndblock:
                     if haveSeenFirstEndblock == True:
                         return
@@ -190,7 +190,7 @@ class Hold( Notice ):
                 line = lines.pop()
                 if isAddress:
                     customer.setAddressText( line )
-                    self.__set_customer_data__( lines, customer.setAddressText )
+                    self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
                     isAddress = False
                     isItemBlock = True
                 elif isPickupLocation:
@@ -198,7 +198,7 @@ class Hold( Notice ):
                     isPickupLocation = False
                     isAddress = True
                 elif isItemsBlocks:
-                    self.__set_customer_data__( lines, customer.setItemText, True )
+                    self.__set_customer_data__( lines, customer.setItemText, '.endblock', True )
                     isItemsBlocks = False
             elif line.startswith( '.report' ):
                 if customer != None:
@@ -219,7 +219,41 @@ class Overdue( Notice ):
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppress_malformed_customer=True ):
-        return False
+        # .folddata
+        # .report
+        # .col 5l,1,73
+        # .language ENGLISH
+        # Friday, December 7, 2012
+        # .block
+                  # Gerald Haekel
+                  # 3528 108 Street
+                  # Edmonton, AB
+                  # T6J 1B4
+        # .endblock
+        # .read /s/sirsi/Unicorn/Notices/1stoverdue
+          # 1  call number:PERIODICAL                                ID:31221091576145  
+             # ADULT PERIODICAL
+             # due:11/22/2012,23:59
+        # .report
+        lines = self.__get_lines__()
+        # now pop off each line from the file and form it into a block of data
+        customer = Customer()
+        isItemsBlocks = False
+        isPickupLocation = False
+        isAddress = False
+        while( len( lines ) > 0 ):
+            line = lines.pop()
+            if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
+                print 'opening message and customer items'
+                self.startNoticePath = line.split()[1]
+                print self.startNoticePath
+                # The rest of the text until the next .report tag is items for the customer
+                self.__set_customer_data__( lines, customer.setItemText, '.report' )
+                self.customers.append( customer )
+                customer = Customer()
+            elif line.startswith( '.block' ):
+                self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+        return True
         
 class Bill( Notice ):
     def __init__( self, inFile, bulletinDir, printDir, billLimit=10.0 ):
@@ -302,13 +336,13 @@ class Bill( Notice ):
                 elif line.find( '=====' ) > 0: # summary block.
                     print 'found summary'
                     customer.setSummaryText( line )
-                    self.__set_customer_data__( lines, customer.setSummaryText )
+                    self.__set_customer_data__( lines, customer.setSummaryText, '.endblock' )
                 elif isItemsBlocks == True:
                     customer.setItemText( line )
-                    self.__set_customer_data__( lines, customer.setItemText )
+                    self.__set_customer_data__( lines, customer.setItemText, '.endblock' )
                 else:
                     customer.setAddressText( line )
-                    self.__set_customer_data__( lines, customer.setAddressText )
+                    self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
             elif line.startswith( '.email' ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
