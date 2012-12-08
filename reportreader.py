@@ -238,7 +238,7 @@ class Overdue( Notice ):
         lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer = Customer()
-        isItemsBlocks = False
+        hasEmail = False
         isPickupLocation = False
         isAddress = False
         while( len( lines ) > 0 ):
@@ -249,10 +249,14 @@ class Overdue( Notice ):
                 print self.startNoticePath
                 # The rest of the text until the next .report tag is items for the customer
                 self.__set_customer_data__( lines, customer.setItemText, '.report' )
-                self.customers.append( customer )
+                if hasEmail == False:
+                    self.customers.append( customer )
                 customer = Customer()
             elif line.startswith( '.block' ):
                 self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+            elif line.startswith( '.email' ):
+                # this customer doesn't get added because they have an email.
+                hasEmail = True
         return True
         
 class Bill( Notice ):
