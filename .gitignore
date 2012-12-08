@@ -12,3 +12,4 @@ print/*.ps
 print/*.pdf
 print/
 reports/
+malformed_addr.lst
