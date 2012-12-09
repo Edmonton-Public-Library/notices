@@ -23,9 +23,9 @@ REPORT_DIR=${LOCAL}/reports
 BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
-# ARGS= -b 10.0 --ifile=${BILLS}
+ARGS= -b 10.0 --ifile=${BILLS}
 # ARGS= -h --ifile=${HOLDS}
-ARGS= -o --ifile=${OVERDUES}
+# ARGS= -o --ifile=${OVERDUES}
 
 test: ${RELATED}
 	clear

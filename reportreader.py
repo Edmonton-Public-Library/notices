@@ -14,6 +14,7 @@ from customer import Customer
 from datetime import date
 from noticeformatter import PostscriptFormatter
 
+############## Base Class ####################
 class Notice:
     def __init__( self, inFile, bulletinDir, printDir, outFilePrefix ):
         self.today            = date.today()
@@ -134,6 +135,7 @@ class Notice:
             sys.stderr.write( 'error: failed to find Notice file: "' + newPath + '".' )
             sys.exit( 2 )
         
+############## Holds ####################
 class Hold( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_holds_' )
@@ -144,7 +146,7 @@ class Hold( Notice ):
         
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
-    def parseReport( self, suppress_malformed_customer=True ):
+    def parseReport( self, suppress_malformed_customer=False ):
         # .folddata
         # .report
         # .language ENGLISH
@@ -175,10 +177,10 @@ class Hold( Notice ):
         #
         lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
-        customer = None
-        isItemsBlocks = False
+        customer         = None
+        hasEmail         = False
         isPickupLocation = False
-        isAddress = False
+        isAddress        = False
         while( len( lines ) > 0 ):
             line = lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
@@ -201,13 +203,21 @@ class Hold( Notice ):
                     self.__set_customer_data__( lines, customer.setItemText, '.endblock', True )
                     isItemsBlocks = False
             elif line.startswith( '.report' ):
-                if customer != None:
-                    self.customers.append( customer )
+                if customer != None and hasEmail == False:
+                    if not customer.isWellFormed() and suppress_malformed_customer:
+                        pass
+                    else:
+                        self.customers.append( customer )
+                    hasEmail = False
                 customer = Customer()
                 isPickupLocation = True
+            elif line.startswith( '.email' ):
+                # this customer doesn't get added because they have an email.
+                hasEmail = True
         print self.customers[0]
         return True
-        
+
+############## Overdues ####################
 class Overdue( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
@@ -218,7 +228,7 @@ class Overdue( Notice ):
         
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
-    def parseReport( self, suppress_malformed_customer=True ):
+    def parseReport( self, suppress_malformed_customer=False ):
         # .folddata
         # .report
         # .col 5l,1,73
@@ -237,10 +247,10 @@ class Overdue( Notice ):
         # .report
         lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
-        customer = Customer()
-        hasEmail = False
+        customer         = Customer()
+        hasEmail         = False
         isPickupLocation = False
-        isAddress = False
+        isAddress        = False
         while( len( lines ) > 0 ):
             line = lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
@@ -250,7 +260,10 @@ class Overdue( Notice ):
                 # The rest of the text until the next .report tag is items for the customer
                 self.__set_customer_data__( lines, customer.setItemText, '.report' )
                 if hasEmail == False:
-                    self.customers.append( customer )
+                    if not customer.isWellFormed() and suppress_malformed_customer:
+                        pass
+                    else:
+                        self.customers.append( customer )
                 hasEmail = False
                 customer = Customer()
             elif line.startswith( '.block' ):
@@ -259,7 +272,9 @@ class Overdue( Notice ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True
         return True
-        
+
+
+############## Bills ####################        
 class Bill( Notice ):
     def __init__( self, inFile, bulletinDir, printDir, billLimit=10.0 ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_bills_' )
@@ -354,21 +369,6 @@ class Bill( Notice ):
         # for testing print out the customers and what you have set.
         print self.customers[0]
         return True
-        
-    # def writeToFile( self, debug=False ):
-        # get the formatter to set up the postscript
-        # formatter = PostscriptFormatter( self.oFileName )
-        # Title
-        # formatter.setGlobalTitle( self.title )
-        # read the opening bulletin
-        # boilerPlateHeaderText = self.__read_Bulletin__( self.startNoticePath )
-        # formatter.setGlobalHeader( boilerPlateHeaderText )
-        # read the closing bulletin
-        # boilerPlateFooterText = self.__read_Bulletin__( self.endNoticePath )
-        # formatter.setGlobalFooter( boilerPlateFooterText )
-        # for customer in self.customers:
-            # formatter.setCustomer( customer )
-        # formatter.format( debug )
             
 # Initial entry point for program
 if __name__ == "__main__":

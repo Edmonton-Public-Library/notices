@@ -226,7 +226,7 @@ class Customer:
         output += 'address block: \n' + str(self.addressBlock)
         return output + 'COSTOMER]\n'
     
-    # Returns true if the customer's email address is complete and valid
+    # Returns true if the customer's mail address is complete and valid
     # and False otherwise. The last line of an address must be a postal code.
     def isWellFormed( self ):
         """
