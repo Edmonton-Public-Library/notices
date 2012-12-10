@@ -46,9 +46,9 @@ class ItemBlock:
 class Customer:
     def __init__( self ):
         self.addressBlock = ItemBlock()
-        self.header       = ''
+        self.header       = ''          # a customer header is for personalization. Currently only pickup library for holds.
         self.items        = []
-        self.summaryBlock = ItemBlock()
+        self.summaryBlock = ItemBlock() # Used for determining total bill amounts. The text is treated as an item though.
         self.postalCode   = re.compile( "(\s+)?[a-z]\d[a-z](\s+)?\d[a-z]\d(\s+)?", re.IGNORECASE )
         self.email        = ''
         self.pagesPrinted = 0
@@ -112,6 +112,9 @@ class Customer:
     # Adds text to a summary block.
     def setSummaryText( self, text ):
         self.summaryBlock.addLine( text )
+        # This treats the summary on bills as just part of the last item.
+        # The summary text is used to calculate how much the customer owes on all bills.
+        self.setItemText( text )
         
     # This method returns the total bills for the customer. If this customer was created
     # for a holds or overdue report the return value is 0.0. If the customer was invoked

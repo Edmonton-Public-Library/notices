@@ -84,7 +84,7 @@ class Notice:
     def __get_lines__( self ):
         # read in the report and parse it.
         iFile = open( self.iFileName, 'r' )
-        print 'reading reading reading .... '
+        # print 'reading reading reading .... '
         lines = iFile.readlines()
         iFile.close()
         blocks = []
@@ -184,10 +184,10 @@ class Hold( Notice ):
         while( len( lines ) > 0 ):
             line = lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
-                print 'opening message and customer items'
+                # print 'opening message and customer items'
                 isItemsBlocks = True
                 self.startNoticePath = line.split()[1]
-                print self.startNoticePath
+                # print self.startNoticePath
             elif line.startswith( '.block' ):
                 line = lines.pop()
                 if isAddress:
@@ -214,7 +214,7 @@ class Hold( Notice ):
             elif line.startswith( '.email' ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True
-        print self.customers[0]
+        # print self.customers[0]
         return True
 
 ############## Overdues ####################
@@ -254,9 +254,9 @@ class Overdue( Notice ):
         while( len( lines ) > 0 ):
             line = lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
-                print 'opening message and customer items'
+                # print 'opening message and customer items'
                 self.startNoticePath = line.split()[1]
-                print self.startNoticePath
+                # print self.startNoticePath
                 # The rest of the text until the next .report tag is items for the customer
                 self.__set_customer_data__( lines, customer.setItemText, '.report' )
                 if hasEmail == False:
@@ -331,13 +331,13 @@ class Bill( Notice ):
         while( len( lines ) > 0 ):
             line = lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
-                print 'opening message and customer items'
+                # print 'opening message and customer items'
                 isItemsBlocks = True
                 self.startNoticePath = line.split()[1]
             elif line.startswith( '.block' ):
                 line = lines.pop()
                 if line.startswith( '.read' ): # closing message and end of customer.
-                    print 'found end message and end of customer'
+                    # print 'found end message and end of customer'
                     # get the message and pass it to the noticeFormatter.
                     self.endNoticePath = line.split()[1]
                     # Test if the customer should even receive mailed notices.
@@ -354,7 +354,7 @@ class Bill( Notice ):
                     isItemsBlocks = False
                     # break
                 elif line.find( '=====' ) > 0: # summary block.
-                    print 'found summary'
+                    # print 'found summary'
                     customer.setSummaryText( line )
                     self.__set_customer_data__( lines, customer.setSummaryText, '.endblock' )
                 elif isItemsBlocks == True:
@@ -367,7 +367,7 @@ class Bill( Notice ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
         # for testing print out the customers and what you have set.
-        print self.customers[0]
+        # print self.customers[0]
         return True
             
 # Initial entry point for program

@@ -117,22 +117,21 @@ class PostscriptFormatter( NoticeFormatter ):
         # every page gets these
         page.setTitle( self.title )
         page.setAddress( customer.getAddress() )
-        yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) )
+        yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) ) - self.blockSpacing
         # Each customer gets only one header message so set that now
-        if isFirstPage:
-            header = ''
-            if len( customer.header ) > 0:
-                header = self.header.replace( SENTINAL, customer.header )
-            else:
-                header = self.header
-            yPos = page.setHeader( header )
+        if isFirstPage and len( customer.header ) > 0:
+            # This code replaces what ever is defined as a sentinal with the customer's pickup library. 
+            header = self.header.replace( SENTINAL, customer.header )
+            yPos = page.setHeader( header ) - self.blockSpacing
         item = customer.getNextItem()
         while len( item ) > 0:
-            yPos = page.setItem( item, self.leftMargin, ( yPos - self.blockSpacing ) )
+            yPos = page.setItem( item, self.leftMargin, yPos  ) - self.blockSpacing
+            item = customer.getNextItem()
+            if len( item ) == 0: # when the previous item was the last.
+                break
             if page.isRoomForItem( item, yPos ) == False:
                 customer.pushItem( item )
                 break # we have to make another page to fit it all.
-            item = customer.getNextItem()
         return page
     
     # Finalizes all the pages into a single PS file.

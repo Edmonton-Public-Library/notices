@@ -39,7 +39,7 @@ class PostscriptPage( Page ):
         self.yDate           = 9.875
         self.xFooter         = self.leftMargin
         self.yFooter         = 4.5
-        self.xAddressBlock   = 4.0
+        self.xAddressBlock   = 3.25
         self.yAddressBlock   = 1.75
         self.itemYMin        = 5.0
         # The first page is set to the bottom of the header, the second page will print just below the statement
@@ -61,19 +61,19 @@ class PostscriptPage( Page ):
     # return: float - the y location of the last line printed.
     def __set_text_block__( self, lines, x, y, dryRun=False ):
         for line in lines:
-            if dryRun == False:
-                self.__set_text__( line, x, y )
-            y -= ( self.kerning / POINTS ) # convert points to inches to keep y in sync
+            y = self.__set_text__( line, x, y, dryRun )
         return y
     
     # Writes a line of text to the location given.
     # param:  line - string to be laid out on the page
     # param:  x - x coordinate of the string.
     # param:  y - y coordinate with origin (0,0) at the lower left corner of the page. 
-    def __set_text__( self, line, x, y ):
-        x_s = self.__to_points__( x )
-        y_s = self.__to_points__( y )
-        self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
+    def __set_text__( self, line, x, y, dryRun=False ):
+        if not dryRun:
+            x_s = self.__to_points__( x )
+            y_s = self.__to_points__( y )
+            self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
+        return y - ( self.kerning / POINTS ) # convert points to inches to keep y in sync
         
     # Default method that stringifies object.
     # param:  
@@ -195,9 +195,10 @@ class PostscriptPage( Page ):
         if bold == True:
             self.page += 'gsave\n'
             self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
-        self.__set_text__( text, x, y )
+        y = self.__set_text__( text, x, y )
         if bold == True:
             self.page += 'grestore\n'
+        return y
        
     # Returns the height of the block of text in inches.
     # param:  list of lines of text.
@@ -208,8 +209,7 @@ class PostscriptPage( Page ):
     # Prints the argument text at the appropriate position
     # param:  text - single string.
     def setStatementDate( self, text ):
-        self.setLine( text, self.xDate, self.yDate, False )
-        return self.yDate - ( self.kerning/POINTS )
+        return self.setLine( text, self.xDate, self.yDate, False )
     
     # Sets the header message of the page.
     # param:  string
