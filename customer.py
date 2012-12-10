@@ -190,7 +190,7 @@ class Customer:
             return
         item = None
         # Test if the first non-white char is a digit. Thats when to create a new item.
-        if text.lstrip()[0].isdigit():
+        if text.lstrip()[0].isdigit() or len( self.items ) == 0:
             item = ItemBlock()
         else:
             # get the first item off the list
@@ -257,7 +257,7 @@ class Customer:
         return not isinstance( self.postalCode.match( self.addressBlock.getLastLine().strip() ), type( None ) )
     
     # Creates a customer with bogus data for testing.
-    def __create_customer__( self ):
+    def __create_customer__( self ):    
         """
         >>> c = Customer()
         >>> customer = c.__create_customer__()
@@ -273,6 +273,7 @@ class Customer:
             c.setItemText('      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60')
         return c
     
+ 
         
 # Initial entry point for program
 if __name__ == "__main__":
