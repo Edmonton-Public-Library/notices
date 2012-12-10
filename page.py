@@ -245,6 +245,11 @@ class PostscriptPage( Page ):
         block = self.__break_line__( text, False, False )
         return self.setTextBlock( block, self.xHeader, self.yHeader, False )
         
+    # Sets the footer message of the page.
+    # param:  string
+    def setFooter( self, textBlock, x, y ):
+        return self.setItem( textBlock, x, y )
+        
     # Sets the block of text as item text.
     # param:  List of strings of an items
     # return: True if the item could fit on the page and False otherwise.

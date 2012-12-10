@@ -101,13 +101,16 @@ class PostscriptFormatter( NoticeFormatter ):
             yPos = page.setHeader( header ) - self.blockSpacing
         item = customer.getNextItem()
         while len( item ) > 0:
-            yPos = page.setItem( item, self.leftMargin, yPos  ) - self.blockSpacing
+            yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
             item = customer.getNextItem()
             if len( item ) == 0: # when the previous item was the last.
                 break
             if page.isRoomForItem( item, yPos ) == False:
                 customer.pushItem( item )
                 break # we have to make another page to fit it all.
+        # Handle footers; no more items but there is a footer...
+        if customer.hasMoreItems() == False and customer.summaryBlock.isEmpty() == False:
+            page.setFooter( customer.getFooter(), self.leftMargin, yPos )
         return page
     
     # Finalizes all the pages into a single PS file.

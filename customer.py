@@ -28,8 +28,8 @@ class ItemBlock:
             return ''
         return self.itemLines[-1]
         
-    # def isEmpty( self ):
-        # return len(self.itemLines) == 0 or len(self.itemLines[0]) == 0
+    def isEmpty( self ):
+        return len( self.itemLines ) == 0 or len( self.itemLines[0] ) == 0
         
     def getItem( self ):
         return self.itemLines
@@ -114,8 +114,14 @@ class Customer:
         self.summaryBlock.addLine( text )
         # This treats the summary on bills as just part of the last item.
         # The summary text is used to calculate how much the customer owes on all bills.
-        self.setItemText( text )
-        
+        # self.setItemText( text )
+    
+    # Returns an array strings from the summary block.
+    # param:  
+    # return: array of strings which may be empty.
+    def getFooter( self ):
+        return self.summaryBlock.getItem()
+    
     # This method returns the total bills for the customer. If this customer was created
     # for a holds or overdue report the return value is 0.0. If the customer was invoked
     # by a bills report then the method returns the customers total bills.
