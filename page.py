@@ -72,9 +72,36 @@ class PostscriptPage( Page ):
         if not dryRun:
             x_s = self.__to_points__( x )
             y_s = self.__to_points__( y )
+            # sanitize the line
+            line = line.replace( '(', '\(' )
+            line = line.replace( ')', '\)' )
             self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
         return y - ( self.kerning / POINTS ) # convert points to inches to keep y in sync
-        
+    
+    # Returns a minimized string of the first characters an ellipsis and last 10 characters
+    # of a line like: 'This is how a very long line would be printed ... end of the line.'
+    # param:  string text to shorten
+    # param:  Maximum number of characters allowed - default 83. 
+    # return: string text shortened
+    def __minimize_line__( self, text, maxCharacters=65 ):
+        # """
+        # >>> nf = Customer()
+        # >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 40) + '"'
+        # "1234567890123456789012345 ... 1234567890"
+        # >>> print '"' + nf.__minimize_line__('1234567890123456789012345678901234567890', 40) + '"'
+        # "1234567890123456789012345678901234567890"
+        # >>> print '"' + nf.__minimize_line__('123456789012345678901234567890123456789', 40) + '"'
+        # "123456789012345678901234567890123456789"
+        # >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901', 40) + '"'
+        # "1234567890123456789012345 ... 2345678901"
+        # """
+        if len( text ) <= maxCharacters:
+            return text
+        ellipsis = len( '...' )
+        endLine = 10
+        beginLine = maxCharacters - (endLine + ellipsis)
+        return text[0:beginLine] + ' ... ' + text[-endLine:].rstrip()
+    
     # Default method that stringifies object.
     # param:  
     # return: the postscript string of this object.
@@ -93,10 +120,10 @@ class PostscriptPage( Page ):
     # param:  block - array of strings.
     # param:  preserveWhiteSpace - True to keep leading white space before words and False otherwise.
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
-    def __break_lines__( self, block, preserveWhiteSpace ):
+    def __break_lines__( self, block, preserveWhiteSpace, minimize ):
         textBlock = []
         for line in block:
-            newLines = self.__break_line__( line, preserveWhiteSpace )
+            newLines = self.__break_line__( line, preserveWhiteSpace, minimize )
             for newLine in newLines:
                 textBlock.append( newLine )
         return textBlock
@@ -106,35 +133,36 @@ class PostscriptPage( Page ):
     # param:  text string of text
     # param:  preserveWhitespace  - if True all white space is presevered, and if False words are separated by a single whitespace.
     # return: list of split strings.
-    def __break_line__( self, text, preserveWhiteSpace ):
+    def __break_line__( self, text, preserveWhiteSpace, minimize ):
         maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
         thisLine = ''
         textBlock = []
         if len( text ) <= maxCharsPerLine:
             textBlock.append( text )
             return textBlock
-        words = []
-        # If items don't preserve whitespace they end up looking odd.
-        if preserveWhiteSpace == True:
-            words = self.__split__( text )
-        else: # this is for messages that are just one long line.
-            words = text.split()
-        for word in words:
-            if len( thisLine ) + len( word ) <= maxCharsPerLine:
-                thisLine += word + ' '
-            else:
-                textBlock.append( thisLine[:-1] )
-                thisLine  = word + ' '
-        textBlock.append( thisLine[:-1] )
+        if minimize == True: # take the whole line and shorten it with ellipses.
+            textBlock.append( self.__minimize_line__( text, maxCharsPerLine ) )
+            return textBlock
+        else: # we will split lines based on line length.
+            words = self.__split__( text, preserveWhiteSpace )
+            for word in words:
+                if len( thisLine ) + len( word ) <= maxCharsPerLine:
+                    thisLine += word + ' '
+                else:
+                    textBlock.append( thisLine[:-1] )
+                    thisLine  = word + ' '
+            textBlock.append( thisLine[:-1] )
         return textBlock
     
     # Splits a line into words but keeps the leading spacing.
     # param:  sentence - string of words
     # return: array of words with leading spaces intact.
-    def __split__( self, sentence ):
-        words = sentence.split()
-        start   = 0
-        end     = 0
+    def __split__( self, sentence, preserveWhiteSpace ):
+        words    = sentence.split()
+        if preserveWhiteSpace == False:
+            return words
+        start    = 0
+        end      = 0
         spcWords = []
         for word in words:
             end = sentence.find( word, start ) + len(word)
@@ -214,7 +242,7 @@ class PostscriptPage( Page ):
     # Sets the header message of the page.
     # param:  string
     def setHeader( self, text ):
-        block = self.__break_line__( text, False )
+        block = self.__break_line__( text, False, False )
         return self.setTextBlock( block, self.xHeader, self.yHeader, False )
         
     # Sets the block of text as item text.
@@ -223,7 +251,7 @@ class PostscriptPage( Page ):
     def setItem( self, textBlock, x, y ):
         block = []
         for line in textBlock:
-            block.extend( self.__break_line__( line, True ) )
+            block.extend( self.__break_line__( line, True, True ) )
         return self.setTextBlock( block, x, y, True, True )
     
     # This page returns True if the argument item can be fit on this page and False
