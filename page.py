@@ -49,6 +49,7 @@ class PostscriptPage( Page ):
             self.page  = '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
             self.page += '%%Pages: 1\n'
         self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
+        self.isComplete       = False # marker that page has been finalized.
             
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
@@ -153,6 +154,12 @@ class PostscriptPage( Page ):
                     thisLine  = word + ' '
             textBlock.append( thisLine[:-1] )
         return textBlock
+        
+    # ###################################################################################    
+    # def __flow_block__( self, textBlock, preserveWhiteSpace ):
+        # flowBlock = []
+        # return textBlock
+    # ##################################################################################
     
     # Splits a line into words but keeps the leading spacing.
     # param:  sentence - string of words
@@ -241,23 +248,34 @@ class PostscriptPage( Page ):
     
     # Sets the header message of the page.
     # param:  string
-    def setHeader( self, text ):
-        block = self.__break_line__( text, False, False )
-        return self.setTextBlock( block, self.xHeader, self.yHeader, False )
+    # def setHeader( self, text ):
+        # block = self.__break_line__( text, False, False )
+        # return self.setTextBlock( block, self.xHeader, self.yHeader, False )
         
     # Sets the footer message of the page.
     # param:  string
-    def setFooter( self, textBlock, x, y ):
-        return self.setItem( textBlock, x, y )
+    # def setFooter( self, textBlock, x, y ):
+        # return self.setItem( textBlock, x, y )
+        
+    # Sets the footer message of the page.
+    # param:  string
+    # def setFooter( self, text, x, y ):
+        # self.isComplete = True
+        # block = self.__break_line__( text, False, False )
+        # return self.setTextBlock( block, x, y, False )
         
     # Sets the block of text as item text.
     # param:  List of strings of an items
     # return: True if the item could fit on the page and False otherwise.
-    def setItem( self, textBlock, x, y ):
+    def setItem( self, textBlock, x, y, complete=False ):
+        self.isComplete = complete
+        if len( textBlock ) == 0 or len( textBlock[0] ) == 0:
+            return y # No change in position for empty block.
         block = []
-        for line in textBlock:
-            block.extend( self.__break_line__( line, True, True ) )
-        return self.setTextBlock( block, x, y, True, True )
+        # for line in textBlock:
+            # block.extend( self.__break_line__( line, True, True ) )
+        # return self.setTextBlock( block, x, y, True, True )
+        return self.setTextBlock( textBlock, x, y, True, True )
     
     # This page returns True if the argument item can be fit on this page and False
     # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer

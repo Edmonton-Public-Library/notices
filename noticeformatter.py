@@ -45,8 +45,8 @@ class PostscriptFormatter( NoticeFormatter ):
     def __init__( self, fileBaseName ):
         self.today           = date.today().strftime("%A, %B %d, %Y")
         self.title           = '' # text string for title
-        self.header          = '' # text string for header
-        self.footer          = '' # text strings for footer
+        self.header          = [] # text string for header
+        self.footer          = [] # text strings for footer
         self.customers       = []
         self.fileBaseName    = fileBaseName
         self.font            = 'Courier'
@@ -95,22 +95,34 @@ class PostscriptFormatter( NoticeFormatter ):
         page.setAddress( customer.getAddress() )
         yPos = page.setStatementDate( 'Statement produced: ' + str( self.today ) ) - self.blockSpacing
         # Each customer gets only one header message so set that now
-        if isFirstPage and len( customer.header ) > 0:
-            # This code replaces what ever is defined as a sentinal with the customer's pickup library. 
-            header = self.header.replace( SENTINAL, customer.header )
-            yPos = page.setHeader( header ) - self.blockSpacing
-        item = customer.getNextItem()
-        while len( item ) > 0:
-            yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
-            item = customer.getNextItem()
-            if len( item ) == 0: # when the previous item was the last.
+        if isFirstPage:
+            # This code replaces what ever is defined as a sentinal with the customer's pickup library.
+            if len( customer.header ) > 0:
+                header = []
+                for line in self.header:
+                    header.append( line.replace( SENTINAL, customer.header ) )
+            else:
+                header = self.header
+            yPos = page.setItem( header, self.leftMargin, yPos ) - self.blockSpacing
+        while ( True ):
+            if customer.hasMoreItems():
+                item = customer.getNextItem()
+                if page.isRoomForItem( item, yPos ) == False:
+                    customer.pushItem( item )
+                    break # we have to make another page to fit it all.
+                yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
+            elif customer.summaryBlock.isEmpty() == False:
+                item = customer.getFooter()
+                if page.isRoomForItem( item, yPos ) == False:
+                    customer.pushFooter( item )
+                    break # we have to make another page to fit it all.
+                yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
+            elif page.isComplete == False:
+                item = self.footer
+                if page.isRoomForItem( item, yPos ) == False:
+                    break # we have to make another page to fit but the footer is local to this script.
+                page.setItem( self.footer, self.leftMargin, yPos, True ) # This sets the page complete flag.
                 break
-            if page.isRoomForItem( item, yPos ) == False:
-                customer.pushItem( item )
-                break # we have to make another page to fit it all.
-        # Handle footers; no more items but there is a footer...
-        if customer.hasMoreItems() == False and customer.summaryBlock.isEmpty() == False:
-            page.setFooter( customer.getFooter(), self.leftMargin, yPos )
         return page
     
     # Finalizes all the pages into a single PS file.
@@ -199,10 +211,10 @@ class PostscriptFormatter( NoticeFormatter ):
         self.title = text
         
     def setGlobalHeader( self, text ):
-        self.header = text
+        self.header.append( text )
         
     def setGlobalFooter( self, text ):
-        self.footer = text
+        self.footer.append( text )
 
     def __str__( self ):
         return 'Postscript formatter: ' + self.fileName

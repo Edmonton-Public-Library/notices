@@ -65,11 +65,9 @@ class Notice:
         # Title
         formatter.setGlobalTitle( self.title )
         # read the opening bulletin
-        boilerPlateHeaderText = self.__read_Bulletin__( self.startNoticePath )
-        formatter.setGlobalHeader( boilerPlateHeaderText )
+        self.__read_Bulletin__( self.startNoticePath, formatter.setGlobalHeader )
         # read the closing bulletin
-        boilerPlateFooterText = self.__read_Bulletin__( self.endNoticePath )
-        formatter.setGlobalFooter( boilerPlateFooterText )
+        self.__read_Bulletin__( self.endNoticePath, formatter.setGlobalFooter )
         self.totalCustomers   = len( self.customers )
         for customer in self.customers:
             formatter.setCustomer( customer )
@@ -95,6 +93,9 @@ class Notice:
     # Adds item text from the report to the customer.
     # param:  the remainder of the lines from the report as a list
     # param:  function to be called. Data dependant.
+    # param:  the rtf tag that terminates data collection, usually an '.endblock'.
+    # param:  ignoreFirstEndBlock - if set to true the first endBlockTag specified above is ignored This
+    #         is used to handle nested rtf tags.
     def __set_customer_data__( self, lines, customerFunc, endBlockTag, ignoreFirstEndblock=False ):
         haveSeenFirstEndblock = False
         while( len( lines ) > 0  ):
@@ -116,21 +117,16 @@ class Notice:
     # Reads a bulletin, or Notice, to be used as a header or footer for a notice.
     # param:  path - path to file. Looks in the local bulletin directory.
     # return: Message from file as a single string.
-    def __read_Bulletin__( self, path ):
-        """
-        >>> n = Bill( 'some_file', 'bulletins', 'print' )
-        >>> print n.__read_Bulletin__( '/s/sirsi/Unicorn/Notices/testfile' )
-        Test test test
-        <BLANKLINE>
-        """
+    def __read_Bulletin__( self, path, func ):
         if len( path ) == 0: # This happens if there is no footertext mentioned in the report.
             return ''
         newPath = self.bulletinDir + os.sep + path.split( os.sep )[-1]
         try:
             with open( newPath, 'r' ) as f:
-                bulletin = f.readlines()
+                for line in f.readlines():
+                    func( line )
                 f.close()
-                return ''.join( bulletin )
+                
         except IOError:
             sys.stderr.write( 'error: failed to find Notice file: "' + newPath + '".' )
             sys.exit( 2 )
@@ -214,6 +210,7 @@ class Hold( Notice ):
             elif line.startswith( '.email' ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True
+                customer.setEmail( line )
         # print self.customers[0]
         return True
 
@@ -253,10 +250,9 @@ class Overdue( Notice ):
         isAddress        = False
         while( len( lines ) > 0 ):
             line = lines.pop()
-            if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
+            if line.startswith( '.read' ): # message read instruction not in block.
                 # print 'opening message and customer items'
                 self.startNoticePath = line.split()[1]
-                # print self.startNoticePath
                 # The rest of the text until the next .report tag is items for the customer
                 self.__set_customer_data__( lines, customer.setItemText, '.report' )
                 if hasEmail == False:
@@ -271,6 +267,7 @@ class Overdue( Notice ):
             elif line.startswith( '.email' ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True
+                customer.setEmail( line )
         return True
 
 

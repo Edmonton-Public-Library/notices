@@ -17,7 +17,7 @@
 
 LOCAL=/home/ilsdev/projects/notices
 APP=notice.py
-RELATED=customer.py reportreader.py page.py noticeformatter.py
+RELATED=customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh
 PRINT_DIR=${LOCAL}/print
 REPORT_DIR=${LOCAL}/reports
 BILLS=${REPORT_DIR}/bills.prn
@@ -27,23 +27,24 @@ ARGS_BILLS= -b 10.0 --ifile=${BILLS}
 ARGS_HOLDS= -h --ifile=${HOLDS}
 ARGS_OVERD= -o --ifile=${OVERDUES}
 
+run: ${RELATED}
+	clear
+	-rm ${PRINT_DIR}/*.ps
+	-rm ${PRINT_DIR}/*.pdf
+	# -rm ${REPORT_DIR}/*.prn
+	# ${LOCAL}/report.sh   # getting today's reports
+	# ${LOCAL}/bulletin.sh # getting Notices for today's reports.
+	python ${LOCAL}/${APP} -h     -i${HOLDS}
+	python ${LOCAL}/${APP} -b10.0 -i${BILLS}
+	python ${LOCAL}/${APP} -o     -i${OVERDUES}
+	${LOCAL}/pstopdf.sh
+
 test: ${RELATED}
 	clear
 	python ${LOCAL}/${APP} ${ARGS_BILLS}
 	python ${LOCAL}/${APP} ${ARGS_HOLDS}
 	python ${LOCAL}/${APP} ${ARGS_OVERD}
 	
-run: ${RELATED}
-	clear
-	# -rm ${PRINT_DIR}/*.ps
-	# -rm ${PRINT_DIR}/*.pdf
-	-rm ${REPORT_DIR}/*.prn
-	${LOCAL}/report.sh   # getting today's reports
-	${LOCAL}/bulletin.sh # getting Notices for today's reports.
-	# python ${LOCAL}/${APP} -h     -i${HOLDS}
-	# python ${LOCAL}/${APP} -b12.0 -i${BILLS}
-	# python ${LOCAL}/${APP} -o     -i${OVERDUES}
-	${LOCAL}/pstopdf.sh
 pdf:
 	${LOCAL}/pstopdf.sh
 page:

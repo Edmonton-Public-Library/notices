@@ -120,7 +120,29 @@ class Customer:
     # param:  
     # return: array of strings which may be empty.
     def getFooter( self ):
-        return self.summaryBlock.getItem()
+        item = self.summaryBlock.getItem()
+        self.summaryBlock = ItemBlock() # removes the summary block so it behaves like an item.
+        return item
+        
+    def pushFooter( self, item ):
+        """
+        >>> c = Customer()
+        >>> c.setSummaryText( '1' )
+        >>> c.setSummaryText( '2' )
+        >>> print str( c.summaryBlock )
+        1 2
+        >>> item = c.getFooter()
+        >>> print str( c.summaryBlock )
+        <BLANKLINE>
+        >>> print str( item )
+        ['1', '2']
+        >>> c.pushFooter( item )
+        >>> print str( c.summaryBlock )
+        1 2
+        """
+        pushedItem = ItemBlock()
+        pushedItem.addAllLines( item )
+        self.summaryBlock = pushedItem
     
     # This method returns the total bills for the customer. If this customer was created
     # for a holds or overdue report the return value is 0.0. If the customer was invoked
