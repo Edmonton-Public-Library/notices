@@ -31,8 +31,8 @@ run: ${RELATED}
 	clear
 	-rm ${PRINT_DIR}/*.ps
 	-rm ${PRINT_DIR}/*.pdf
-	-rm ${REPORT_DIR}/*.prn
-	${LOCAL}/report.sh   # getting today's reports
+	# -rm ${REPORT_DIR}/*.prn
+	# ${LOCAL}/report.sh   # getting today's reports
 	# ${LOCAL}/bulletin.sh # getting Notices for today's reports.
 	python ${LOCAL}/${APP} -h     -i${HOLDS}
 	python ${LOCAL}/${APP} -b10.0 -i${BILLS}

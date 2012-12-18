@@ -123,10 +123,22 @@ class PostscriptPage( Page ):
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
     def __break_lines__( self, block, preserveWhiteSpace, minimize ):
         textBlock = []
-        for line in block:
-            newLines = self.__break_line__( line, preserveWhiteSpace, minimize )
-            for newLine in newLines:
-                textBlock.append( newLine )
+        prevLine = ''
+        while ( True ):
+            line1 = prevLine
+            try:
+                if len( line1 ) == 0: # This stops an intial ' ' character for the initial string.
+                    line2 = block.pop( 0 )
+                else:
+                    line2 = line1 + ' ' + block.pop( 0 )
+            except IndexError:
+                newLines = self.__break_line__( line1, preserveWhiteSpace, minimize )
+                textBlock.extend( newLines )
+                break
+            newLines = self.__break_line__( line2, preserveWhiteSpace, minimize )
+            # extend the array to include all but the last line, it becomes the first line next time.
+            textBlock.extend( newLines[:-1] ) 
+            prevLine = newLines[-1]
         return textBlock
     
     # Breaks a single string into an block of text (array) of one element if the 
@@ -154,12 +166,6 @@ class PostscriptPage( Page ):
                     thisLine  = word + ' '
             textBlock.append( thisLine[:-1] )
         return textBlock
-        
-    # ###################################################################################    
-    # def __flow_block__( self, textBlock, preserveWhiteSpace ):
-        # flowBlock = []
-        # return textBlock
-    # ##################################################################################
     
     # Splits a line into words but keeps the leading spacing.
     # param:  sentence - string of words
