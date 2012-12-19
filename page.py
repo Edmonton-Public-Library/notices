@@ -30,7 +30,7 @@ class Page:
         self.page = ''
     def setTitle( self ):
         pass
-    def setTextBlock( self, text ):
+    def setBoldTextBlock( self, text ):
         pass
     def setLine( self, text ):
         pass
@@ -142,7 +142,7 @@ class PostscriptPage( Page ):
         while ( True ):
             line1 = prevLine
             try:
-                if len( line1 ) == 0: # This stops an intial ' ' character for the initial string.
+                if len( line1 ) == 0: # This stops an intial ' ' character for the first string.
                     line2 = block.pop( 0 )
                 else:
                     line2 = line1 + ' ' + block.pop( 0 )
@@ -154,6 +154,8 @@ class PostscriptPage( Page ):
             # extend the array to include all but the last line, it becomes the first line next time.
             textBlock.extend( newLines[:-1] ) 
             prevLine = newLines[-1]
+        for line in textBlock:
+            block.append( line )
         return textBlock
     
     # Breaks a single string into an block of text (array) of one element if the 
@@ -227,13 +229,11 @@ class PostscriptPage( Page ):
     # param:  x - x coord.
     # param:  y - y coord in inches.
     # return: last y coord in inches.
-    def setTextBlock( self, block, x, y, bold=False ):
-        if bold == True:
-            self.page += 'gsave\n'
-            self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+    def setBoldTextBlock( self, block, x, y ):
+        self.page += 'gsave\n'
+        self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
         lastY = self.__set_text_block__( block, x, y )
-        if bold == True:
-            self.page += 'grestore\n'
+        self.page += 'grestore\n'
         return lastY
         
     # Sets a single line of text.
@@ -254,7 +254,7 @@ class PostscriptPage( Page ):
     # param:  list of lines of text.
     # return: total height in inches.
     def setAddress( self, textBlock ):
-        self.nextLine = self.setTextBlock( textBlock, self.xAddressBlock, self.yAddressBlock )
+        self.nextLine = self.__set_text_block__( textBlock, self.xAddressBlock, self.yAddressBlock )
         
     # Prints the argument text at the appropriate position
     # param:  text - single string.
@@ -266,20 +266,16 @@ class PostscriptPage( Page ):
     # return: True if the item could fit on the page and False otherwise.
     def setItem( self, textBlock, x, y, complete=False ):
         self.isComplete = complete
-        if len( textBlock ) == 0 or len( textBlock[0] ) == 0:
-            return y # No change in position for empty block.
-        block = []
-        # for line in textBlock:
-            # block.extend( self.__break_line__( line ) )
-        # return self.setTextBlock( block, x, y, True )
-        return self.setTextBlock( textBlock, x, y, True )
+        myBlock = self.__break_lines__( textBlock )
+        return self.setBoldTextBlock( myBlock, x, y )
     
     # This page returns True if the argument item can be fit on this page and False
     # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
     # to zero y gets the closer to the bottom of the page. Items can't print below 
     # the itemYMin which is currently set to 5.0 inches from the bottom of the form.
     def isRoomForItem( self, textBlock, lastYPosition ):
-        y = self.__set_text_block__( textBlock, self.leftMargin, lastYPosition, True )
+        myBlock = self.__break_lines__( textBlock )
+        y = lastYPosition - ( len( myBlock ) * ( self.kerning / POINTS ))
         if y >= self.itemYMin:
             return True
         else:
@@ -292,9 +288,9 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
     page = PostscriptPage( 1, 'Courier', 10.0, 11.0, True )
-    page.setTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
+    page.setBoldTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
     msg = ['Statement produced: Friday, August 24 2012']
-    nextLine = page.setTextBlock( msg, 0.875, 9.875 )
+    nextLine = page.setBoldTextBlock( msg, 0.875, 9.875 )
     msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.',  
     'This may block your ability to borrow or to place holds or to renew materials online or via our',
     'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
@@ -304,7 +300,7 @@ if __name__ == "__main__":
     msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
     '      Raymond, Bradley.',
     '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
-    nextLine = page.setTextBlock( msg, 0.875, (nextLine - 0.18), True )
+    nextLine = page.setBoldTextBlock( msg, 0.875, (nextLine - 0.18) )
     page.setTitle( 'Test Title' )
     page.setLine('Statement 1 of 2', 0.875, 4.5 )
     f = open( 'test.ps', 'w' )

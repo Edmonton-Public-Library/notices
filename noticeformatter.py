@@ -113,13 +113,14 @@ class PostscriptFormatter( NoticeFormatter ):
         # Each customer gets only one header message so set that now
         if isFirstPage:
             # This code replaces what ever is defined as a sentinal with the customer's pickup library.
+            header = []
             if len( customer.header ) > 0:
-                header = []
                 for line in self.header:
                     header.append( line.replace( SENTINAL, customer.header ) )
             else:
                 header = self.header
-            yPos = page.setItem( header, self.leftMargin, yPos ) - self.blockSpacing
+            if len( header ) > 0:
+                yPos = page.setItem( header, self.leftMargin, yPos ) - self.blockSpacing
         while ( True ):
             if customer.hasMoreItems():
                 item = customer.getNextItem()
