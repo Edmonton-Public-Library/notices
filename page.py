@@ -137,6 +137,7 @@ class PostscriptPage( Page ):
     # param:  block - array of strings.
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
     def __break_lines__( self, block ):
+        maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
         textBlock = []
         prevLine = ''
         while ( True ):
@@ -144,13 +145,16 @@ class PostscriptPage( Page ):
             try:
                 if len( line1 ) == 0: # This stops an intial ' ' character for the first string.
                     line2 = block.pop( 0 )
+                    if len( line2 ) <= maxCharsPerLine: # don't wrap lines that are smaller than max size.
+                        textBlock.append( line2 )
+                        continue
                 else:
                     line2 = line1 + ' ' + block.pop( 0 )
             except IndexError:
-                newLines = self.__break_line__( line1 )
+                newLines = self.__break_line__( line1, maxCharsPerLine )
                 textBlock.extend( newLines )
                 break
-            newLines = self.__break_line__( line2 )
+            newLines = self.__break_line__( line2, maxCharsPerLine )
             # extend the array to include all but the last line, it becomes the first line next time.
             textBlock.extend( newLines[:-1] ) 
             prevLine = newLines[-1]
@@ -163,12 +167,12 @@ class PostscriptPage( Page ):
     # param:  text string of text
     # param:  preserveWhitespace  - if True all white space is presevered, and if False words are separated by a single whitespace.
     # return: list of split strings.
-    def __break_line__( self, text ):
-        maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
+    def __break_line__( self, text, maxCharsPerLine ):
         thisLine = ''
         textBlock = []
         if len( text ) <= maxCharsPerLine:
-            textBlock.append( text )
+            if len( text) > 0: # this stops excessive spacing between items.
+                textBlock.append( text )
             return textBlock
         else: # we will split the long strings.
             words = self.__split__( text )

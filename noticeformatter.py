@@ -127,18 +127,25 @@ class PostscriptFormatter( NoticeFormatter ):
                 if page.isRoomForItem( item, yPos ) == False:
                     customer.pushItem( item )
                     break # we have to make another page to fit it all.
+                print 'printing an item'
                 yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
             elif customer.summaryBlock.isEmpty() == False:
                 item = customer.getFooter()
+                print 'testing for summary...', len( item )
                 if page.isRoomForItem( item, yPos ) == False:
+                    print 'the size of the footer is ', len( item )
                     customer.pushFooter( item )
+                    print 'the size of the summaryBlock is ', customer.summaryBlock.getSize()
                     break # we have to make another page to fit it all.
+                print 'printing the summary'
                 yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
             elif page.isComplete == False:
                 item = self.footer
+                print 'testing for footer...'
                 if page.isRoomForItem( item, yPos ) == False:
                     break # we have to make another page to fit but the footer is local to this script.
                 page.setItem( self.footer, self.leftMargin, yPos, True ) # This sets the page complete flag.
+                print 'printing the footer'
                 break
         return page
     
