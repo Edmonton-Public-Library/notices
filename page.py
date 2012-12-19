@@ -73,26 +73,23 @@ class PostscriptPage( Page ):
     #         placement is based on the bottom left corner of the first character of the first
     #         line. In Postscript bottom refers to the lowest point on a non-decending character.
     # param:  y - y coordinate with origin (0,0) at the lower left corner of the page.
-    # param:  dry run - True if you want the text to appear, false if you want the location of 
-    #         where the bottom of the text box would have been if the text was to be laid out.
     # return: float - the y location of the last line printed.
-    def __set_text_block__( self, lines, x, y, dryRun=False ):
+    def __set_text_block__( self, lines, x, y ):
         for line in lines:
-            y = self.__set_text__( line, x, y, dryRun )
+            y = self.__set_text__( line, x, y )
         return y
     
     # Writes a line of text to the location given.
     # param:  line - string to be laid out on the page
     # param:  x - x coordinate of the string.
     # param:  y - y coordinate with origin (0,0) at the lower left corner of the page. 
-    def __set_text__( self, line, x, y, dryRun=False ):
-        if not dryRun:
-            x_s = self.__to_points__( x )
-            y_s = self.__to_points__( y )
-            # sanitize the line
-            line = line.replace( '(', '\(' )
-            line = line.replace( ')', '\)' )
-            self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
+    def __set_text__( self, line, x, y ):
+        x_s = self.__to_points__( x )
+        y_s = self.__to_points__( y )
+        # sanitize the line
+        line = line.replace( '(', '\(' )
+        line = line.replace( ')', '\)' )
+        self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
         return y - ( self.kerning / POINTS ) # convert points to inches to keep y in sync
     
     # Returns a minimized string of the first characters an ellipsis and last 10 characters
