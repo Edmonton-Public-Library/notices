@@ -65,7 +65,7 @@ class PostscriptPage( Page ):
             self.page  = '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
             self.page += '%%Pages: 1\n'
         self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
-        self.isComplete       = False # marker that page has been finalized.
+        self.isIncomplete      = True # marker that page has been finalized.
             
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
@@ -268,8 +268,8 @@ class PostscriptPage( Page ):
     # Sets the block of text as item text.
     # param:  List of strings of an items
     # return: True if the item could fit on the page and False otherwise.
-    def setItem( self, textBlock, x, y, complete=False ):
-        self.isComplete = complete
+    def setItem( self, textBlock, x, y, complete=True ):
+        self.isIncomplete = complete
         myBlock = self.__break_lines__( textBlock )
         return self.setBoldTextBlock( myBlock, x, y )
     

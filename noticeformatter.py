@@ -78,11 +78,11 @@ class PostscriptFormatter( NoticeFormatter ):
         totalPageCount  = 1
         for customer in self.customers:
             customerPages = []
-            isFirstPage   = True
-            while( customer.hasMoreItems() ):
-                page = self.__get_additional_page__( totalPageCount, customer, isFirstPage )
-                if isFirstPage == True: # First page needs a header, 
-                    isFirstPage = False
+            page = self.__get_additional_page__( totalPageCount, customer, True )
+            customerPages.append( page )
+            totalPageCount += 1
+            while( page.isIncomplete ):
+                page = self.__get_additional_page__( totalPageCount, customer )
                 customerPages.append( page )
                 totalPageCount += 1
             # add the statement page of pages notice
@@ -121,32 +121,23 @@ class PostscriptFormatter( NoticeFormatter ):
                 header = self.header
             if len( header ) > 0:
                 yPos = page.setItem( header, self.leftMargin, yPos ) - self.blockSpacing
-        while ( True ):
-            if customer.hasMoreItems():
-                item = customer.getNextItem()
-                if page.isRoomForItem( item, yPos ) == False:
-                    customer.pushItem( item )
-                    break # we have to make another page to fit it all.
-                print 'printing an item'
-                yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
-            elif customer.summaryBlock.isEmpty() == False:
-                item = customer.getFooter()
-                print 'testing for summary...', len( item )
-                if page.isRoomForItem( item, yPos ) == False:
-                    print 'the size of the footer is ', len( item )
-                    customer.pushFooter( item )
-                    print 'the size of the summaryBlock is ', customer.summaryBlock.getSize()
-                    break # we have to make another page to fit it all.
-                print 'printing the summary'
-                yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
-            elif page.isComplete == False:
-                item = self.footer
-                print 'testing for footer...'
-                if page.isRoomForItem( item, yPos ) == False:
-                    break # we have to make another page to fit but the footer is local to this script.
-                page.setItem( self.footer, self.leftMargin, yPos, True ) # This sets the page complete flag.
-                print 'printing the footer'
-                break
+        # Output all the items for a customer
+        while ( customer.hasMoreItems() ):
+            item = customer.getNextItem()
+            if page.isRoomForItem( item, yPos ) == False:
+                customer.pushItem( item )
+                return page # we have to make another page to fit it all.
+            yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
+        # Add any footer the customer has, usually a bill summary.
+        if customer.hasFooter():
+            item = customer.getFooter()
+            if page.isRoomForItem( item, yPos ) == False:
+                customer.pushFooter( item )
+                return page # we have to make another page to fit it all.
+            yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
+        # Add the page's footer
+        if page.isRoomForItem( self.footer, yPos ):
+            page.setItem( self.footer, self.leftMargin, yPos, False ) # This sets the page complete flag.
         return page
     
     # Finalizes all the pages into a single PS file.
