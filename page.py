@@ -121,7 +121,7 @@ class PostscriptPage( Page ):
     # param:  block - array of strings.
     # param:  preserveWhiteSpace - True to keep leading white space before words and False otherwise.
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
-    def __break_lines__( self, block, preserveWhiteSpace, minimize ):
+    def __break_lines__( self, block, preserveWhiteSpace ):
         textBlock = []
         prevLine = ''
         while ( True ):
@@ -132,10 +132,10 @@ class PostscriptPage( Page ):
                 else:
                     line2 = line1 + ' ' + block.pop( 0 )
             except IndexError:
-                newLines = self.__break_line__( line1, preserveWhiteSpace, minimize )
+                newLines = self.__break_line__( line1, preserveWhiteSpace )
                 textBlock.extend( newLines )
                 break
-            newLines = self.__break_line__( line2, preserveWhiteSpace, minimize )
+            newLines = self.__break_line__( line2, preserveWhiteSpace )
             # extend the array to include all but the last line, it becomes the first line next time.
             textBlock.extend( newLines[:-1] ) 
             prevLine = newLines[-1]
@@ -146,15 +146,12 @@ class PostscriptPage( Page ):
     # param:  text string of text
     # param:  preserveWhitespace  - if True all white space is presevered, and if False words are separated by a single whitespace.
     # return: list of split strings.
-    def __break_line__( self, text, preserveWhiteSpace, minimize ):
+    def __break_line__( self, text, preserveWhiteSpace ):
         maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
         thisLine = ''
         textBlock = []
         if len( text ) <= maxCharsPerLine:
             textBlock.append( text )
-            return textBlock
-        if minimize == True: # take the whole line and shorten it with ellipses.
-            textBlock.append( self.__minimize_line__( text, maxCharsPerLine ) )
             return textBlock
         else: # we will split lines based on line length.
             words = self.__split__( text, preserveWhiteSpace )
@@ -250,24 +247,6 @@ class PostscriptPage( Page ):
     # param:  text - single string.
     def setStatementDate( self, text ):
         return self.setLine( text, self.xDate, self.yDate, False )
-    
-    # Sets the header message of the page.
-    # param:  string
-    # def setHeader( self, text ):
-        # block = self.__break_line__( text, False, False )
-        # return self.setTextBlock( block, self.xHeader, self.yHeader )
-        
-    # Sets the footer message of the page.
-    # param:  string
-    # def setFooter( self, textBlock, x, y ):
-        # return self.setItem( textBlock, x, y )
-        
-    # Sets the footer message of the page.
-    # param:  string
-    # def setFooter( self, text, x, y ):
-        # self.isComplete = True
-        # block = self.__break_line__( text, False, False )
-        # return self.setTextBlock( block, x, y )
         
     # Sets the block of text as item text.
     # param:  List of strings of an items
@@ -278,7 +257,7 @@ class PostscriptPage( Page ):
             return y # No change in position for empty block.
         block = []
         # for line in textBlock:
-            # block.extend( self.__break_line__( line, True, True ) )
+            # block.extend( self.__break_line__( line, True ) )
         # return self.setTextBlock( block, x, y, True )
         return self.setTextBlock( textBlock, x, y, True )
     
@@ -306,7 +285,7 @@ if __name__ == "__main__":
     msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.',  
     'This may block your ability to borrow or to place holds or to renew materials online or via our',
     'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
-    myBlock = page.__break_lines__( msg, False, False )
+    myBlock = page.__break_lines__( msg, False )
     print myBlock
     nextLine = page.setItem( myBlock, 0.875, (nextLine - 0.18), False )
     msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
