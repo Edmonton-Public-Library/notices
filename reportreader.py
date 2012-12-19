@@ -85,7 +85,6 @@ class Notice:
         # print 'reading reading reading .... '
         lines = iFile.readlines()
         iFile.close()
-        blocks = []
         # reverse the order so we just use 
         lines.reverse()
         return lines
