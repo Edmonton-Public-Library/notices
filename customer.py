@@ -124,6 +124,21 @@ class Customer:
         self.summaryBlock = ItemBlock() # removes the summary block so it behaves like an item.
         return item
         
+    def hasFooter( self ):
+        """
+        >>> c = Customer()
+        >>> c.setSummaryText( '1' )
+        >>> c.setSummaryText( '2' )
+        >>> print str( c.summaryBlock )
+        1 2
+        >>> print c.hasFooter()
+        True
+        >>> item = c.getFooter()
+        >>> print c.hasFooter()
+        False
+        """
+        return not self.summaryBlock.isEmpty()
+        
     def pushFooter( self, item ):
         """
         >>> c = Customer()
