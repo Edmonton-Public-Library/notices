@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 ###########################################################################
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
+#
 # Purpose: Notice object.
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
@@ -119,9 +135,8 @@ class PostscriptPage( Page ):
     # Breaks long lines from a block of text into chunks that will fit within
     # the notice boundaries (line length < 6.5").
     # param:  block - array of strings.
-    # param:  preserveWhiteSpace - True to keep leading white space before words and False otherwise.
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
-    def __break_lines__( self, block, preserveWhiteSpace ):
+    def __break_lines__( self, block ):
         textBlock = []
         prevLine = ''
         while ( True ):
@@ -132,10 +147,10 @@ class PostscriptPage( Page ):
                 else:
                     line2 = line1 + ' ' + block.pop( 0 )
             except IndexError:
-                newLines = self.__break_line__( line1, preserveWhiteSpace )
+                newLines = self.__break_line__( line1 )
                 textBlock.extend( newLines )
                 break
-            newLines = self.__break_line__( line2, preserveWhiteSpace )
+            newLines = self.__break_line__( line2 )
             # extend the array to include all but the last line, it becomes the first line next time.
             textBlock.extend( newLines[:-1] ) 
             prevLine = newLines[-1]
@@ -146,7 +161,7 @@ class PostscriptPage( Page ):
     # param:  text string of text
     # param:  preserveWhitespace  - if True all white space is presevered, and if False words are separated by a single whitespace.
     # return: list of split strings.
-    def __break_line__( self, text, preserveWhiteSpace ):
+    def __break_line__( self, text ):
         maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
         thisLine = ''
         textBlock = []
@@ -154,7 +169,7 @@ class PostscriptPage( Page ):
             textBlock.append( text )
             return textBlock
         else: # we will split lines based on line length.
-            words = self.__split__( text, preserveWhiteSpace )
+            words = self.__split__( text )
             for word in words:
                 if len( thisLine ) + len( word ) <= maxCharsPerLine:
                     thisLine += word + ' '
@@ -167,10 +182,8 @@ class PostscriptPage( Page ):
     # Splits a line into words but keeps the leading spacing.
     # param:  sentence - string of words
     # return: array of words with leading spaces intact.
-    def __split__( self, sentence, preserveWhiteSpace ):
+    def __split__( self, sentence ):
         words    = sentence.split()
-        if preserveWhiteSpace == False:
-            return words
         start    = 0
         end      = 0
         spcWords = []
@@ -257,7 +270,7 @@ class PostscriptPage( Page ):
             return y # No change in position for empty block.
         block = []
         # for line in textBlock:
-            # block.extend( self.__break_line__( line, True ) )
+            # block.extend( self.__break_line__( line ) )
         # return self.setTextBlock( block, x, y, True )
         return self.setTextBlock( textBlock, x, y, True )
     
@@ -285,7 +298,7 @@ if __name__ == "__main__":
     msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.',  
     'This may block your ability to borrow or to place holds or to renew materials online or via our',
     'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
-    myBlock = page.__break_lines__( msg, False )
+    myBlock = page.__break_lines__( msg )
     print myBlock
     nextLine = page.setItem( myBlock, 0.875, (nextLine - 0.18), False )
     msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
