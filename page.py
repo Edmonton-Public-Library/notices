@@ -267,9 +267,10 @@ class PostscriptPage( Page ):
         
     # Sets the block of text as item text.
     # param:  List of strings of an items
+    # param:  x - x coord.
+    # param:  y - y coord in inches.
     # return: True if the item could fit on the page and False otherwise.
-    def setItem( self, textBlock, x, y, complete=True ):
-        self.isIncomplete = complete
+    def setItem( self, textBlock, x, y ):
         myBlock = self.__break_lines__( textBlock )
         return self.setBoldTextBlock( myBlock, x, y )
         
