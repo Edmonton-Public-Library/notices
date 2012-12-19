@@ -97,7 +97,7 @@ class PostscriptPage( Page ):
     # param:  string text to shorten
     # param:  Maximum number of characters allowed - default 83. 
     # return: string text shortened
-    def __minimize_line__( self, text, maxCharacters=65 ):
+    # def __minimize_line__( self, text, maxCharacters=65 ):
         # """
         # >>> nf = Customer()
         # >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 40) + '"'
@@ -109,12 +109,12 @@ class PostscriptPage( Page ):
         # >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901', 40) + '"'
         # "1234567890123456789012345 ... 2345678901"
         # """
-        if len( text ) <= maxCharacters:
-            return text
-        ellipsis = len( '...' )
-        endLine = 10
-        beginLine = maxCharacters - (endLine + ellipsis)
-        return text[0:beginLine] + ' ... ' + text[-endLine:].rstrip()
+        # if len( text ) <= maxCharacters:
+            # return text
+        # ellipsis = len( '...' )
+        # endLine = 10
+        # beginLine = maxCharacters - (endLine + ellipsis)
+        # return text[0:beginLine] + ' ... ' + text[-endLine:].rstrip()
     
     # Default method that stringifies object.
     # param:  
