@@ -168,15 +168,15 @@ class PostscriptPage( Page ):
         if len( text ) <= maxCharsPerLine:
             textBlock.append( text )
             return textBlock
-        else: # we will split lines based on line length.
+        else: # we will split the long strings.
             words = self.__split__( text )
             for word in words:
                 if len( thisLine ) + len( word ) <= maxCharsPerLine:
-                    thisLine += word + ' '
-                else:
-                    textBlock.append( thisLine[:-1] )
-                    thisLine  = word + ' '
-            textBlock.append( thisLine[:-1] )
+                    thisLine += word
+                else: # if the word doesn't fit, append what's on the line now and then make a new one starting with the current word.
+                    textBlock.append( thisLine )
+                    thisLine = word.lstrip()
+            textBlock.append( thisLine )
         return textBlock
     
     # Splits a line into words but keeps the leading spacing.
