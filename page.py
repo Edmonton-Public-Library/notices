@@ -272,6 +272,12 @@ class PostscriptPage( Page ):
         self.isIncomplete = complete
         myBlock = self.__break_lines__( textBlock )
         return self.setBoldTextBlock( myBlock, x, y )
+        
+    # Sets the complete flag.
+    # param:  
+    # return:
+    def finalize( self ):
+        self.isIncomplete = False
     
     # This page returns True if the argument item can be fit on this page and False
     # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer

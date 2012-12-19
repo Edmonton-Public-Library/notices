@@ -137,7 +137,8 @@ class PostscriptFormatter( NoticeFormatter ):
             yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
         # Add the page's footer
         if page.isRoomForItem( self.footer, yPos ):
-            page.setItem( self.footer, self.leftMargin, yPos, False ) # This sets the page complete flag.
+            page.setItem( self.footer, self.leftMargin, yPos ) # This sets the page complete flag.
+            page.finalize()
         return page
     
     # Finalizes all the pages into a single PS file.
