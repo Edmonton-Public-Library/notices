@@ -78,9 +78,11 @@ class PostscriptFormatter( NoticeFormatter ):
         totalPageCount  = 1
         for customer in self.customers:
             customerPages = []
+            # make the customers initial page - they all have at least one.
             page = self.__get_additional_page__( totalPageCount, customer, True )
             customerPages.append( page )
             totalPageCount += 1
+            # but if the page was incomplete, create a new one and keep going until it is complete.
             while( page.isIncomplete ):
                 page = self.__get_additional_page__( totalPageCount, customer )
                 customerPages.append( page )
