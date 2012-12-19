@@ -216,9 +216,8 @@ class PostscriptPage( Page ):
     # param:  list of strings of a block
     # param:  x - x coord.
     # param:  y - y coord in inches.
-    # param:  preserverWhiteSpace True to save leading white space on line breaking False will remove it.
     # return: last y coord in inches.
-    def setTextBlock( self, block, x, y, preserverWhiteSpace, bold=False ):
+    def setTextBlock( self, block, x, y, bold=False ):
         if bold == True:
             self.page += 'gsave\n'
             self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
@@ -245,7 +244,7 @@ class PostscriptPage( Page ):
     # param:  list of lines of text.
     # return: total height in inches.
     def setAddress( self, textBlock ):
-        self.nextLine = self.setTextBlock( textBlock, self.xAddressBlock, self.yAddressBlock, False )
+        self.nextLine = self.setTextBlock( textBlock, self.xAddressBlock, self.yAddressBlock )
         
     # Prints the argument text at the appropriate position
     # param:  text - single string.
@@ -256,7 +255,7 @@ class PostscriptPage( Page ):
     # param:  string
     # def setHeader( self, text ):
         # block = self.__break_line__( text, False, False )
-        # return self.setTextBlock( block, self.xHeader, self.yHeader, False )
+        # return self.setTextBlock( block, self.xHeader, self.yHeader )
         
     # Sets the footer message of the page.
     # param:  string
@@ -268,7 +267,7 @@ class PostscriptPage( Page ):
     # def setFooter( self, text, x, y ):
         # self.isComplete = True
         # block = self.__break_line__( text, False, False )
-        # return self.setTextBlock( block, x, y, False )
+        # return self.setTextBlock( block, x, y )
         
     # Sets the block of text as item text.
     # param:  List of strings of an items
@@ -280,8 +279,8 @@ class PostscriptPage( Page ):
         block = []
         # for line in textBlock:
             # block.extend( self.__break_line__( line, True, True ) )
-        # return self.setTextBlock( block, x, y, True, True )
-        return self.setTextBlock( textBlock, x, y, True, True )
+        # return self.setTextBlock( block, x, y, True )
+        return self.setTextBlock( textBlock, x, y, True )
     
     # This page returns True if the argument item can be fit on this page and False
     # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
@@ -301,15 +300,19 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
     page = PostscriptPage( 1, 'Courier', 10.0, 11.0, True )
-    page.setTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75, False )
+    page.setTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
     msg = ['Statement produced: Friday, August 24 2012']
-    nextLine = page.setTextBlock( msg, 0.875, 9.875, False )
-    msg = 'Our records indicate that the following amount(s) is outstanding by more than 15 days.  This may block your ability to borrow or to place holds or to renew materials online or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.'
-    nextLine = page.setHeader( msg )#, 0.875, (nextLine - 0.18), False )
+    nextLine = page.setTextBlock( msg, 0.875, 9.875 )
+    msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.',  
+    'This may block your ability to borrow or to place holds or to renew materials online or via our',
+    'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
+    myBlock = page.__break_lines__( msg, False, False )
+    print myBlock
+    nextLine = page.setItem( myBlock, 0.875, (nextLine - 0.18), False )
     msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
     '      Raymond, Bradley.',
     '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
-    nextLine = page.setTextBlock( msg, 0.875, (nextLine - 0.18), True, True )
+    nextLine = page.setTextBlock( msg, 0.875, (nextLine - 0.18), True )
     page.setTitle( 'Test Title' )
     page.setLine('Statement 1 of 2', 0.875, 4.5 )
     f = open( 'test.ps', 'w' )
