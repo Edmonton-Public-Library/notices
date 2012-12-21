@@ -1,0 +1,27 @@
+December 21, 2012
+=================
+The process of running print notices is a series of steps, all of which have been automated with scripts in this directory.
+
+Normally the ILS team receives the notices in their inbox at ilsteam@epl.ca. The notices are produced each weekday moring and
+sent as an attachment by cron. To see if the job is scheduled type 'crontab -l'.
+
+If that failed for some reason, the whole process, with the exception of emailing the results, can be done on the command line
+by 'cd'ing into /home/ilsdev/projects/notices and typing: 'make'. The first rule, 'run', is run which will place the PDF notices
+in the 'print' directory.
+
+The Entire Process
+------------------
+1) Find the necessary reports needed for bills, overdues, and holds for the day and copy then to ilsdev 'reports' directory.
+2) Find the bulletins that need to be included in the header or footer of the notices, and copy them to ildsdev 'bulletins' directory.
+3) Format the reports with notice.py. Just this step of the conversion can be done by typing 'make test'. This will create PS files 
+   in the 'print' directory.
+4) Convert PS files to PDF using ghostscript.
+5) Optional: email reports. You will need uuencode in the sharutils package to do this.
+
+Other Helper scripts
+--------------------
+
+report.sh - fetches the latest mail notice reports, translates them and 'scp's them to the 'reports' directory.
+bulletin.sh - checks any reports in the 'report' directory for all the bulletins that are needed for the reports and 'scp's them
+            to the 'bulletins' directory.
+pstopdf.sh - converts any PS file in the 'print' directory into PDF.
