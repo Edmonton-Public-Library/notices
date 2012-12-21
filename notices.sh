@@ -18,17 +18,17 @@
 # Collects all the notices required for the day and coordinates convertion to PDF.
 #
 
-LOCAL="/home/ilsdev/projects/notices"
-APP="notice.py"
-PRINT_DIR="${LOCAL}/print"
-REPORT_DIR="${LOCAL}/reports"
-BILLS="${REPORT_DIR}/bills.prn"
-HOLDS="${REPORT_DIR}/holds.prn"
-OVERDUES="${REPORT_DIR}/overdues.prn"
+LOCAL=/home/ilsdev/projects/notices
+APP=notice.py
+PRINT_DIR=${LOCAL}/print
+REPORT_DIR=${LOCAL}/reports
+BILLS=${REPORT_DIR}/bills.prn
+HOLDS=${REPORT_DIR}/holds.prn
+OVERDUES=${REPORT_DIR}/overdues.prn
 
-rm "${PRINT_DIR}/*.ps"
-rm "${PRINT_DIR}/*.pdf"
-rm "${REPORT_DIR}/*.prn"
+rm ${PRINT_DIR}/*.ps
+rm ${PRINT_DIR}/*.pdf
+rm ${REPORT_DIR}/*.prn
 ${LOCAL}/report.sh   # getting today's reports
 # ${LOCAL}/bulletin.sh # getting Notices for today's reports.
 python ${LOCAL}/${APP} -h     -i${HOLDS}

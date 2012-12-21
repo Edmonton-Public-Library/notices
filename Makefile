@@ -34,9 +34,9 @@ run: ${RELATED}
 	-rm ${REPORT_DIR}/*.prn
 	${LOCAL}/report.sh   # getting today's reports
 	# ${LOCAL}/bulletin.sh # getting Notices for today's reports.
-	python ${LOCAL}/${APP} -h     -i${HOLDS}
-	python ${LOCAL}/${APP} -b10.0 -i${BILLS}
-	python ${LOCAL}/${APP} -o     -i${OVERDUES}
+	python ${LOCAL}/${APP} ${ARGS_BILLS}
+	python ${LOCAL}/${APP} ${ARGS_HOLDS}
+	python ${LOCAL}/${APP} ${ARGS_OVERD}
 	${LOCAL}/pstopdf.sh
 
 test: ${RELATED}
