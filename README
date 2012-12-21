@@ -9,6 +9,14 @@ If that failed for some reason, the whole process, with the exception of emailin
 by 'cd'ing into /home/ilsdev/projects/notices and typing: 'make'. The first rule, 'run', is run which will place the PDF notices
 in the 'print' directory.
 
+DEBUGGING
+---------
+Many of the python files contain unit tests to check their own integrity. You can run them with 'python <file>.py [-c]'.
+Some useful tests already exist in the make file. 
+
+REMEMBER: when debugging esp. bills, the script will withhold bills that are less than $10.00. This can be confusing because
+The sirsi report contains all bills - the results from notice.py will be different. 
+
 The Entire Process
 ------------------
 1) Find the necessary reports needed for bills, overdues, and holds for the day and copy then to ilsdev 'reports' directory.
