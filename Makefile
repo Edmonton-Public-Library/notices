@@ -27,11 +27,7 @@ ARGS_BILLS= -b 10.0 --ifile=${BILLS}
 ARGS_HOLDS= -h --ifile=${HOLDS}
 ARGS_OVERD= -o --ifile=${OVERDUES}
 
-run: ${RELATED}
-	clear
-	-rm ${PRINT_DIR}/*.ps
-	-rm ${PRINT_DIR}/*.pdf
-	-rm ${REPORT_DIR}/*.prn
+run: ${RELATED} clean
 	${LOCAL}/report.sh   # getting today's reports
 	# ${LOCAL}/bulletin.sh # getting Notices for today's reports.
 	python ${LOCAL}/${APP} ${ARGS_BILLS}
@@ -40,7 +36,6 @@ run: ${RELATED}
 	${LOCAL}/pstopdf.sh
 
 test: ${RELATED}
-	clear
 	python ${LOCAL}/${APP} ${ARGS_BILLS}
 	python ${LOCAL}/${APP} ${ARGS_HOLDS}
 	python ${LOCAL}/${APP} ${ARGS_OVERD}
@@ -54,4 +49,8 @@ format:
 customer:
 	python ${LOCAL}/customer.py
 clean:
+	-rm ${PRINT_DIR}/*.ps
+	-rm ${PRINT_DIR}/*.pdf
+	-rm ${REPORT_DIR}/*.prn
+proper:
 	-rm *.pyc

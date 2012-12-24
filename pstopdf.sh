@@ -21,8 +21,8 @@
 # =======================================
 #
 
-PRINT_DIR="print"
-PS_LIST="ps_files.lst"
+PRINT_DIR=/home/ilsdev/projects/notices/print
+PS_LIST=${PRINT_DIR}/ps_files.lst
 # convert all the PS files in print using
 # basic format: ps2pdf14 testFormatPage.ps test.pdf
 
@@ -32,7 +32,7 @@ ls -c1 *.ps >$PS_LIST
 for psFile in $(cat $PS_LIST)
 do
 	printf "converting: %s\n" "${psFile}"
-	ps2pdf14 ${psFile}
+	/usr/bin/ps2pdf14 ${PRINT_DIR}/${psFile}
 done
 
 rm $PS_LIST

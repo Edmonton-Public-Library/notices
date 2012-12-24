@@ -17,6 +17,12 @@
 #
 # Collects all the notices required for the day and coordinates convertion to PDF.
 #
+export HOME=/home/ilsdev
+export LOGNAME=ilsdev
+export PATH=$PATH:/usr/bin:/bin
+export LANG=en_US.UTF-8
+export SHELL=/bin/sh
+export PWD=/home/ilsdev
 
 LOCAL=/home/ilsdev/projects/notices
 APP=notice.py
@@ -31,13 +37,14 @@ rm ${PRINT_DIR}/*.pdf
 rm ${REPORT_DIR}/*.prn
 ${LOCAL}/report.sh   # getting today's reports
 # ${LOCAL}/bulletin.sh # getting Notices for today's reports.
-python ${LOCAL}/${APP} -h     -i${HOLDS}
-python ${LOCAL}/${APP} -b10.0 -i${BILLS}
-python ${LOCAL}/${APP} -o     -i${OVERDUES}
+/usr/bin/python ${LOCAL}/${APP} -h     -i${HOLDS}
+/usr/bin/python ${LOCAL}/${APP} -b10.0 -i${BILLS}
+/usr/bin/python ${LOCAL}/${APP} -o     -i${OVERDUES}
 ${LOCAL}/pstopdf.sh
 cd ${PRINT_DIR}
 for name in $(ls *.pdf)
 do
 	# printf "%s\n" "$name"
-	uuencode $name $name | mailx -s "Print Notices" ilsteam@epl.ca
+	/usr/bin/uuencode $name $name | /usr/bin/mailx -s "Print Notices" "ilsteam@epl.ca"
 done
+
