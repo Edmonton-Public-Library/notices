@@ -159,13 +159,31 @@ class Hold( Notice ):
         # .read /s/sirsi/Unicorn/Notices/1stpickup
         # .block
         # .block
-          # 1   Bobby Flay's mesa grill cookbook : explosive flavors from the
-              # Southwestern kitchen / by Bobby Flay with Stephanie Banyas and Sally
-              # Jackson ; photographs by Ben Fink.
-              # Flay, Bobby.
+          # 1   Holiday crafts.
         # .endblock
-              # call number:641.5784 FLA                                copy:1    
-                # Pickup by:12/13/2012
+              # $<call_num:3>745.5941 HOL 2004                           $<copy:3>1    
+                # $<pickup_by:3>1/20/2013 
+        # .endblock
+        # .block
+        # .block
+          # 2   Holiday crafts.
+        # .endblock
+              # $<call_num:3>745.5941 HOL 2005                           $<copy:3>2    
+                # $<pickup_by:3>1/20/2013 
+        # .endblock
+        # .block
+        # .block
+          # 3   Holiday crafts.
+        # .endblock
+              # $<call_num:3>745.5941 HOL 2006                           $<copy:3>2    
+                # $<pickup_by:3>1/20/2013 
+        # .endblock
+        # .block
+        # .block
+          # 4   Holiday crafts.
+        # .endblock
+              # $<call_num:3>745.5941 HOL 2008                           $<copy:3>1    
+                # $<pickup_by:3>1/20/2013 
         # .endblock
         # .report
         # ...
@@ -196,7 +214,6 @@ class Hold( Notice ):
                     isAddress = True
                 elif isItemsBlocks:
                     self.__set_customer_data__( lines, customer.setItemText, '.endblock', True )
-                    isItemsBlocks = False
             elif line.startswith( '.report' ):
                 if customer != None and hasEmail == False:
                     if not customer.isWellFormed() and suppress_malformed_customer:
@@ -206,6 +223,7 @@ class Hold( Notice ):
                     hasEmail = False
                 customer = Customer()
                 isPickupLocation = True
+                isItemsBlocks = False
             elif line.startswith( '.email' ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True
