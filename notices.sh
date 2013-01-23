@@ -30,10 +30,12 @@ LOCAL_DIR=/home/ilsdev/projects/notices
 APP=notice.py
 PRINT_DIR=${LOCAL_DIR}/print
 REPORT_DIR=${LOCAL_DIR}/reports
+BULLETIN_DIR=${LOCAL_DIR}/bulletins
 BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
 LOG_FILE=${LOCAL_DIR}/notice.log
+cd ${LOCAL_DIR}
 date >${LOG_FILE}
 env >>${LOG_FILE}
 rm ${PRINT_DIR}/*.ps
@@ -44,8 +46,9 @@ rm ${REPORT_DIR}/*.prn
 echo "rm ${REPORT_DIR}/*.prn" >>${LOG_FILE}
 ${LOCAL_DIR}/report.sh   # getting today's reports
 # ${LOCAL_DIR}/bulletin.sh # getting Notices for today's reports.
-echo "$PYTHONPATH" >>${LOG_FILE}
-echo "$PYTHONHOME" >>${LOG_FILE}
+# echo "$PYTHONPATH" >>${LOG_FILE}
+# echo "$PYTHONHOME" >>${LOG_FILE}
+cd ${LOCAL_DIR}
 ${LOCAL_DIR}/${APP} -h     -i${HOLDS}
 echo "${LOCAL_DIR}/${APP} -h     -i${HOLDS}" >>${LOG_FILE}
 ${LOCAL_DIR}/${APP} -b10.0 -i${BILLS}
