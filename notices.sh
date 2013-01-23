@@ -24,7 +24,7 @@ export LANG=en_US.UTF-8
 export SHELL=/bin/sh
 export PWD=/home/ilsdev
 # export PYTHONHOME=/home/ilsdev/projects/notices:/usr/lib/python2.7
-export PYTHONPATH=.:/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
+export PYTHONPATH=/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
 
 LOCAL_DIR=/home/ilsdev/projects/notices
 APP=notice.py
@@ -34,9 +34,10 @@ BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
 LOG_FILE=${LOCAL_DIR}/notice.log
-
+date >${LOG_FILE}
+env >>${LOG_FILE}
 rm ${PRINT_DIR}/*.ps
-echo "rm ${PRINT_DIR}/*.ps" >${LOG_FILE}
+echo "rm ${PRINT_DIR}/*.ps" >>${LOG_FILE}
 rm ${PRINT_DIR}/*.pdf
 echo "rm ${PRINT_DIR}/*.pdf" >>${LOG_FILE}
 rm ${REPORT_DIR}/*.prn

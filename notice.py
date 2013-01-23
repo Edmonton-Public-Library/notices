@@ -78,10 +78,10 @@ def main( argv, log ):
     print 'Input file is = ', inputFile
     log.write('running file ' + inputFile + '\n')
     if os.path.isfile( inputFile ) == False:
-        sys.stderr.write( 'error: input report file ' + inputFile + ' does not exist. Did the report run?\n' )
+        log.write( 'error: input report file ' + inputFile + ' does not exist. Did the report run?\n' )
         sys.exit()
     if os.path.getsize( inputFile ) == 0:
-        sys.stderr.write( 'error: input report file ' + inputFile + ' is empty. Did the report run?\n' )
+        log.write( 'error: input report file ' + inputFile + ' is empty. Did the report run?\n' )
         sys.exit()
     
     # basic checks done, let's get down to business.
@@ -93,6 +93,7 @@ def main( argv, log ):
     elif noticeType == 'ODUE':
         noticeReader = Overdue( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     else:
+        log.write( 'nothing to do; notice type not selected\n' )
         sys.stderr.write( 'nothing to do; notice type not selected\n' )
         usage()
         sys.exit()
@@ -101,7 +102,7 @@ def main( argv, log ):
     noticeReader.setOutputFormat( psFormatter )
     # Don't suppress customers even if their address is bad.
     if noticeReader.parseReport( False ) == False:
-        sys.stderr.write( 'error: unable to parse report\n' )
+        log.write( 'error: unable to parse report\n' )
         sys.exit()
     noticeReader.writeToFile()
     noticeReader.outputReport()
