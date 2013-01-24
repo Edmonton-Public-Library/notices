@@ -206,12 +206,12 @@ class Hold( Notice ):
                 if isAddress:
                     customer.setAddressText( line )
                     self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
-                    isAddress = False
+                    isAddress   = False
                     isItemBlock = True
                 elif isPickupLocation:
                     customer.setHeader( line )
                     isPickupLocation = False
-                    isAddress = True
+                    isAddress        = True
                 elif isItemsBlocks:
                     self.__set_customer_data__( lines, customer.setItemText, '.endblock', True )
             elif line.startswith( '.report' ):
@@ -220,10 +220,10 @@ class Hold( Notice ):
                         pass
                     else:
                         self.customers.append( customer )
-                    hasEmail = False
                 customer = Customer()
                 isPickupLocation = True
-                isItemsBlocks = False
+                isItemsBlocks    = False
+                hasEmail         = False
             elif line.startswith( '.email' ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True

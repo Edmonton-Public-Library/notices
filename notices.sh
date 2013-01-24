@@ -23,32 +23,30 @@ export PATH=$PATH:/usr/bin:/bin:/home/ilsdev/projects/notices
 export LANG=en_US.UTF-8
 export SHELL=/bin/sh
 export PWD=/home/ilsdev
-# export PYTHONHOME=/home/ilsdev/projects/notices:/usr/lib/python2.7
 export PYTHONPATH=/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
 
 LOCAL_DIR=/home/ilsdev/projects/notices
 APP=notice.py
-PRINT_DIR=${LOCAL_DIR}/print
-REPORT_DIR=${LOCAL_DIR}/reports
-BULLETIN_DIR=${LOCAL_DIR}/bulletins
+PRINT_DIR=./print
+REPORT_DIR=./reports
+BULLETIN_DIR=./bulletins
 BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
-LOG_FILE=${LOCAL_DIR}/notice.log
+LOG_FILE=${LOCAL_DIR}/notices.log
 cd ${LOCAL_DIR}
-date >${LOG_FILE}
-env >>${LOG_FILE}
 rm ${PRINT_DIR}/*.ps
+echo "" >> ${LOG_FILE}
+date >>${LOG_FILE}
 echo "rm ${PRINT_DIR}/*.ps" >>${LOG_FILE}
 rm ${PRINT_DIR}/*.pdf
 echo "rm ${PRINT_DIR}/*.pdf" >>${LOG_FILE}
 rm ${REPORT_DIR}/*.prn
 echo "rm ${REPORT_DIR}/*.prn" >>${LOG_FILE}
+rm ${BULLETIN_DIR}/*
+echo "rm ${BULLETIN_DIR}/*" >>${LOG_FILE}
 ${LOCAL_DIR}/report.sh   # getting today's reports
-# ${LOCAL_DIR}/bulletin.sh # getting Notices for today's reports.
-# echo "$PYTHONPATH" >>${LOG_FILE}
-# echo "$PYTHONHOME" >>${LOG_FILE}
-cd ${LOCAL_DIR}
+${LOCAL_DIR}/bulletin.sh # getting Notices for today's reports.
 ${LOCAL_DIR}/${APP} -h     -i${HOLDS}
 echo "${LOCAL_DIR}/${APP} -h     -i${HOLDS}" >>${LOG_FILE}
 ${LOCAL_DIR}/${APP} -b10.0 -i${BILLS}
@@ -60,6 +58,6 @@ cd ${PRINT_DIR}
 for name in $(ls *.pdf)
 do
 	# printf "%s\n" "$name"
-	/usr/bin/uuencode $name $name | /usr/bin/mailx -s "Print Notices" "ilsteam@epl.ca"
+	/usr/bin/uuencode $name $name | /usr/bin/mailx -s "Print Notices `date`" "ilsteam@epl.ca"
 done
 

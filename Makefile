@@ -17,9 +17,10 @@
 
 LOCAL=/home/ilsdev/projects/notices
 APP=notice.py
-RELATED=customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh
+RELATED=customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh notices.sh
 PRINT_DIR=${LOCAL}/print
 REPORT_DIR=${LOCAL}/reports
+BULLETINS_DIR=${LOCAL}/bulletins
 BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
@@ -29,7 +30,7 @@ ARGS_OVERD= -o --ifile=${OVERDUES}
 
 run: ${RELATED} clean
 	${LOCAL}/report.sh   # getting today's reports
-	# ${LOCAL}/bulletin.sh # getting Notices for today's reports.
+	${LOCAL}/bulletin.sh # getting Notices for today's reports.
 	python ${LOCAL}/${APP} ${ARGS_BILLS}
 	python ${LOCAL}/${APP} ${ARGS_HOLDS}
 	python ${LOCAL}/${APP} ${ARGS_OVERD}
@@ -42,15 +43,21 @@ test: ${RELATED}
 	
 pdf:
 	${LOCAL}/pstopdf.sh
+	
 page:
 	python ${LOCAL}/page.py
+	
 format:
 	python ${LOCAL}/noticeformatter.py
+
 customer:
 	python ${LOCAL}/customer.py
+	
 clean:
 	-rm ${PRINT_DIR}/*.ps
 	-rm ${PRINT_DIR}/*.pdf
 	-rm ${REPORT_DIR}/*.prn
-proper:
+	-rm ${BULLETINS_DIR}/*
+	
+proper: clean
 	-rm *.pyc

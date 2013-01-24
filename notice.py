@@ -54,13 +54,12 @@ def usage():
     sys.stderr.write( '  Processes Symphony reports into printable notice format\n' )
     
 # Take valid command line arguments -b'n', -o, -i, -d, and -h.
-def main( argv, log ):
+def main( argv ):
     inputFile  = ''
     noticeType = 'INIT'
     billLimit  = 10.0
     try:
         opts, args = getopt.getopt( argv, "ohb:i:", [ "dollars=", "ifile=" ] )
-        log.write(str(args)+'\n')
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -76,12 +75,12 @@ def main( argv, log ):
         elif opt in ( "-i", "--ifile" ):
             inputFile = arg
     print 'Input file is = ', inputFile
-    log.write('running file ' + inputFile + '\n')
+    sys.stderr.write('running file ' + inputFile + '\n')
     if os.path.isfile( inputFile ) == False:
-        log.write( 'error: input report file ' + inputFile + ' does not exist. Did the report run?\n' )
+        sys.stderr.write( 'error: input report file ' + inputFile + ' does not exist. Did the report run?\n' )
         sys.exit()
     if os.path.getsize( inputFile ) == 0:
-        log.write( 'error: input report file ' + inputFile + ' is empty. Did the report run?\n' )
+        sys.stderr.write( 'error: input report file ' + inputFile + ' is empty. Did the report run?\n' )
         sys.exit()
     
     # basic checks done, let's get down to business.
@@ -93,7 +92,6 @@ def main( argv, log ):
     elif noticeType == 'ODUE':
         noticeReader = Overdue( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     else:
-        log.write( 'nothing to do; notice type not selected\n' )
         sys.stderr.write( 'nothing to do; notice type not selected\n' )
         usage()
         sys.exit()
@@ -102,14 +100,11 @@ def main( argv, log ):
     noticeReader.setOutputFormat( psFormatter )
     # Don't suppress customers even if their address is bad.
     if noticeReader.parseReport( False ) == False:
-        log.write( 'error: unable to parse report\n' )
+        sys.stderr.write( 'error: unable to parse report\n' )
         sys.exit()
     noticeReader.writeToFile()
     noticeReader.outputReport()
 
 # Initial entry point for program
 if __name__ == "__main__":
-    l = open('/home/ilsdev/projects/notices/notice.py.log', 'w+')
-    l.write( str(sys.path) + '\n' )
-    main( sys.argv[1:], l )
-    l.close()
+    main( sys.argv[1:] )
