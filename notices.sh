@@ -58,6 +58,6 @@ cd ${PRINT_DIR}
 for name in $(ls *.pdf)
 do
 	# printf "%s\n" "$name"
-	/usr/bin/uuencode $name $name | /usr/bin/mailx -s "Print Notices `date`" "ilsteam@epl.ca"
+	/usr/bin/uuencode $name $name | /usr/bin/mailx -s "Print Notices `date`" "mailclerks@epl.ca"
 done
 
