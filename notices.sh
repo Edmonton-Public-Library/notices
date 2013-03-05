@@ -47,11 +47,11 @@ rm ${BULLETIN_DIR}/*
 echo "rm ${BULLETIN_DIR}/*" >>${LOG_FILE}
 ${LOCAL_DIR}/report.sh   # getting today's reports
 ${LOCAL_DIR}/bulletin.sh # getting Notices for today's reports.
-${LOCAL_DIR}/${APP} -h     -i${HOLDS}
+${LOCAL_DIR}/${APP} -h     -i${HOLDS}  >>${LOG_FILE}
 echo "${LOCAL_DIR}/${APP} -h     -i${HOLDS}" >>${LOG_FILE}
-${LOCAL_DIR}/${APP} -b10.0 -i${BILLS}
+${LOCAL_DIR}/${APP} -b10.0 -i${BILLS}  >>${LOG_FILE}
 echo "${LOCAL_DIR}/${APP} -b10.0 -i${BILLS}" >>${LOG_FILE}
-${LOCAL_DIR}/${APP} -o     -i${OVERDUES}
+${LOCAL_DIR}/${APP} -o     -i${OVERDUES} >>${LOG_FILE}
 echo "${LOCAL_DIR}/${APP} -o     -i${OVERDUES}" >>${LOG_FILE}
 ${LOCAL_DIR}/pstopdf.sh
 cd ${PRINT_DIR}
