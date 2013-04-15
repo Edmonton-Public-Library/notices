@@ -177,7 +177,7 @@ class Customer:
         if lastLine == '':
             return 0.0
         try:
-            return (float)(lastLine.split( '$' )[1].rstrip())
+            return (float)(lastLine.split( '$' )[-1].rstrip())
         except IndexError:
             return 0.0
         
