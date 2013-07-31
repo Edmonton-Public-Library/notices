@@ -59,11 +59,11 @@ scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/
 
 
 ################ Holds ###############
-REPORT_CODE=`ssh $USER\@$SERVER 'echo "Hold Pickup Notices" | rptstat.pl -oc | cut -d"|" -f1'`
-CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn"
-# echo $CMD >>${LOG_FILE}
-ssh $USER\@$SERVER "$CMD"
-echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
-scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn ${REPORT_DIR}/
+#REPORT_CODE=`ssh $USER\@$SERVER 'echo "Hold Pickup Notices" | rptstat.pl -oc | cut -d"|" -f1'`
+#CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn"
+## echo $CMD >>${LOG_FILE}
+#ssh $USER\@$SERVER "$CMD"
+#echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
+#scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn ${REPORT_DIR}/
 
 
