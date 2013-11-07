@@ -53,13 +53,14 @@ def usage():
     sys.stderr.write( '  notice.py [-b[10]dh] -i <inputfile> -o <outputfile>\n' )
     sys.stderr.write( '  Processes Symphony reports into printable notice format\n' )
     
-# Take valid command line arguments -b'n', -o, -i, -d, and -h.
+# Take valid command line arguments -b'n', -o, -i, -d, and -h -s.
 def main( argv ):
     inputFile  = ''
     noticeType = 'INIT'
     billLimit  = 10.0
+    isCustomerSuppressionDesired = False
     try:
-        opts, args = getopt.getopt( argv, "ohb:i:", [ "dollars=", "ifile=" ] )
+        opts, args = getopt.getopt( argv, "ohb:i:s", [ "dollars=", "ifile=" ] )
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -74,6 +75,9 @@ def main( argv ):
             noticeType = 'BILL' # bills.
         elif opt in ( "-i", "--ifile" ):
             inputFile = arg
+        elif opt == '-s':
+            # suppress malformed customers.
+            isCustomerSuppressionDesired = True
     print 'Input file is = ', inputFile
     sys.stderr.write('running file ' + inputFile + '\n')
     if os.path.isfile( inputFile ) == False:
@@ -98,8 +102,7 @@ def main( argv ):
     print noticeReader
     psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
     noticeReader.setOutputFormat( psFormatter )
-    # Don't suppress customers even if their address is bad.
-    if noticeReader.parseReport( False ) == False:
+    if noticeReader.parseReport( isCustomerSuppressionDesired ) == False:
         sys.stderr.write( 'error: unable to parse report\n' )
         sys.exit()
     noticeReader.writeToFile()
