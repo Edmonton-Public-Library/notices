@@ -270,7 +270,7 @@ class Customer:
         output += 'cutomer\'s mail address is valid: '+str(self.isWellFormed())+'\n'
         output += 'items for this customer include: %d\n' % len( self.items )
         output += 'address block: \n' + str(self.addressBlock)
-        return output + 'COSTOMER]\n'
+        return output + 'CUSTOMER]\n'
     
     # Returns true if the customer's mail address is complete and valid
     # and False otherwise. The last line of an address must be a postal code.
