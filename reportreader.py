@@ -45,8 +45,8 @@ class Notice:
         print 'bad addresses:       %d' % len( self.customersWithBadAddress )
         if len( self.customersWithBadAddress ) == 0:
             return
-        # f = open( 'malformed_addr.lst', 'w+' )
-        f = open( 'malformed_addr.lst', 'w' )  # for testing clobber the old list.
+        # f = open( 'malformed_addr.txt', 'w+' )
+        f = open( 'malformed_addr.txt', 'w' )  # for testing clobber the old list.
         for c in self.customersWithBadAddress:
             f.write( str( c ) )
         f.close()  

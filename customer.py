@@ -266,8 +266,8 @@ class Customer:
             return []
             
     def __str__( self ):
-        output =  '[CUSTOMER\ncutomer receives mail notices: '+str(self.getsPrintedNotices())+'\n'
-        output += 'cutomer\'s mail address is valid: '+str(self.isWellFormed())+'\n'
+        output =  '[CUSTOMER\ncustomer receives mail notices: '+str(self.getsPrintedNotices())+'\n'
+        output += 'customer\'s mail address is valid: '+str(self.isWellFormed())+'\n'
         output += 'items for this customer include: %d\n' % len( self.items )
         output += 'address block: \n' + str(self.addressBlock)
         return output + 'CUSTOMER]\n'

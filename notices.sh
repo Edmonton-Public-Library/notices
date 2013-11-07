@@ -24,6 +24,7 @@ export LANG=en_US.UTF-8
 export SHELL=/bin/sh
 export PWD=/home/ilsdev
 export PYTHONPATH=/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
+export EXCEPTIONS=/home/ilsdev/projects/notices/malformed_addr.txt
 
 LOCAL_DIR=/home/ilsdev/projects/notices
 APP=notice.py
@@ -60,4 +61,5 @@ do
 	# printf "%s\n" "$name"
 	/usr/bin/uuencode $name $name | /usr/bin/mailx -s "Print Notices `date`" "mailclerks@epl.ca"
 done
-
+# Now mail the exceptions list to Vicky and I
+/usr/bin/uuencode $EXCEPTIONS $EXCEPTIONS | /usr/bin/mailx -s "Print Notice Address Exceptions `date`" "anisbet@epl.ca"
