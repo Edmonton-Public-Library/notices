@@ -38,7 +38,7 @@ ODUE_REPORT=overdues
 
 ################ Bills ###############
 # Find the bills report for today
-REPORT_CODE=`ssh $USER\@$SERVER 'echo "Generalized" | rptstat.pl -oc | cut -d"|" -f1'`
+REPORT_CODE=`ssh $USER\@$SERVER 'echo "Generalized Bill Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
 # Translate the report to replace the Sirsi Internationalization codes with English text.
 CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn"
 # echo $CMD >>${LOG_FILE}
@@ -50,7 +50,7 @@ scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn ${REPORT_DIR}/
 
 
 ################ Overdue ###############
-REPORT_CODE=`ssh $USER\@$SERVER 'echo "Overdue Notices" | rptstat.pl -oc | cut -d"|" -f1'`
+REPORT_CODE=`ssh $USER\@$SERVER 'echo "Overdue Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
 CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn"
 # echo $CMD >>${LOG_FILE}
 ssh $USER\@$SERVER "$CMD"

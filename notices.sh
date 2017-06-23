@@ -62,4 +62,4 @@ do
 	/usr/bin/uuencode $name $name | /usr/bin/mailx -s "Print Notices `date`" "mailclerks@epl.ca"
 done
 # Now mail the exceptions list to Vicky and I
-/usr/bin/uuencode $EXCEPTIONS $EXCEPTIONS | /usr/bin/mailx -s "Print Notice Address Exceptions `date`" "ilsadmins@epl.ca vvarga@epl.ca"
+#/usr/bin/uuencode $EXCEPTIONS $EXCEPTIONS | /usr/bin/mailx -s "Print Notice Address Exceptions `date`" "ilsadmins@epl.ca vvarga@epl.ca"
