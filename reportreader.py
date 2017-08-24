@@ -416,7 +416,7 @@ class PreReferral( Notice ):
         
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
-    def parseReport( self, suppress_malformed_customer=False ):
+    def parseReport( self, suppressMalformedCustomer=False ):
         # .folddata
         # .report
         # .email jackyo@gmail.com
