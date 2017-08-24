@@ -2,6 +2,10 @@
 
 ###########################################################################
 #
+#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+# The Edmonton Public Library respectfully acknowledges that we sit on
+# Treaty 6 territory, traditional lands of First Nations and Metis people.
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -33,6 +37,7 @@
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
 # Rev:     
+#          1.0 - Added licensing changes and pre-referral report processing.
 #          0.0 - Dev.
 ###########################################################################
 
@@ -43,6 +48,7 @@ import os
 from reportreader import Hold
 from reportreader import Bill
 from reportreader import Overdue
+from reportreader import PreReferral
 from noticeformatter import PostscriptFormatter
 
 LOCAL_BULLETIN_FOLDER = 'bulletins'
@@ -50,17 +56,26 @@ LOCAL_PRINT_FOLDER    = 'print'
 
 def usage():
     sys.stderr.write( 'Usage:\n' )
-    sys.stderr.write( '  notice.py [-b[10]dh] -i <inputfile> -o <outputfile>\n' )
+    sys.stderr.write( '  notice.py [-b[10]hors] -i <inputfile>\n' )
     sys.stderr.write( '  Processes Symphony reports into printable notice format\n' )
+    sys.stderr.write( '  -b[n] - Produce bill notices using bill threshold \'n\', as an integer\n' )
+    sys.stderr.write( '  dollar value, like \'10\' for $10.00.\n' )
+    sys.stderr.write( '  -h - Produce hold notices. We don\'t send these by mail anymore.\n' )
+    sys.stderr.write( '  -i --ifile - Argument file shall contain the raw report data to consume.\n' )
+    sys.stderr.write( '  -o - Produce overdue report.\n' )
+    sys.stderr.write( '  -r - Produce pre-referral report.\n' )
+    sys.stderr.write( '  -s - Turns the \'isCustomerSuppressionDesired\' flag on.\n' )
+    sys.stderr.write( '  In this mode customers with malformed mailing addresses are not printed\n' )
+    sys.stderr.write( '  since it just costs to print and mail, just to be returned by the post office.\n' )
     
-# Take valid command line arguments -b'n', -o, -i, -d, and -h -s.
+# Take valid command line arguments -b'n', -h, -i, -o, -r, and -s.
 def main( argv ):
     inputFile  = ''
     noticeType = 'INIT'
     billLimit  = 10.0
     isCustomerSuppressionDesired = False
     try:
-        opts, args = getopt.getopt( argv, "ohb:i:s", [ "dollars=", "ifile=" ] )
+        opts, args = getopt.getopt( argv, "ohb:i:rs", [ "dollars=", "ifile=" ] )
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -70,12 +85,15 @@ def main( argv ):
         elif opt == '-o':
             # overdues
             noticeType = 'ODUE' # overdues.
+        elif opt == '-r':
+            # pre-referral; notices that customers are about to be sent to collections.
+            noticeType = 'REFR' # pre-referral.
         elif opt in ( "-b", "--dollars" ): # bills
             billLimit = float( arg )
             noticeType = 'BILL' # bills.
         elif opt in ( "-i", "--ifile" ):
             inputFile = arg
-        elif opt == '-s':
+        elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
     print 'Input file is = ', inputFile
@@ -95,6 +113,8 @@ def main( argv ):
         noticeReader = Bill( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER, billLimit )
     elif noticeType == 'ODUE':
         noticeReader = Overdue( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
+    elif noticeType == 'REFR':
+        noticeReader = PreReferral( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     else:
         sys.stderr.write( 'nothing to do; notice type not selected\n' )
         usage()

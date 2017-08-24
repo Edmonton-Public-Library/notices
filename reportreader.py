@@ -1,10 +1,32 @@
 #!/usr/bin/env python
 ###########################################################################
-# Purpose: Notice object.
+#
+# Purpose: Notice object definition, from which sub-classes such as 
+# pre-referral, and bill notices can be generated.
+#
+#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+# The Edmonton Public Library respectfully acknowledges that we sit on
+# Treaty 6 territory, traditional lands of First Nations and Metis people.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
 # Rev:     
+#          1.5 - Updated license and added PreReferral object.
 #          0.0 - Dev.
 ###########################################################################
 
@@ -337,7 +359,6 @@ class Bill( Notice ):
         # .read /s/sirsi/Unicorn/Notices/eclosing
         # .endblock
         # read in the report and parse it.
-        # TODO - add the rest of the blocks to capture customer data
         lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer = Customer()
@@ -383,7 +404,135 @@ class Bill( Notice ):
         # for testing print out the customers and what you have set.
         # print self.customers[0]
         return True
-            
+        
+############## PreReferral ####################
+class PreReferral( Notice ):
+    def __init__( self, inFile, bulletinDir, printDir ):
+        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prereferral_' )
+        self.title = 'PRE-REFERRAL NOTICE' # PreReferral Bill notice for mailing.
+        
+    def __str__( self ):
+        return 'Pre-referral Notice using: ' + self.iFileName
+        
+    # Reads the report and parses it into customer related notices.
+    # Returns number of pages that will be printed.
+    def parseReport( self, suppressMalformedCustomer=False ):
+        # .folddata
+        # .report
+        # .email jackyo@gmail.com
+        # .col 5l,1,73
+        # .language ENGLISH
+        # Tuesday, August 22, 2017
+        # .block
+        # Jacqueline Onasis
+        # 403-12345 Saskatchewan Drive NW
+        # Edmonton, AB
+        # T6E 4R9
+        # .endblock
+        # .read /s/sirsi/Unicorn/Notices/blankmessage
+        # .block
+        # 1   Vikings. Season 4, Volume 1 [videorecording].
+        # Fimmel, Travis, 1979-
+        # date billed:8/8/2017     bill reason:OVERDUE      amount due:     $5.00
+        # .endblock
+        # .block
+        # 2   Outlander. Season two [videorecording].
+        # Balfe, Caitriona.
+        # date billed:8/8/2017     bill reason:OVERDUE      amount due:     $5.00
+        # .endblock
+        # .block
+        # =======================================================================
+        # TOTAL FINES/FEES AND UNPAID BILLS:    $10.00
+        # .endblock
+        # .block
+        # .read /s/sirsi/Unicorn/Notices/prereferralbillclosing
+        # .endblock
+        # .endemail
+        # .report
+        # .col 5l,1,73
+        # .language ENGLISH
+        # Tuesday, August 22, 2017
+        # .block
+        # Some customer
+        # SOME CUSTOMER'S        PRESTON
+        # 25-1655 49 Street NW
+        # Edmonton, AB
+        # T6L 2R8
+        # .endblock
+        # .read /s/sirsi/Unicorn/Notices/blankmessage
+        # .block
+        # 1   Grammy nominees. 2015 [sound recording].
+        # date billed:8/8/2017     bill reason:LOST         amount due:    $24.49
+        # .endblock
+        # .block
+        # 2   Big Hero 6 [videorecording] / directors, Don Hall, Chris Williams.
+        # Hall, Don.
+        # date billed:8/8/2017     bill reason:LOST         amount due:    $30.49
+        # .endblock
+        # .block
+        # 3   Tony Hawk's pro skater 5 [game] / Robomodo.
+        # Hawk, Tony.
+        # date billed:8/8/2017     bill reason:LOST         amount due:    $55.99
+        # .endblock
+        # .block
+        # 4   Grammy nominees. 2017 [sound recording].
+        # date billed:8/8/2017     bill reason:LOST         amount due:    $22.24
+        # .endblock
+        # .block
+        # =======================================================================
+        # TOTAL FINES/FEES AND UNPAID BILLS:   $133.21
+        # .endblock
+        # .block
+        # .read /s/sirsi/Unicorn/Notices/prereferralbillclosing
+        # .endblock
+        # ...
+        lines = self.__get_lines__()
+        # now pop off each line from the file and form it into a block of data
+        customer = Customer()
+        isItemsBlocks = False
+        while( len( lines ) > 0 ):
+            line = lines.pop()
+            if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
+                # print 'opening message and customer items'
+                isItemsBlocks = True
+                self.startNoticePath = line.split()[1]
+            elif line.startswith( '.block' ):
+                line = lines.pop()
+                if line.startswith( '.read' ): # closing message and end of customer.
+                    # print 'found end message and end of customer'
+                    # get the message and pass it to the noticeFormatter.
+                    self.endNoticePath = line.split()[1]
+                    # Test if the customer should even receive mailed notices.
+                    if customer.isWellFormed() == False:
+                        # save these to report to staff for corrective action.
+                        self.customersWithBadAddress.append( customer )
+                    # Test if the customer has an email address, we don't want to print those.
+                    if customer.getsPrintedNotices():
+                        if customer.isWellFormed():
+                            self.customers.append( customer )
+                        # The customer has a bad postal code but do we care? Can we mail it anyway?
+                        elif suppressMalformedCustomer == False: 
+                            self.customers.append( customer )
+                    customer = Customer()
+                    isItemsBlocks = False
+                    # break
+                elif line.find( '=====' ) > 0: # summary block.
+                    # print 'found summary'
+                    customer.setSummaryText( line )
+                    self.__set_customer_data__( lines, customer.setSummaryText, '.endblock' )
+                elif isItemsBlocks == True:
+                    customer.setItemText( line )
+                    self.__set_customer_data__( lines, customer.setItemText, '.endblock' )
+                else:
+                    customer.setAddressText( line )
+                    self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+            elif line.startswith( '.email' ):
+                customer.setEmail( line )
+            # ignore everything else it's just dross.
+        # for testing print out the customers and what you have set.
+        print self.customers[0]
+        return True
+        
 # Initial entry point for program
 if __name__ == "__main__":
     import doctest

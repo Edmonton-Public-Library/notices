@@ -1,4 +1,12 @@
 #!/bin/bash
+###########################################################################
+#
+# Converts the PS files in the print/ directory to PDF
+#
+#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+# The Edmonton Public Library respectfully acknowledges that we sit on
+# Treaty 6 territory, traditional lands of First Nations and Metis people.
+# Collects all the notices required for the day and coordinates convertion to PDF.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +23,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 #
-# Converts the PS files in the print/ directory to PDF
+# Author:  Andrew Nisbet, Edmonton Public Library
+# Date:    November 7, 2012
+# Rev:     
+#          1.0 - Added licensing changes and pre-referral report processing.
+#          0.0 - Dev.
+#
+###########################################################################
+#
+# Dependencies: Ghostscript.
 # =======================================
 # *** Requires the use of Ghostscript ***
 # =======================================

@@ -1,6 +1,10 @@
 #!/usr/bin/env python 
 ###########################################################################
 #
+#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+# The Edmonton Public Library respectfully acknowledges that we sit on
+# Treaty 6 territory, traditional lands of First Nations and Metis people.
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -26,6 +30,7 @@
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
 # Rev:     
+#          1.0 - Added licensing changes and pre-referral report processing.
 #          0.0 - Dev.
 ###########################################################################
 from datetime import date

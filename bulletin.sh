@@ -1,4 +1,13 @@
 #!/bin/bash
+###########################################################################
+#
+# Parses each report to determine which notices are referenced in the reports
+# then SCPs them over from the ILS.
+#
+#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+# The Edmonton Public Library respectfully acknowledges that we sit on
+# Treaty 6 territory, traditional lands of First Nations and Metis people.
+# Collects all the notices required for the day and coordinates convertion to PDF.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +24,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 #
-# Collects all the notices required for the reports in the reports/ directory
+# Author:  Andrew Nisbet, Edmonton Public Library
+# Date:    November 7, 2012
+# Rev:     
+#          1.0 - Added licensing changes and pre-referral report processing.
+#          0.0 - Dev.
 #
-
+###########################################################################
+# Dependency: Must have SSH public key in the sirsi/.ssh/authorized_keys file
+# to allow password-less transfer of notice files.
+#
+# The files are copied fresh each day, ensuring that any changes to the files
+# are reflected on the next run.
 SERVER=eplapp.library.ualberta.ca
 USER=sirsi
 REMOTE="/s/sirsi/Unicorn/Notices"
