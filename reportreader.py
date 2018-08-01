@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ###########################################################################
 #
-# Purpose: Notice object definition, from which sub-classes such as 
+# Purpose: Notice object definition, from which sub-classes such as
 # pre-referral, and bill notices can be generated.
 #
 #    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
@@ -12,12 +12,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -25,7 +25,7 @@
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
-# Rev:     
+# Rev:
 #          1.5 - Updated license and added PreReferral object.
 #          0.0 - Dev.
 ###########################################################################
@@ -44,7 +44,7 @@ class Notice:
         self.iFileName        = inFile
         self.oFileName        = printDir + os.sep + outFilePrefix + str( self.today ) # If we see this file the subclass screwed up.
         self.statementDate    = 'Statement produced: ' + self.humanDate
-        self.bulletinDir      = bulletinDir # path of the open bulletin  
+        self.bulletinDir      = bulletinDir # path of the open bulletin
         self.printDir         = printDir
         self.startNoticePath  = ''
         self.endNoticePath    = ''
@@ -52,11 +52,11 @@ class Notice:
         self.customers        = []
         self.pagesPrinted     = 0
         self.customersWithBadAddress = []
-    
+
     # Prints out key information about the running report such as total pages printed
-    # number of customers mailed and outputs a list of customers that need to have 
+    # number of customers mailed and outputs a list of customers that need to have
     # street addresses corrected.
-    # param:  
+    # param:
     # return:
     def outputReport( self ):
         print '========='
@@ -71,16 +71,16 @@ class Notice:
         f = open( 'malformed_addr.txt', 'w' )  # for testing clobber the old list.
         for c in self.customersWithBadAddress:
             f.write( str( c ) )
-        f.close()  
-        
+        f.close()
+
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppress_malformed_customer=True ):
         return self.pagesPrinted
-        
+
     def setOutputFormat( self, formatter ):
         self.formatter = formatter
-        
+
     def writeToFile( self, debug=False ):
         # get the formatter to set up the postscript
         formatter = PostscriptFormatter( self.oFileName )
@@ -97,20 +97,20 @@ class Notice:
         # after formatting we collect pages printed.
         for customer in self.customers:
             self.pagesPrinted += customer.getPagesPrinted()
-    
+
     def getOutFileBaseName( self ):
         return self.oFileName
-        
+
     def __get_lines__( self ):
         # read in the report and parse it.
         iFile = open( self.iFileName, 'r' )
         # print 'reading reading reading .... '
         lines = iFile.readlines()
         iFile.close()
-        # reverse the order so we just use 
+        # reverse the order so we just use
         lines.reverse()
         return lines
-        
+
     # Adds item text from the report to the customer.
     # param:  the remainder of the lines from the report as a list
     # param:  function to be called. Data dependant.
@@ -130,11 +130,11 @@ class Notice:
                 else:
                     return
             customerFunc( line )
-        
+
     def __str__( self ):
         outstring  = '   report: ' + self.iFileName + '\n'
         return outstring
-    
+
     # Reads a bulletin, or Notice, to be used as a header or footer for a notice.
     # param:  path - path to file. Looks in the local bulletin directory.
     # return: Message from file as a single string.
@@ -147,20 +147,20 @@ class Notice:
                 for line in f.readlines():
                     func( line )
                 f.close()
-                
+
         except IOError:
             sys.stderr.write( 'error: failed to find Notice file: "' + newPath + '".' )
             sys.exit( 2 )
-        
+
 ############## Holds ####################
 class Hold( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_holds_' )
         self.title = 'PICKUP NOTICE'
-        
+
     def __str__( self ):
         return 'Hold Notice using: ' + self.iFileName
-        
+
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppress_malformed_customer=False ):
@@ -183,29 +183,29 @@ class Hold( Notice ):
         # .block
           # 1   Holiday crafts.
         # .endblock
-              # $<call_num:3>745.5941 HOL 2004                           $<copy:3>1    
-                # $<pickup_by:3>1/20/2013 
+              # $<call_num:3>745.5941 HOL 2004                           $<copy:3>1
+                # $<pickup_by:3>1/20/2013
         # .endblock
         # .block
         # .block
           # 2   Holiday crafts.
         # .endblock
-              # $<call_num:3>745.5941 HOL 2005                           $<copy:3>2    
-                # $<pickup_by:3>1/20/2013 
+              # $<call_num:3>745.5941 HOL 2005                           $<copy:3>2
+                # $<pickup_by:3>1/20/2013
         # .endblock
         # .block
         # .block
           # 3   Holiday crafts.
         # .endblock
-              # $<call_num:3>745.5941 HOL 2006                           $<copy:3>2    
-                # $<pickup_by:3>1/20/2013 
+              # $<call_num:3>745.5941 HOL 2006                           $<copy:3>2
+                # $<pickup_by:3>1/20/2013
         # .endblock
         # .block
         # .block
           # 4   Holiday crafts.
         # .endblock
-              # $<call_num:3>745.5941 HOL 2008                           $<copy:3>1    
-                # $<pickup_by:3>1/20/2013 
+              # $<call_num:3>745.5941 HOL 2008                           $<copy:3>1
+                # $<pickup_by:3>1/20/2013
         # .endblock
         # .report
         # ...
@@ -258,10 +258,10 @@ class Overdue( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
         self.title = 'OVERDUE NOTICE'
-        
+
     def __str__( self ):
         return 'Overdue Notice using: ' + self.iFileName
-        
+
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppress_malformed_customer=False ):
@@ -277,7 +277,7 @@ class Overdue( Notice ):
                   # T6J 1B4
         # .endblock
         # .read /s/sirsi/Unicorn/Notices/1stoverdue
-          # 1  call number:PERIODICAL                                ID:31221091576145  
+          # 1  call number:PERIODICAL                                ID:31221091576145
              # ADULT PERIODICAL
              # due:11/22/2012,23:59
         # .report
@@ -310,16 +310,16 @@ class Overdue( Notice ):
         return True
 
 
-############## Bills ####################        
+############## Bills ####################
 class Bill( Notice ):
     def __init__( self, inFile, bulletinDir, printDir, billLimit=10.0 ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_bills_' )
         self.minimumBillValue = billLimit
         self.title            = 'NEW BILLINGS' # we set this since the report doesn't have it explicitely.
-        
+
     def __str__( self ):
         return 'Bill Notice using: ' + self.iFileName + '\nminimum bill value = ' + str( self.minimumBillValue )
-        
+
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppressMalformedCustomer=False ):
@@ -383,7 +383,7 @@ class Bill( Notice ):
                         if customer.isWellFormed():
                             self.customers.append( customer )
                         # The customer has a bad postal code but do we care? Can we mail it anyway?
-                        elif suppressMalformedCustomer == False: 
+                        elif suppressMalformedCustomer == False:
                             self.customers.append( customer )
                     customer = Customer()
                     isItemsBlocks = False
@@ -404,16 +404,16 @@ class Bill( Notice ):
         # for testing print out the customers and what you have set.
         # print self.customers[0]
         return True
-        
+
 ############## PreReferral ####################
 class PreReferral( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prereferral_' )
         self.title = 'PRE-REFERRAL NOTICE' # PreReferral Bill notice for mailing.
-        
+
     def __str__( self ):
         return 'Pre-referral Notice using: ' + self.iFileName
-        
+
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppressMalformedCustomer=False ):
@@ -502,17 +502,17 @@ class PreReferral( Notice ):
                     # print 'found end message and end of customer'
                     # get the message and pass it to the noticeFormatter.
                     self.endNoticePath = line.split()[1]
-                    # Test if the customer should even receive mailed notices.
+                    # Test if the customer can even be emailed notices.
                     if customer.isWellFormed() == False:
                         # save these to report to staff for corrective action.
                         self.customersWithBadAddress.append( customer )
-                    # Test if the customer has an email address, we don't want to print those.
-                    if customer.getsPrintedNotices():
-                        if customer.isWellFormed():
-                            self.customers.append( customer )
+                    # All customers get pre-referal notices snail-mailed to them 
+                    # to ensure there are mix-ups April 30, 2018.
+                    if customer.isWellFormed():
+                        self.customers.append( customer )
                         # The customer has a bad postal code but do we care? Can we mail it anyway?
-                        elif suppressMalformedCustomer == False: 
-                            self.customers.append( customer )
+                    elif suppressMalformedCustomer == False:
+                        self.customers.append( customer )
                     customer = Customer()
                     isItemsBlocks = False
                     # break
@@ -532,7 +532,7 @@ class PreReferral( Notice ):
         # for testing print out the customers and what you have set.
         print self.customers[0]
         return True
-        
+
 # Initial entry point for program
 if __name__ == "__main__":
     import doctest
