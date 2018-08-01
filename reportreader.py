@@ -121,6 +121,9 @@ class Notice:
         haveSeenFirstEndblock = False
         while( len( lines ) > 0  ):
             line = lines.pop()
+            if line.startswith( '.read' ): # There may be another .read tag inside the customer block; it's the footer.
+                self.endNoticePath = line.split()[1]
+                continue
             if line.startswith( endBlockTag ):
                 if ignoreFirstEndblock:
                     if haveSeenFirstEndblock == True:
@@ -269,24 +272,30 @@ class Overdue( Notice ):
         # .report
         # .col 5l,1,73
         # .language ENGLISH
-        # Friday, December 7, 2012
+        # $<wednesday:u>, $<august:u> 1, 2018
+        # <blank lines>
         # .block
-                  # Gerald Haekel
-                  # 3528 108 Street
-                  # Edmonton, AB
-                  # T6J 1B4
+                  # Mary Madeleine Bennett
+                  # 1162 Rutherford Close SW
+                  # Edmonton AB
+                  # T6W 1H6
         # .endblock
-        # .read /s/sirsi/Unicorn/Notices/1stoverdue
-          # 1  call number:PERIODICAL                                ID:31221091576145
-             # ADULT PERIODICAL
-             # due:11/22/2012,23:59
-        # .report
+        # <blank lines>
+        # .read /s/sirsi/Unicorn/Notices/1stoverdue.print
+        # <blank lines>
+          # 1  $<call_num:3>CD WOO                                    $<id:3U>312211045160                                                                                            62
+             # Bellwether revivals [sound recording] / Benjamin Wood.
+             # Wood, Benjamin, 1981-
+             # $<due:3>7/17/2018,23:59
+             # <blank lines>
+        # .read /s/sirsi/Unicorn/Notices/eplmailclosing
         lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer         = Customer()
         hasEmail         = False
         isPickupLocation = False
         isAddress        = False
+        readTagsPerCustomer = 2
         while( len( lines ) > 0 ):
             line = lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block.
