@@ -3,7 +3,7 @@
 #
 # Driver to coordinate the running of all reports.
 #
-#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2019  Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 # Collects all the notices required for the day and coordinates convertion to PDF.
@@ -26,6 +26,8 @@
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
 # Rev:     
+#          1.1 - Added new address for mail clerks to get rid of public folders
+#                'printednotices@epl.ca'
 #          1.0 - Added licensing changes and pre-referral report processing.
 #          0.0 - Dev.
 #
@@ -41,6 +43,8 @@ export SHELL=/bin/sh
 export PWD=/home/ilsdev
 export PYTHONPATH=/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
 export EXCEPTIONS=/home/ilsdev/projects/notices/malformed_addr.txt
+
+EMAIL_ADDRESSES="printednotices@epl.ca,mailclerks@epl.ca,ilsadmins@epl.ca"
 
 LOCAL_DIR=/home/ilsdev/projects/notices
 APP=notice.py
@@ -79,7 +83,7 @@ cd ${PRINT_DIR}
 for name in $(ls *.pdf)
 do
 	# printf "%s\n" "$name"
-	/usr/bin/uuencode $name $name | /usr/bin/mailx -a'From:ilsdev@ilsdev1.epl.ca' -s "Print Notices `date`" "mailclerks@epl.ca,ilsadmins@epl.ca"
+	/usr/bin/uuencode $name $name | /usr/bin/mailx -a'From:ilsdev@ilsdev1.epl.ca' -s "Print Notices `date`" "$EMAIL_ADDRESSES"
 done
 # Now mail the exceptions list to Vicky and I
 #/usr/bin/uuencode $EXCEPTIONS $EXCEPTIONS | /usr/bin/mailx -a'From:ilsdev@ilsdev1.epl.ca' -s "Print Notice Address Exceptions `date`" "ilsadmins@epl.ca vvarga@epl.ca"
