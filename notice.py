@@ -96,7 +96,7 @@ def main( argv ):
         elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
-    print 'Input file is = ', inputFile
+    print('Input file is = ', inputFile)
     sys.stderr.write('running file ' + inputFile + '\n')
     if os.path.isfile( inputFile ) == False:
         sys.stderr.write( 'error: input report file ' + inputFile + ' does not exist. Did the report run?\n' )
@@ -119,7 +119,7 @@ def main( argv ):
         sys.stderr.write( 'nothing to do; notice type not selected\n' )
         usage()
         sys.exit()
-    print noticeReader
+    print(noticeReader)
     psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
     noticeReader.setOutputFormat( psFormatter )
     if noticeReader.parseReport( isCustomerSuppressionDesired ) == False:

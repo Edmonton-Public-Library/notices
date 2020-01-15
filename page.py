@@ -125,8 +125,8 @@ class PostscriptPage( Page ):
     # param:  
     # return: the postscript string of this object.
     def __str__( self ):
-		self.page += 'showpage\n'
-		return self.page
+        self.page += 'showpage\n'
+        return self.page
         
     # Converts the argument into points
     # param:  n float - the value to convert.
@@ -308,7 +308,7 @@ if __name__ == "__main__":
     'This may block your ability to borrow or to place holds or to renew materials online or via our',
     'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
     myBlock = page.__break_lines__( msg )
-    print myBlock
+    print(myBlock)
     nextLine = page.setItem( myBlock, 0.875, (nextLine - 0.18), False )
     msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
     '      Raymond, Bradley.',

@@ -59,12 +59,12 @@ class Notice:
     # param:
     # return:
     def outputReport( self ):
-        print '========='
-        print 'notice report for ' + self.iFileName + ' for ' + self.humanDate
+        print('=========')
+        print('notice report for ' + self.iFileName + ' for ' + self.humanDate)
         # output the results
-        print 'total pages printed: %d' % self.pagesPrinted
-        print 'customers mailed:    %d' % len( self.customers )
-        print 'bad addresses:       %d' % len( self.customersWithBadAddress )
+        print('total pages printed: %d' % self.pagesPrinted)
+        print('customers mailed:    %d' % len( self.customers ))
+        print('bad addresses:       %d' % len( self.customersWithBadAddress ))
         if len( self.customersWithBadAddress ) == 0:
             return
         # f = open( 'malformed_addr.txt', 'w+' )
@@ -539,7 +539,7 @@ class PreReferral( Notice ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
         # for testing print out the customers and what you have set.
-        print self.customers[0]
+        print(self.customers[0])
         return True
 
 # Initial entry point for program

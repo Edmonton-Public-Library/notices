@@ -26,6 +26,7 @@
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
 # Rev:     
+#          2.0 - Updated driver to use python3.
 #          1.1 - Added new address for mail clerks to get rid of public folders
 #                'printednotices@epl.ca'
 #          1.0 - Added licensing changes and pre-referral report processing.
@@ -41,7 +42,8 @@ export PATH=$PATH:/usr/bin:/bin:/home/ilsdev/projects/notices
 export LANG=en_US.UTF-8
 export SHELL=/bin/sh
 export PWD=/home/ilsdev
-export PYTHONPATH=/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
+# export PYTHONPATH=/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
+export PYTHONPATH=/home/ilsdev/projects/notices
 export EXCEPTIONS=/home/ilsdev/projects/notices/malformed_addr.txt
 
 EMAIL_ADDRESSES="printednotices@epl.ca,mailclerks@epl.ca,ilsadmins@epl.ca"
@@ -72,12 +74,12 @@ ${LOCAL_DIR}/report.sh   # getting today's reports
 ${LOCAL_DIR}/bulletin.sh # getting Notices for today's reports.
 #${LOCAL_DIR}/${APP} -h -s    -i${HOLDS}  >>${LOG_FILE}
 #echo "${LOCAL_DIR}/${APP} -h -s    -i${HOLDS}" >>${LOG_FILE}
-${LOCAL_DIR}/${APP} -s -b10.0 -i${BILLS}  >>${LOG_FILE}
-echo "${LOCAL_DIR}/${APP} -s -b10.0 -i${BILLS}" >>${LOG_FILE}
-${LOCAL_DIR}/${APP} -o -s    -i${OVERDUES} >>${LOG_FILE}
-echo "${LOCAL_DIR}/${APP} -o -s    -i${OVERDUES}" >>${LOG_FILE}
-${LOCAL_DIR}/${APP} -r -s    -i${PREREFERRAL}  >>${LOG_FILE}
-echo "${LOCAL_DIR}/${APP} -r -s -i${PREREFERRAL}" >>${LOG_FILE}
+python3 ${LOCAL_DIR}/${APP} -s -b10.0 -i${BILLS}  >>${LOG_FILE}
+echo "python3 ${LOCAL_DIR}/${APP} -s -b10.0 -i${BILLS}" >>${LOG_FILE}
+python3 ${LOCAL_DIR}/${APP} -o -s    -i${OVERDUES} >>${LOG_FILE}
+echo "python3 ${LOCAL_DIR}/${APP} -o -s    -i${OVERDUES}" >>${LOG_FILE}
+python3 ${LOCAL_DIR}/${APP} -r -s    -i${PREREFERRAL}  >>${LOG_FILE}
+echo "python3 ${LOCAL_DIR}/${APP} -r -s -i${PREREFERRAL}" >>${LOG_FILE}
 ${LOCAL_DIR}/pstopdf.sh
 cd ${PRINT_DIR}
 for name in $(ls *.pdf)

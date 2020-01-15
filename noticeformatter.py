@@ -253,4 +253,4 @@ if __name__ == "__main__":
     customer = c.__create_customer__()
     formatter.setCustomer( customer )
     formatter.format( True )
-    print '=>' + str(customer.getPagesPrinted())
+    print('=>' + str(customer.getPagesPrinted()))
