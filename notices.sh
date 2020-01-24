@@ -45,8 +45,10 @@ export PWD=/home/ilsdev
 # export PYTHONPATH=/home/ilsdev/projects/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
 export PYTHONPATH=/home/ilsdev/projects/notices
 export EXCEPTIONS=/home/ilsdev/projects/notices/malformed_addr.txt
-
+# The next line is all the addresses that should be receiving the notices. Make sure it is not commented in production.
 EMAIL_ADDRESSES="printednotices@epl.ca,mailclerks@epl.ca,ilsadmins@epl.ca"
+# Testing only make sure this is commented out when going to production.
+# EMAIL_ADDRESSES="andrew.nisbet@epl.ca"
 
 LOCAL_DIR=/home/ilsdev/projects/notices
 APP=notice.py
