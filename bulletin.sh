@@ -36,9 +36,9 @@
 #
 # The files are copied fresh each day, ensuring that any changes to the files
 # are reflected on the next run.
-SERVER=eplapp.library.ualberta.ca
+SERVER=edpl.sirsidynix.net
 USER=sirsi
-REMOTE="/s/sirsi/Unicorn/Notices"
+REMOTE="/software/EDPL/Unicorn/Notices"
 LIST_OF_BULLETINS="bulletins.lst"
 LIST_OF_BULLETIN_FILES="notice.lst"
 REPORT_DIR="reports"
