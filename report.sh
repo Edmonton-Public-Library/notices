@@ -42,10 +42,10 @@ export LANG=en_US.UTF-8
 export SHELL=/bin/sh
 export PWD=/home/ilsdev
 
-SERVER=eplapp.library.ualberta.ca
+SERVER=edpl.sirsidynix.net
 USER=sirsi
-REMOTE_PRINT_DIR=/s/sirsi/Unicorn/Rptprint
-REMOTE_SCATCH_DIR=/s/sirsi/Unicorn/EPLwork/anisbet/Reports
+REMOTE_PRINT_DIR=/software/EDPL/Unicorn/Rptprint
+REMOTE_SCATCH_DIR=/software/EDPL/Unicorn/EPLwork/anisbet/Reports
 LOCAL_DIR=/home/ilsdev/projects/notices
 REPORT_DIR=${LOCAL_DIR}/reports
 LOG_FILE=${LOCAL_DIR}/notice.log
@@ -59,7 +59,7 @@ PRER_REPORT=prereferral
 # Find the bills report for today
 REPORT_CODE=`ssh $USER\@$SERVER 'echo "Generalized Bill Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
 # Translate the report to replace the Sirsi Internationalization codes with English text.
-CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn"
+CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn"
 # echo $CMD >>${LOG_FILE}
 echo "ssh $USER\@$SERVER '$CMD'" >>${LOG_FILE}
 ssh $USER\@$SERVER "$CMD"
@@ -70,7 +70,7 @@ scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn ${REPORT_DIR}/
 
 ################ Overdue ###############
 REPORT_CODE=`ssh $USER\@$SERVER 'echo "Overdue Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
-CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn"
+CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn"
 # echo $CMD >>${LOG_FILE}
 ssh $USER\@$SERVER "$CMD"
 echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
@@ -80,7 +80,7 @@ scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/
 ################ Holds ###############
 ### No longer used, since we don't mail customers hold notices because they are too expensive.
 #REPORT_CODE=`ssh $USER\@$SERVER 'echo "Hold Pickup Notices" | rptstat.pl -oc | cut -d"|" -f1'`
-#CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn"
+#CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn"
 ## echo $CMD >>${LOG_FILE}
 #ssh $USER\@$SERVER "$CMD"
 #echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
@@ -89,7 +89,7 @@ scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/
 
 ################ PreReferral ###############
 REPORT_CODE=`ssh $USER\@$SERVER 'echo "PreReferral Bill Notice - Weekdays" | rptstat.pl -oc | cut -d"|" -f1'`
-CMD="cat /s/sirsi/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn"
+CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn"
 # echo $CMD >>${LOG_FILE}
 ssh $USER\@$SERVER "$CMD"
 echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
