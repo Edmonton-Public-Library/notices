@@ -22,8 +22,9 @@ SERVER=ils@epl-ils.epl.ca
 REMOTE_DIR=/home/ils/notices
 REMOTE_BIN_DIR=/home/ils/notices/bin
 CODE_FILES=customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh notices.sh
-HELPER_FILES=Readme.md Makefile
+HELPER_FILES=Readme.md Makefile.remote
 
 production: ${CODE_FILES} ${HELPER_FILES}
 	scp ${CODE_FILES} ${SERVER}:${REMOTE_BIN_DIR}
-	scp ${HELPER_FILES} ${SERVER}:${REMOTE_DIR}
+	scp Readme.md ${SERVER}:${REMOTE_DIR}
+	scp Makefile.remote ${SERVER}:${REMOTE_DIR}/Makefile
