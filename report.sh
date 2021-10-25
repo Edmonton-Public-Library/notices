@@ -3,7 +3,7 @@
 #
 # Collects all the reports required for the reports in the reports / directory.
 #
-#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2021 Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 # Collects all the notices required for the day and coordinates convertion to PDF.
@@ -25,9 +25,6 @@
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
-# Rev:     
-#          1.0 - Added licensing changes and pre-referral report processing.
-#          0.0 - Dev.
 # 
 ###########################################################################
 ###
@@ -35,64 +32,96 @@
 ### the local directory for consumption by other processes. See notices.sh
 ### for more information.
 ###
-export HOME=/home/ilsdev
-export LOGNAME=ilsdev
-export PATH=$PATH:/usr/bin:/bin
-export LANG=en_US.UTF-8
-export SHELL=/bin/sh
-export PWD=/home/ilsdev
-
-SERVER=edpl.sirsidynix.net
-USER=sirsi
-REMOTE_PRINT_DIR=/software/EDPL/Unicorn/Rptprint
+SERVER=sirsi\@edpl.sirsidynix.net
+REMOTE_PRINT_DIR=/software/EDPL/Unicorn/Rptprint__
 REMOTE_SCATCH_DIR=/software/EDPL/Unicorn/EPLwork/anisbet/Reports
-LOCAL_DIR=/home/ilsdev/projects/notices
-REPORT_DIR=${LOCAL_DIR}/reports
-LOG_FILE=${LOCAL_DIR}/notice.log
+REPORT_DIR=/home/ils/notices/reports
 BILL_REPORT=bills
 HOLD_REPORT=holds
 ODUE_REPORT=overdues
 PRER_REPORT=prereferral
-# Get the reports from rptstat.pl:
+VERSION="1.00.00"
+HOST=$(hostname)
+ERROR_COUNT=0
+## Set up logging.
+LOG_FILE=/home/ils/notices/notices.log
+# Logs messages to STDOUT and $LOG_FILE file.
+# param:  Message to put in the file.
+logit()
+{
+    local message="$1"
+    local time=$(date +"%Y-%m-%d %H:%M:%S")
+    if [ -t 0 ]; then
+        # If run from an interactive shell message STDOUT and LOG_FILE.
+        echo -e "[$time] $message" | tee -a $LOG_FILE
+    else
+        # If run from cron do write to log.
+        echo -e "[$time] $message" >>$LOG_FILE
+    fi
+}
 
 ################ Bills ###############
-# Find the bills report for today
-REPORT_CODE=`ssh $USER\@$SERVER 'echo "Generalized Bill Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
+logit "== Starting $0 version: $VERSION on $HOST"
+logit "looking for today's bills report"
+REPORT_CODE=$(ssh $SERVER 'echo "Generalized Bill Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1' 2>> $LOG_FILE)
+if [ -z "$REPORT_CODE" ]; then
+    logit "**error, failed to find  today's 'Generalized Bill Notices - Weekday'. Check that you can run rptstat.pl via ssh."
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi
 # Translate the report to replace the Sirsi Internationalization codes with English text.
-CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn"
-# echo $CMD >>${LOG_FILE}
-echo "ssh $USER\@$SERVER '$CMD'" >>${LOG_FILE}
-ssh $USER\@$SERVER "$CMD"
-# Get the file from the production server.
-echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
-scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn ${REPORT_DIR}/
+if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn" 2>>$LOG_FILE; then
+    # Get the file from the production server.
+    logit "translated ${REPORT_CODE}.prn into human readable format (${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn)."
+    if scp $SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn ${REPORT_DIR}/ 2>>$LOG_FILE; then
+        logit "${BILL_REPORT}.prn copied from the ILS to ${REPORT_DIR}/ on $HOST"
+    else
+        logit "**error, failed to copy $SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn to ${REPORT_DIR}/"
+        ERROR_COUNT=$(($ERROR_COUNT + 1))
+    fi
+else
+    logit "**error, failed to translate ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn"
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi
 
 
 ################ Overdue ###############
-REPORT_CODE=`ssh $USER\@$SERVER 'echo "Overdue Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
-CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn"
-# echo $CMD >>${LOG_FILE}
-ssh $USER\@$SERVER "$CMD"
-echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
-scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/
-
-
-################ Holds ###############
-### No longer used, since we don't mail customers hold notices because they are too expensive.
-#REPORT_CODE=`ssh $USER\@$SERVER 'echo "Hold Pickup Notices" | rptstat.pl -oc | cut -d"|" -f1'`
-#CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn"
-## echo $CMD >>${LOG_FILE}
-#ssh $USER\@$SERVER "$CMD"
-#echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
-#scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${HOLD_REPORT}.prn ${REPORT_DIR}/
-
+logit "looking for today's overdue notice report"
+REPORT_CODE=`ssh $SERVER 'echo "Overdue Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
+if [ -z "$REPORT_CODE" ]; then
+    logit "**error, failed to find  today's 'Overdue Notices - Weekday'. Check that you can run rptstat.pl via ssh."
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi 
+if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn" 2>>$LOG_FILE; then
+    logit "${ODUE_REPORT}.prn translated to human readable form (${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn)."
+    if scp $SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/ ; then
+        logit "${ODUE_REPORT}.prn copied from the ILS to ${REPORT_DIR}/"
+    else
+        logit "**error, failed to copy $SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn to ${REPORT_DIR}/"
+        ERROR_COUNT=$(($ERROR_COUNT + 1))
+    fi
+else
+    logit "**error, failed to translate ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn"
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi
 
 ################ PreReferral ###############
-REPORT_CODE=`ssh $USER\@$SERVER 'echo "PreReferral Bill Notice - Weekdays" | rptstat.pl -oc | cut -d"|" -f1'`
-CMD="cat /software/EDPL/Unicorn/Rptprint/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn"
-# echo $CMD >>${LOG_FILE}
-ssh $USER\@$SERVER "$CMD"
-echo "scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn ${REPORT_DIR}/" >>${LOG_FILE}
-scp $USER\@$SERVER:${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn ${REPORT_DIR}/
-
+logit "looking for today's pre-referral bill notice report"
+REPORT_CODE=`ssh $SERVER 'echo "PreReferral Bill Notice - Weekdays" | rptstat.pl -oc | cut -d"|" -f1'`
+if [ -z "$REPORT_CODE" ]; then
+    logit "**error, failed to find  today's 'PreReferral Bill Notice - Weekdays'. Check that you can run rptstat.pl via ssh."
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi 
+if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn" 2>>$LOG_FILE; then
+    logit "${PRER_REPORT}.prn translated to human readable form (${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn)."
+    if scp $SERVER:${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn ${REPORT_DIR}/ ; then
+        logit "${PRER_REPORT}.prn copied from the ILS to ${REPORT_DIR}/"
+    else
+        logit "**error, failed to copy $SERVER:${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn to ${REPORT_DIR}/"
+        ERROR_COUNT=$(($ERROR_COUNT + 1))
+    fi
+else
+    logit "**error, failed to translate ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn"
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi
+logit "= finished with $ERROR_COUNT error(s)."
 ## EOF
