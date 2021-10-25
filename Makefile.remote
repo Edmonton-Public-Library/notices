@@ -18,7 +18,7 @@
 LOCAL=/home/ils/notices
 LOCAL_BIN=/home/ils/notices/bin
 APP=notice.py
-RELATED=customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh notices.sh
+RELATED=${LOCAL_BIN}/customer.py ${LOCAL_BIN}/reportreader.py ${LOCAL_BIN}/page.py ${LOCAL_BIN}/noticeformatter.py ${LOCAL_BIN}/report.sh ${LOCAL_BIN}/bulletin.sh ${LOCAL_BIN}/pstopdf.sh ${LOCAL_BIN}/notices.sh
 PRINT_DIR=${LOCAL}/print
 REPORT_DIR=${LOCAL}/reports
 BULLETINS_DIR=${LOCAL}/bulletins
@@ -32,27 +32,27 @@ ARGS_OVERD= -o --ifile=${OVERDUES}
 run: ${RELATED} clean
 	${LOCAL_BIN}/report.sh   # getting today's reports
 	${LOCAL_BIN}/bulletin.sh # getting Notices for today's reports.
-	python ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
-	python ${LOCAL_BIN}/${APP} ${ARGS_HOLDS}
-	python ${LOCAL_BIN}/${APP} ${ARGS_OVERD}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_HOLDS}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_OVERD}
 	${LOCAL_BIN}/pstopdf.sh
 
 test: ${RELATED}
-	python ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
-	python ${LOCAL_BIN}/${APP} ${ARGS_HOLDS}
-	python ${LOCAL_BIN}/${APP} ${ARGS_OVERD}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_HOLDS}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_OVERD}
 	
 pdf:
 	${LOCAL_BIN}/pstopdf.sh
 	
 page:
-	python ${LOCAL_BIN}/page.py
+	python3 ${LOCAL_BIN}/page.py
 	
 format:
-	python ${LOCAL_BIN}/noticeformatter.py
+	python3 ${LOCAL_BIN}/noticeformatter.py
 
 customer:
-	python ${LOCAL_BIN}/customer.py
+	python3 ${LOCAL_BIN}/customer.py
 	
 clean:
 	-rm ${PRINT_DIR}/*.ps

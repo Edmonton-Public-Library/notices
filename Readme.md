@@ -19,10 +19,10 @@ ils@epl-ils $ make # or make run
 5) Optional: email reports. You will need uuencode in the sharutils package to do this.
 
 ## Helper scripts
-- report.sh - fetches the latest mail notice reports, translates them and 'scp's them to the 'reports' directory.
-- bulletin.sh - checks any reports in the 'report' directory for all the bulletins that are needed for the reports and 'scp's them
-            to the 'bulletins' directory.
-- pstopdf.sh - converts any PS file in the 'print' directory into PDF.
+- ```Makefile(.remote)``` - prepares the notices from the command line if required. Normally ```report.sh``` would be scheduled to do this.
+- ```report.sh``` - fetches the latest mail notice reports, translates them and 'scp's them to the 'reports' directory.
+- ```bulletin.sh``` - checks any reports in the 'report' directory for all the bulletins that are needed for the reports and 'scp's them to the 'bulletins' directory.
+- ```pstopdf.sh``` - converts any PS file in the 'print' directory into PDF.
 
 ## Debugging
 Many of the python files contain unit tests to check their own integrity. You can run them with 'python <file>.py [-c]'.

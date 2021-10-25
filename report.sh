@@ -33,14 +33,14 @@
 ### for more information.
 ###
 SERVER=sirsi\@edpl.sirsidynix.net
-REMOTE_PRINT_DIR=/software/EDPL/Unicorn/Rptprint__
+REMOTE_PRINT_DIR=/software/EDPL/Unicorn/Rptprint
 REMOTE_SCATCH_DIR=/software/EDPL/Unicorn/EPLwork/anisbet/Reports
 REPORT_DIR=/home/ils/notices/reports
 BILL_REPORT=bills
 HOLD_REPORT=holds
 ODUE_REPORT=overdues
 PRER_REPORT=prereferral
-VERSION="1.00.00"
+VERSION="1.00.01"
 HOST=$(hostname)
 ERROR_COUNT=0
 ## Set up logging.
