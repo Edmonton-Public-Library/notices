@@ -37,8 +37,9 @@ export PATH=$PATH:/usr/bin:/bin:/home/ils/notices/bin
 export PYTHONPATH=${LOCAL_BIN_DIR}
 export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
-VERSION="1.01.04"
+VERSION="1.02.00"
 HOST=$(hostname)
+TEST_ACCOUNTS=''
 
 ## Set up logging.
 LOG_FILE=/home/ils/notices/notices.log
@@ -69,9 +70,9 @@ usage()
    
   Flags:
     -h, -help, --help - prints this help message and exits.
-    -t, -test, --test - Run notices in test mode. The script
-      runs as normal, but changes \$EMAIL_ADDRESSES and \$ADDR_FIX_STAFF
-      to ILS staff instead of the mail clerks.
+    -t, -test, --test[email@example.com] - Run notices in test mode, and
+      send results to an email address of your choice instead of the mail clerks.
+      Example: $0 --test="ils.account@epl.ca"
     -x, -xhelp, --xhelp - prints this help message and exits
 	  (default action) from a given date.
              
@@ -83,7 +84,7 @@ EOFU!
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -l "help,test,version,xhelp" -o "htvx" -a -- "$@")
+options=$(getopt -l "help,test:,version,xhelp" -o "ht:vx" -a -- "$@")
 if [ $? != 0 ] ; then echo "Failed to parse options...exiting." >&2 ; exit 1 ; fi
 # set --:
 # If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters
@@ -99,6 +100,8 @@ do
         ;;
 	-t|--test)
         export IS_TEST=true
+        shift
+        export TEST_ACCOUNTS="$1"
 		logit "=== TEST MODE"
 		;;
     -v|--version)
@@ -119,8 +122,8 @@ done
 ### Setup globals for the script
 if [ "$IS_TEST" == true ]; then
     # Testing only make sure this is commented out when going to production.
-    EMAIL_ADDRESSES="andrew.nisbet@epl.ca"
-    ADDR_FIX_STAFF="andrew.nisbet@epl.ca"
+    EMAIL_ADDRESSES="$TEST_ACCOUNTS"
+    ADDR_FIX_STAFF="$TEST_ACCOUNTS"
 else
     # The next line is all the addresses that should be receiving the notices. Make sure it is not commented in production.
     EMAIL_ADDRESSES="printednotices@epl.ca,mailclerks@epl.ca,ilsadmins@epl.ca"

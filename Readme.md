@@ -24,6 +24,12 @@ ils@epl-ils $ make # or make run
 - ```bulletin.sh``` - checks any reports in the 'report' directory for all the bulletins that are needed for the reports and 'scp's them to the 'bulletins' directory.
 - ```pstopdf.sh``` - converts any PS file in the 'print' directory into PDF.
 
+## Dependencies
+The server where this runs as production needs '''ps2pdf14''' which is part of '''GhostScript'''.
+```bash
+$> sudo apt install ghostscript
+```
+
 ## Debugging
 Many of the python files contain unit tests to check their own integrity. You can run them with 'python <file>.py [-c]'.
 Some useful tests already exist in the make file. 
