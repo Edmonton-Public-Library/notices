@@ -24,6 +24,9 @@ ils@epl-ils $ make # or make run
 - ```bulletin.sh``` - checks any reports in the 'report' directory for all the bulletins that are needed for the reports and 'scp's them to the 'bulletins' directory.
 - ```pstopdf.sh``` - converts any PS file in the 'print' directory into PDF.
 
+## Installation
+The project is managed from the repos server, which at this time is ```ilsdev1.epl.ca```. The Makefile is used to install the scripts into ```ils@epl-ils.epl.ca:/home/ils/notices/bin```. The Makefile.remote is used to run the process by hand on ```ils@epl-ils.epl.ca``` should that be necessary for testing if the scripts need to be re-run. Re-running notices.sh is not dangerous but it will email the PDFs to the mail clerks so let them know before you run it, or just use the ```--test``` switch, and the PDFs will be sent to an alternate address of your choice. See ```notice.sh --help``` for more details.
+
 ## Dependencies
 The server where this runs as production needs '''ps2pdf14''' which is part of '''GhostScript'''.
 ```bash
