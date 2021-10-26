@@ -38,7 +38,7 @@ PRINT_DIR=/home/ils/notices/print
 PS_LIST=${PRINT_DIR}/ps_files.lst
 # convert all the PS files in print using
 # basic format: ps2pdf14 testFormatPage.ps test.pdf
-VERSION="1.00.00"
+VERSION="1.00.02"
 HOST=$(hostname)
 ERROR_COUNT=0
 ## Set up logging.
@@ -68,9 +68,8 @@ ls -c1 *.ps >$PS_LIST
 
 for psFile in $(cat $PS_LIST)
 do
-	logit "converting: ${psFile}"
 	if /usr/bin/ps2pdf14 ${PRINT_DIR}/${psFile}; then
-		logit "converting: ${psFile}"
+		logit "converted: ${psFile}"
 	else
 		logit "**error, converting ${psFile}"
 		ERROR_COUNT=$(($ERROR_COUNT + 1))
@@ -78,4 +77,4 @@ do
 done
 logit "conversion to PDF finished, cleaning up."
 rm $PS_LIST
-logit "= finished with $ERROR_COUNT error(s)."
+logit "             finished with $ERROR_COUNT error(s)."

@@ -40,7 +40,7 @@ BILL_REPORT=bills
 HOLD_REPORT=holds
 ODUE_REPORT=overdues
 PRER_REPORT=prereferral
-VERSION="1.00.01"
+VERSION="1.00.03"
 HOST=$(hostname)
 ERROR_COUNT=0
 ## Set up logging.
@@ -63,16 +63,16 @@ logit()
 ################ Bills ###############
 logit "== Starting $0 version: $VERSION on $HOST"
 logit "looking for today's bills report"
-REPORT_CODE=$(ssh $SERVER 'echo "Generalized Bill Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1' 2>> $LOG_FILE)
+REPORT_CODE=$(ssh $SERVER 'echo "Generalized Bill Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1')
 if [ -z "$REPORT_CODE" ]; then
     logit "**error, failed to find  today's 'Generalized Bill Notices - Weekday'. Check that you can run rptstat.pl via ssh."
     ERROR_COUNT=$(($ERROR_COUNT + 1))
 fi
 # Translate the report to replace the Sirsi Internationalization codes with English text.
-if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn" 2>>$LOG_FILE; then
+if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn"; then
     # Get the file from the production server.
     logit "translated ${REPORT_CODE}.prn into human readable format (${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn)."
-    if scp $SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn ${REPORT_DIR}/ 2>>$LOG_FILE; then
+    if scp $SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn ${REPORT_DIR}/ ; then
         logit "${BILL_REPORT}.prn copied from the ILS to ${REPORT_DIR}/ on $HOST"
     else
         logit "**error, failed to copy $SERVER:${REMOTE_SCATCH_DIR}/${BILL_REPORT}.prn to ${REPORT_DIR}/"
@@ -91,7 +91,7 @@ if [ -z "$REPORT_CODE" ]; then
     logit "**error, failed to find  today's 'Overdue Notices - Weekday'. Check that you can run rptstat.pl via ssh."
     ERROR_COUNT=$(($ERROR_COUNT + 1))
 fi 
-if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn" 2>>$LOG_FILE; then
+if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn"; then
     logit "${ODUE_REPORT}.prn translated to human readable form (${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn)."
     if scp $SERVER:${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn ${REPORT_DIR}/ ; then
         logit "${ODUE_REPORT}.prn copied from the ILS to ${REPORT_DIR}/"
@@ -111,7 +111,7 @@ if [ -z "$REPORT_CODE" ]; then
     logit "**error, failed to find  today's 'PreReferral Bill Notice - Weekdays'. Check that you can run rptstat.pl via ssh."
     ERROR_COUNT=$(($ERROR_COUNT + 1))
 fi 
-if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn" 2>>$LOG_FILE; then
+if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn"; then
     logit "${PRER_REPORT}.prn translated to human readable form (${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn)."
     if scp $SERVER:${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn ${REPORT_DIR}/ ; then
         logit "${PRER_REPORT}.prn copied from the ILS to ${REPORT_DIR}/"
@@ -123,5 +123,5 @@ else
     logit "**error, failed to translate ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn"
     ERROR_COUNT=$(($ERROR_COUNT + 1))
 fi
-logit "= finished with $ERROR_COUNT error(s)."
+logit "             finished with $ERROR_COUNT error(s)."
 ## EOF

@@ -4,7 +4,7 @@
 # Purpose: Notice object definition, from which sub-classes such as
 # pre-referral, and bill notices can be generated.
 #
-#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2021 Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 #
@@ -35,6 +35,9 @@ import sys # for exit
 from customer import Customer
 from datetime import date
 from noticeformatter import PostscriptFormatter
+
+## Global name of the file that contains broken snail-mail addresses.
+UNMAILABLE_REPORT_FILE = 'unmailable_customers.txt'
 
 ############## Base Class ####################
 class Notice:
@@ -67,8 +70,7 @@ class Notice:
         print('bad addresses:       %d' % len( self.customersWithBadAddress ))
         if len( self.customersWithBadAddress ) == 0:
             return
-        # f = open( 'malformed_addr.txt', 'w+' )
-        f = open( 'malformed_addr.txt', 'w' )  # for testing clobber the old list.
+        f = open( UNMAILABLE_REPORT_FILE, 'w' )
         for c in self.customersWithBadAddress:
             f.write( str( c ) )
         f.close()

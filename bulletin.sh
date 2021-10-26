@@ -40,7 +40,7 @@ LIST_OF_BULLETINS="bulletins.lst"
 LIST_OF_BULLETIN_FILES="notice.lst"
 REPORT_DIR="reports"
 BULLETIN_DIR="bulletins"
-VERSION="1.00.00"
+VERSION="1.00.01"
 HOST=$(hostname)
 ERROR_COUNT=0
 ## Set up logging.
@@ -81,4 +81,4 @@ done
 logit "cleaning up"
 rm ${LIST_OF_BULLETIN_FILES}
 rm ${LIST_OF_BULLETINS}
-logit "= finished with $ERROR_COUNT error(s)."
+logit "             finished with $ERROR_COUNT error(s)."
