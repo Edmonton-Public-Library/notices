@@ -11,7 +11,7 @@ ils@epl-ils $ make # or make run
 ```
 
 ## The Process at a Glance
-1) Find the necessary reports needed for bills, overdues, and holds for the day and copy then to ilsdev 'reports' directory.
+1) Find the necessary reports needed for bills, overdues, and pre-lost for the day and copy then to ilsdev 'reports' directory.
 2) Find the bulletins that need to be included in the header or footer of the notices, and copy them to ildsdev 'bulletins' directory.
 3) Format the reports with notice.py. Just this step of the conversion can be done by typing 'make test'. This will create PS files 
    in the 'print' directory.
@@ -33,9 +33,39 @@ The server where this runs as production needs '''ps2pdf14''' which is part of '
 $> sudo apt install ghostscript
 ```
 
-## Debugging
-Many of the python files contain unit tests to check their own integrity. You can run them with 'python <file>.py [-c]'.
-Some useful tests already exist in the make file. 
+## Debugging Tips
+* Many of the python files contain unit tests to check their own integrity. You can run them with 'python <file>.py [-c]'.
 
-REMEMBER: when debugging esp. bills, the script will withhold bills that are less than $10.00. This can be confusing because
+* Some useful tests already exist in the make file. 
+
+* REMEMBER: when debugging esp. bills, the script will withhold bills that are less than $10.00. This can be confusing because
 The sirsi report contains all bills - the results from notice.py will be different. 
+
+* To find details about a report check the report name in Workflows >> Reports >> Finished Reports tab. Then on the command line use rptstat to get report info.
+```bash
+echo "Overdue Notices - Weekdays" | rptstat.pl -t -oDrcC
+2022-04-19 05:40:00|Overdue Notices - Weekdays|kyil|/software/EDPL/Unicorn/Rptprint/kyil.prn
+```
+
+## Update New Reports HTG and Non-HTG Notices
+April 19, 2022  
+New notices in effect **April 26**. There _may_ be a requirement to conditionally process reports until then, depending on how missing reports are managed.
+
+1) Create 'Overdue Reminder - 8 Days Print' which uses 'overdue8daysprint' and 'eclosing8daysprint' as notice text.
+2) Create 'PreLost Overdue Notice - HTG Print' Which uses 'prelostoverdue1stprint' and 'prelostoverdueclosingprint'.
+3) Retire 'Overdue Notices - Weekdays' which used 'stoverdue.print' and 'eplmailclosing'.
+
+### Changes
+| **File** | **Changes** |
+|:---|:---|
+| notices.sh | Modify overdues, add pre-lost. See pre-referral as template. |
+| Makefile.remote | Add ```PRE_LOST``` handling. ```ARGS_OVERD``` becomes 8 day notice. |
+| report.sh | Modify Overdues, add new section for Pre-Lost. |
+| notice.py | Add new report and update overdue code. See pre-referral as template. |
+| reportreader.py | Add new report, change overdues. |
+| bulletin.sh | no change |
+| Makefile | no change |
+| pstopdf.sh | no change |
+| noticeformatter.py | no change |
+| page.py | no change |
+| customer.py | no change |
