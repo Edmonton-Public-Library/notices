@@ -25,9 +25,13 @@ BULLETINS_DIR=${LOCAL}/bulletins
 BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
+PREREFR=${REPORT_DIR}/prereferral.prn
+PRELOST=${REPORT_DIR}/prelost.prn
 ARGS_BILLS= -b 10.0 --ifile=${BILLS}
 ARGS_HOLDS= -h --ifile=${HOLDS}
 ARGS_OVERD= -o --ifile=${OVERDUES}
+ARGS_PREFR= -r --ifile=${PREREFR}
+ARGS_PLOST= -p --ifile=${PRELOST}
 
 run: ${RELATED} clean
 	${LOCAL_BIN}/report.sh   # getting today's reports
@@ -35,12 +39,16 @@ run: ${RELATED} clean
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_HOLDS}
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_OVERD}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PREFR}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PLOST}
 	${LOCAL_BIN}/pstopdf.sh
 
 test: ${RELATED}
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_HOLDS}
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_OVERD}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PREFR}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PLOST}
 	
 pdf:
 	${LOCAL_BIN}/pstopdf.sh

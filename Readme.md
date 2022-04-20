@@ -51,9 +51,9 @@ echo "Overdue Notices - Weekdays" | rptstat.pl -t -oDrcC
 April 19, 2022  
 New notices in effect **April 26**. There _may_ be a requirement to conditionally process reports until then, depending on how missing reports are managed.
 
-1) Create 'Overdue Reminder - 8 Days Print' which uses 'overdue8daysprint' and 'eclosing8daysprint' as notice text.
-2) Create 'PreLost Overdue Notice - HTG Print' Which uses 'prelostoverdue1stprint' and 'prelostoverdueclosingprint'.
-3) Retire 'Overdue Notices - Weekdays' which used 'stoverdue.print' and 'eplmailclosing'.
+1) Create '**Overdue Reminder - 8 Days Print**' which uses 'overdue8daysprint' and 'eclosing8daysprint' as notice text.
+2) Create '**PreLost Overdue Notice - HTG Print**' Which uses 'prelostoverdue1stprint' and 'prelostoverdueclosingprint'.
+3) Retire '**Overdue Notices - Weekdays**' which used 'stoverdue.print' and 'eplmailclosing'.
 
 ### Changes
 | **File** | **Changes** |

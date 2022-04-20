@@ -3,7 +3,7 @@
 #
 # Driver to coordinate the running of all reports.
 #
-#    Copyright (C) 2019 - 2021  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2019 - 2022  Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 # Collects all the notices required for the day and coordinates convertion to PDF.
@@ -33,11 +33,10 @@
 LOCAL_DIR=/home/ils/notices
 LOCAL_BIN_DIR=/home/ils/notices/bin
 export PATH=$PATH:/usr/bin:/bin:/home/ils/notices/bin
-# export PYTHONPATH=/home/ils/notices:/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/gtk-2.0
 export PYTHONPATH=${LOCAL_BIN_DIR}
 export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
-VERSION="1.02.00"
+VERSION="1.03.00"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
 
@@ -138,6 +137,7 @@ BILLS=${REPORT_DIR}/bills.prn
 HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
 PREREFERRAL=${REPORT_DIR}/prereferral.prn
+PRELOST=${REPORT_DIR}/prelost.prn
 ################ script starts here ###############
 logit "DRIVER SCRIPT: == Starting $0 version: $VERSION on $HOST"
 # Clean up any existing reports.
@@ -165,6 +165,9 @@ python3 ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-referral notices"
 python3 ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL}  >>${LOG_FILE}
+logit " "
+logit "DRIVER SCRIPT: compiling pre-lost notices"
+python3 ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST}  >>${LOG_FILE}
 logit " "
 ${LOCAL_BIN_DIR}/pstopdf.sh
 logit " "

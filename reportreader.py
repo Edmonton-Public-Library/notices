@@ -4,7 +4,7 @@
 # Purpose: Notice object definition, from which sub-classes such as
 # pre-referral, and bill notices can be generated.
 #
-#    Copyright (C) 2012 - 2021 Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2022 Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 #
@@ -25,9 +25,9 @@
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
-# Rev:
-#          1.5 - Updated license and added PreReferral object.
-#          0.0 - Dev.
+# Version: Added 'PreLost Overdue Notice - HTG Print' and 
+#          convert 'Overdue Notices - Weekdays' to 
+#          'Overdue Reminder - 8 Days Print'
 ###########################################################################
 
 import os  # for os specific file bulletin reading.
@@ -258,18 +258,20 @@ class Hold( Notice ):
         # print self.customers[0]
         return True
 
-############## Overdues ####################
+############## Overdue Reminder #################### 
 class Overdue( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
-        self.title = 'OVERDUE NOTICE'
+        self.title = 'OVERDUE REMINDER'
 
     def __str__( self ):
-        return 'Overdue Notice using: ' + self.iFileName
+        return 'Overdue Reminder Notice using: ' + self.iFileName
 
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppress_malformed_customer=False ):
+        #######################
+        ## OLD NOTICE
         # .folddata
         # .report
         # .col 5l,1,73
@@ -291,6 +293,33 @@ class Overdue( Notice ):
              # $<due:3>7/17/2018,23:59
              # <blank lines>
         # .read /s/sirsi/Unicorn/Notices/eplmailclosing
+        ## END OLD OVERDUE NOTICE
+        #########################
+        ## NEW OVERDUE REMINDER NOTICE (kxri.prn)
+        # .folddata
+        # .report
+        # .col 5l,1,73
+        # .language ENGLISH
+        # $<wednesday:u>, $<april:u> 13, 2022
+        # <blank lines>
+        # .block
+        #           Arbry Adult
+        #           1234 5678 Saskatchewan DR NW
+        #           Edmonton, AB
+        #           T6T 4R7
+        # .endblock
+        # <blank lines>
+        # .read /software/EDPL/Unicorn/Notices/overdue8daysprint
+        # <blank lines>
+        #   1  $<call_num:3>927.8242 JON                              $<id:3U>31221317743289  
+        #      Last chance Texaco : chronicles of an American troubadour / Rickie Lee
+        #      Jones.
+        #      Jones, Rickie Lee.
+        #      $<due:3>4/5/2022,23:59  
+        # <blank lines>
+        # .read /software/EDPL/Unicorn/Notices/eclosing8daysprint
+        ## End OVERDUE REMINDER prn data.
+
         lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer         = Customer()
@@ -542,6 +571,72 @@ class PreReferral( Notice ):
             # ignore everything else it's just dross.
         # for testing print out the customers and what you have set.
         print(self.customers[0])
+        return True
+
+
+############## Pre-Lost #################### 
+class PreLost( Notice ):
+    def __init__( self, inFile, bulletinDir, printDir ):
+        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
+        self.title = 'PRE-LOST NOTICE'
+
+    def __str__( self ):
+        return 'Pre-Lost Notice using: ' + self.iFileName
+
+    # Reads the report and parses it into customer related notices.
+    # Returns number of pages that will be printed.
+    def parseReport( self, suppress_malformed_customer=False ):
+        ## PRE-LOST OVERDUE REMINDER NOTICE (kxrk.prn)
+        # .folddata
+        # .report
+        # .col 5l,1,73
+        # .language ENGLISH
+        # $<wednesday:u>, $<april:u> 13, 2022
+        # <blank lines>
+        # .block
+        #           Arbry Adult
+        #           1234 5678 Saskatchewan DR NW
+        #           Edmonton, AB
+        #           T6T 4R7
+        # .endblock
+        # <blank lines>
+        # .read /software/EDPL/Unicorn/Notices/prelostoverdue1stprint
+        # <blank lines>
+        # 1  $<call_num:3>OSM                                       $<id:3U>31221317323405  
+        #      The Thursday murder club / Richard Osman.
+        #      Osman, Richard, 1970-
+        #      $<due:3>4/5/2022,23:59      $<price:3>$28.65    
+        # <blank lines>
+        # .read /software/EDPL/Unicorn/Notices/prelostoverdueclosingprint
+        ## PRE-LOST OVERDUE REMINDER NOTICE (kxrk.prn)
+
+        lines = self.__get_lines__()
+        # now pop off each line from the file and form it into a block of data
+        customer         = Customer()
+        hasEmail         = False
+        isPickupLocation = False
+        isAddress        = False
+        readTagsPerCustomer = 2
+        while( len( lines ) > 0 ):
+            line = lines.pop()
+            if line.startswith( '.read' ): # message read instruction not in block.
+                # print 'opening message and customer items'
+                self.startNoticePath = line.split()[1]
+                # The rest of the text until the next .report tag is items for the customer
+                self.__set_customer_data__( lines, customer.setItemText, '.report' )
+                if hasEmail == False:
+                    if not customer.isWellFormed() and suppress_malformed_customer:
+                        pass
+                    else:
+                        self.customers.append( customer )
+                hasEmail = False
+                customer = Customer()
+            elif line.startswith( '.block' ):
+                self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+            elif line.startswith( '.email' ):
+                # this customer doesn't get added because they have an email.
+                hasEmail = True
+                customer.setEmail( line )
         return True
 
 # Initial entry point for program

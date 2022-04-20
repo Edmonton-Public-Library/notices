@@ -2,7 +2,7 @@
 
 ###########################################################################
 #
-#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2022  Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 #
@@ -36,9 +36,9 @@
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
-# Rev:     
-#          1.0 - Added licensing changes and pre-referral report processing.
-#          0.0 - Dev.
+# Version: Added 'PreLost Overdue Notice - HTG Print' and 
+#          convert 'Overdue Notices - Weekdays' to 
+#          'Overdue Reminder - 8 Days Print'
 ###########################################################################
 
 import sys
@@ -49,6 +49,7 @@ from reportreader import Hold
 from reportreader import Bill
 from reportreader import Overdue
 from reportreader import PreReferral
+from reportreader import PreLost
 from noticeformatter import PostscriptFormatter
 
 LOCAL_BULLETIN_FOLDER = 'bulletins'
@@ -63,19 +64,20 @@ def usage():
     sys.stderr.write( '  -h - Produce hold notices. We don\'t send these by mail anymore.\n' )
     sys.stderr.write( '  -i --ifile - Argument file shall contain the raw report data to consume.\n' )
     sys.stderr.write( '  -o - Produce overdue report.\n' )
+    sys.stderr.write( '  -p - Produce pre-lost report.\n' )
     sys.stderr.write( '  -r - Produce pre-referral report.\n' )
     sys.stderr.write( '  -s - Turns the \'isCustomerSuppressionDesired\' flag on.\n' )
     sys.stderr.write( '  In this mode customers with malformed mailing addresses are not printed\n' )
     sys.stderr.write( '  since it just costs to print and mail, just to be returned by the post office.\n' )
     
-# Take valid command line arguments -b'n', -h, -i, -o, -r, and -s.
+# Take valid command line arguments -b'n', -h, -i, -o, -r, -p, and -s.
 def main( argv ):
     inputFile  = ''
     noticeType = 'INIT'
     billLimit  = 10.0
     isCustomerSuppressionDesired = False
     try:
-        opts, args = getopt.getopt( argv, "ohb:i:rs", [ "dollars=", "ifile=" ] )
+        opts, args = getopt.getopt( argv, "ohb:i:rps", [ "dollars=", "ifile=" ] )
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -93,6 +95,9 @@ def main( argv ):
             noticeType = 'BILL' # bills.
         elif opt in ( "-i", "--ifile" ):
             inputFile = arg
+        elif opt == '-p':
+            # pre-lost; notices that charges are old enough to be thought of as LOST and a bill may be in their future.
+            noticeType = 'PRELOST' # pre-lost.
         elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
@@ -115,6 +120,8 @@ def main( argv ):
         noticeReader = Overdue( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     elif noticeType == 'REFR':
         noticeReader = PreReferral( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
+    elif noticeType == 'PRELOST':
+        noticeReader = PreLost( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     else:
         sys.stderr.write( 'nothing to do; notice type not selected\n' )
         usage()

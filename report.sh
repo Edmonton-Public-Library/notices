@@ -3,7 +3,7 @@
 #
 # Collects all the reports required for the reports in the reports / directory.
 #
-#    Copyright (C) 2012 - 2021 Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2022 Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 # Collects all the notices required for the day and coordinates convertion to PDF.
@@ -25,6 +25,9 @@
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
+# Version: Added 'PreLost Overdue Notice - HTG Print' and 
+#          convert 'Overdue Notices - Weekdays' to 
+#          'Overdue Reminder - 8 Days Print'
 # 
 ###########################################################################
 ###
@@ -37,10 +40,10 @@ REMOTE_PRINT_DIR=/software/EDPL/Unicorn/Rptprint
 REMOTE_SCATCH_DIR=/software/EDPL/Unicorn/EPLwork/anisbet/Reports
 REPORT_DIR=/home/ils/notices/reports
 BILL_REPORT=bills
-HOLD_REPORT=holds
 ODUE_REPORT=overdues
 PRER_REPORT=prereferral
-VERSION="1.00.03"
+PLOS_REPORT=prelost
+VERSION="1.01.00"
 HOST=$(hostname)
 ERROR_COUNT=0
 ## Set up logging.
@@ -85,10 +88,11 @@ fi
 
 
 ################ Overdue ###############
-logit "looking for today's overdue notice report"
-REPORT_CODE=`ssh $SERVER 'echo "Overdue Notices - Weekday" | rptstat.pl -oc | cut -d"|" -f1'`
+logit "looking for today's Overdue Reminder - 8 Days Print report"
+# TODO: change this for the new report name.
+REPORT_CODE=`ssh $SERVER 'echo "Overdue Reminder - 8 Days Print" | rptstat.pl -oc | cut -d"|" -f1'`
 if [ -z "$REPORT_CODE" ]; then
-    logit "**error, failed to find  today's 'Overdue Notices - Weekday'. Check that you can run rptstat.pl via ssh."
+    logit "**error, failed to find  today's 'Overdue Reminder - 8 Days Print'. Check that you can run rptstat.pl via ssh."
     ERROR_COUNT=$(($ERROR_COUNT + 1))
 fi 
 if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${ODUE_REPORT}.prn"; then
@@ -117,6 +121,26 @@ if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE
         logit "${PRER_REPORT}.prn copied from the ILS to ${REPORT_DIR}/"
     else
         logit "**error, failed to copy $SERVER:${REMOTE_SCATCH_DIR}/${PRER_REPORT}.prn to ${REPORT_DIR}/"
+        ERROR_COUNT=$(($ERROR_COUNT + 1))
+    fi
+else
+    logit "**error, failed to translate ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn"
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi
+
+################ PreLost ###############
+logit "looking for today's pre-lost overdue notice report"
+REPORT_CODE=`ssh $SERVER 'echo "PreLost Overdue Notice - HTG Print" | rptstat.pl -oc | cut -d"|" -f1'`
+if [ -z "$REPORT_CODE" ]; then
+    logit "**error, failed to find  today's 'PreLost Overdue Notice - HTG Print'. Check that you can run rptstat.pl via ssh."
+    ERROR_COUNT=$(($ERROR_COUNT + 1))
+fi 
+if ssh $SERVER "cat ${REMOTE_PRINT_DIR}/${REPORT_CODE}.prn | translate >${REMOTE_SCATCH_DIR}/${PLOS_REPORT}.prn"; then
+    logit "${PLOS_REPORT}.prn translated to human readable form (${REMOTE_SCATCH_DIR}/${PLOS_REPORT}.prn)."
+    if scp $SERVER:${REMOTE_SCATCH_DIR}/${PLOS_REPORT}.prn ${REPORT_DIR}/ ; then
+        logit "${PLOS_REPORT}.prn copied from the ILS to ${REPORT_DIR}/"
+    else
+        logit "**error, failed to copy $SERVER:${REMOTE_SCATCH_DIR}/${PLOS_REPORT}.prn to ${REPORT_DIR}/"
         ERROR_COUNT=$(($ERROR_COUNT + 1))
     fi
 else
