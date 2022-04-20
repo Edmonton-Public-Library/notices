@@ -97,7 +97,7 @@ def main( argv ):
             inputFile = arg
         elif opt == '-p':
             # pre-lost; notices that charges are old enough to be thought of as LOST and a bill may be in their future.
-            noticeType = 'PRELOST' # pre-lost.
+            noticeType = 'PLOS' # pre-lost.
         elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
@@ -120,7 +120,7 @@ def main( argv ):
         noticeReader = Overdue( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     elif noticeType == 'REFR':
         noticeReader = PreReferral( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
-    elif noticeType == 'PRELOST':
+    elif noticeType == 'PLOS':
         noticeReader = PreLost( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
     else:
         sys.stderr.write( 'nothing to do; notice type not selected\n' )

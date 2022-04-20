@@ -257,6 +257,10 @@ class Customer:
         else:
             # get the first item off the list
             item = self.items.pop()
+        # Clean up any text that has Symphony delimiters in it.
+        # ie: $<due:3>4/5/2022,23:59      $<price:3>$28.65
+        text = re.sub(r'\$<', "", text)
+        text = re.sub(r':\d.?>', ": ", text)
         item.addLine( text )
         # put it back on the stack for next time.
         self.items.append( item )

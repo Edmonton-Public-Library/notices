@@ -577,7 +577,7 @@ class PreReferral( Notice ):
 ############## Pre-Lost #################### 
 class PreLost( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
-        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
+        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prelost_' )
         self.title = 'PRE-LOST NOTICE'
 
     def __str__( self ):
