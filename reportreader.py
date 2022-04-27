@@ -578,7 +578,8 @@ class PreReferral( Notice ):
 class PreLost( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prelost_' )
-        self.title = 'PRE-LOST NOTICE'
+        # Report name change as requested by staff April 27, 2022. Was PRE-LOST NOTICE.
+        self.title = 'OVERDUE NOTICE'
 
     def __str__( self ):
         return 'Pre-Lost Notice using: ' + self.iFileName
