@@ -36,7 +36,8 @@ export PATH=$PATH:/usr/bin:/bin:/home/ils/notices/bin
 export PYTHONPATH=${LOCAL_BIN_DIR}
 export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
-VERSION="1.03.00"
+# Updated mail requires -r 'ils@epl.ca' not -a 'From:ils@ils-epl.epl.ca'
+VERSION="1.03.01"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
 
@@ -180,10 +181,10 @@ do
     # When you are using -a option, the mailx program will do all the necessary conversions to base64 and 
     # then to MIME format for you. No need to use uuencode. 
     # https://unix.stackexchange.com/questions/394283/how-to-send-email-attachment-using-mailx-a-with-a-different-attachment-name
-	echo | /usr/bin/mailx -a"From:ils@epl-ils.epl.ca" -A ${name} -s "Print Notices $name for $RUN_DATE" "$EMAIL_ADDRESSES"
+	echo | /usr/bin/mailx -r 'ils@epl.ca' -A ${name} -s "Print Notices $name for $RUN_DATE" "$EMAIL_ADDRESSES"
 done
 if [ -r "$EXCEPTIONS" ]; then
     # Now mail the exceptions list to someone who can fix the addresses.
-    echo | /usr/bin/mailx -a'From:ils@epl-ils.epl.ca' -A ${EXCEPTIONS} -s "Unmailable customers due to broken addresses $RUN_DATE" "$ADDR_FIX_STAFF"
+    echo | /usr/bin/mailx -r 'ils@epl.ca' -A ${EXCEPTIONS} -s "Unmailable customers due to broken addresses $RUN_DATE" "$ADDR_FIX_STAFF"
 fi
 logit "== Notice production complete."
