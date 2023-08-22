@@ -44,7 +44,7 @@ BILL_REPORT=bills
 ODUE_REPORT=overdues
 PRER_REPORT=prereferral
 PLOS_REPORT=prelost
-VERSION="1.02.04"
+VERSION="1.02.05"
 HOST=$(hostname)
 ERROR_COUNT=0
 ## Set up logging.
@@ -273,7 +273,15 @@ else
             prelost_notices "$REPRINT_REPORT_CODE" "$REPRINT_REPORT"
         else
             logit "*error, no such report type: '$REPRINT_REPORT'"
+            exit 1
         fi
+        logit "*************************************************************"
+        logit "* NOTE: Dates are automatically added to *.ps files by the"
+        logit "* report generator. This will be fixed, but until then if"
+        logit "* you are reprinting from a day that isn't the day the report"
+        logit "* was run, find-and-replace the date in the PS file(s) before"
+        logit "* running ps2pdf.sh."
+        logit "*************************************************************
     else
         logit "*error use both --reprint and --code for a special report reprint"
         exit 1
