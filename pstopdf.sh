@@ -3,7 +3,7 @@
 #
 # Converts the PS files in the print/ directory to PDF
 #
-#    Copyright (C) 2012 - 2021  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2023  Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 # Collects all the notices required for the day and coordinates convertion to PDF.
@@ -35,10 +35,9 @@
 #
 
 PRINT_DIR=/home/ils/notices/print
-PS_LIST=${PRINT_DIR}/ps_files.lst
 # convert all the PS files in print using
 # basic format: ps2pdf14 testFormatPage.ps test.pdf
-VERSION="1.00.02"
+VERSION="1.00.03"
 HOST=$(hostname)
 ERROR_COUNT=0
 ## Set up logging.
@@ -48,13 +47,13 @@ LOG_FILE=/home/ils/notices/notices.log
 logit()
 {
     local message="$1"
-    local time=$(date +"%Y-%m-%d %H:%M:%S")
+    local TIME=$(date +"%Y-%m-%d %H:%M:%S")
     if [ -t 0 ]; then
         # If run from an interactive shell message STDOUT and LOG_FILE.
-        echo -e "[$time] $message" | tee -a $LOG_FILE
+        echo -e "[$TIME] $message" | tee -a $LOG_FILE
     else
         # If run from cron do write to log.
-        echo -e "[$time] $message" >>$LOG_FILE
+        echo -e "[$TIME] $message" >>$LOG_FILE
     fi
 }
 
@@ -64,17 +63,15 @@ if ! cd ${PRINT_DIR}; then
 	logit "**error, failed to cd into $PRINT_DIR."
 	exit 1
 fi
-ls -c1 *.ps >$PS_LIST
 
-for psFile in $(cat $PS_LIST)
+for psFile in *.ps
 do
 	if /usr/bin/ps2pdf14 ${PRINT_DIR}/${psFile}; then
 		logit "converted: ${psFile}"
 	else
 		logit "**error, converting ${psFile}"
-		ERROR_COUNT=$(($ERROR_COUNT + 1))
+		ERROR_COUNT=$((ERROR_COUNT + 1))
 	fi
 done
 logit "conversion to PDF finished, cleaning up."
-rm $PS_LIST
 logit "             finished with $ERROR_COUNT error(s)."

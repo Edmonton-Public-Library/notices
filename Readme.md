@@ -1,4 +1,7 @@
 # Customer Notices
+'''August 22, 2023'''
+Added argument handling for `report.sh` to allow it to process a specific report by sched ID. See `--reprint` and `--code` in `report.sh`.
+
 '''December 21, 2012'''
 The process of running print notices is a series of steps, all of which have been automated with scripts in this directory.
 
