@@ -3,7 +3,7 @@
 #
 # Driver to coordinate the running of all reports.
 #
-#    Copyright (C) 2019 - 2022  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2019 - 2023  Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 # Collects all the notices required for the day and coordinates convertion to PDF.
@@ -37,7 +37,7 @@ export PYTHONPATH=${LOCAL_BIN_DIR}
 export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
 # Updated mail requires -r 'ils@epl.ca' not -a 'From:ils@ils-epl.epl.ca'
-VERSION="1.03.01"
+VERSION="1.03.02"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
 
@@ -48,13 +48,13 @@ LOG_FILE=/home/ils/notices/notices.log
 logit()
 {
     local message="$1"
-    local time=$(date +"%Y-%m-%d %H:%M:%S")
+    local TIME=$(date +"%Y-%m-%d %H:%M:%S")
     if [ -t 0 ]; then
         # If run from an interactive shell message STDOUT and LOG_FILE.
-        echo -e "[$time] $message" | tee -a $LOG_FILE
+        echo -e "[$TIME] $message" | tee -a $LOG_FILE
     else
         # If run from cron do write to log.
-        echo -e "[$time] $message" >>$LOG_FILE
+        echo -e "[$TIME] $message" >>$LOG_FILE
     fi
 }
 # Usage message then exits.
@@ -135,7 +135,7 @@ PRINT_DIR=${LOCAL_DIR}/print
 REPORT_DIR=${LOCAL_DIR}/reports
 BULLETIN_DIR=${LOCAL_DIR}/bulletins
 BILLS=${REPORT_DIR}/bills.prn
-HOLDS=${REPORT_DIR}/holds.prn
+# HOLDS=${REPORT_DIR}/holds.prn
 OVERDUES=${REPORT_DIR}/overdues.prn
 PREREFERRAL=${REPORT_DIR}/prereferral.prn
 PRELOST=${REPORT_DIR}/prelost.prn
@@ -172,16 +172,16 @@ python3 ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST}  >>${LOG_FILE}
 logit " "
 ${LOCAL_BIN_DIR}/pstopdf.sh
 logit " "
-cd ${PRINT_DIR}
+cd ${PRINT_DIR} || { logit "missing $PRINT_DIR, exiting."; exit 1; }
 RUN_DATE=$(date +'%Y-%m-%d')
-for name in $(ls *.pdf)
+for name in *.pdf
 do
 	logit "DRIVER SCRIPT: mailing $name."
     # using echo command makes sure that mailx will not ask you to enter subject and message body manually.
     # When you are using -a option, the mailx program will do all the necessary conversions to base64 and 
     # then to MIME format for you. No need to use uuencode. 
     # https://unix.stackexchange.com/questions/394283/how-to-send-email-attachment-using-mailx-a-with-a-different-attachment-name
-	echo | /usr/bin/mailx -r 'ils@epl.ca' -A ${name} -s "Print Notices $name for $RUN_DATE" "$EMAIL_ADDRESSES"
+	echo | /usr/bin/mailx -r 'ils@epl.ca' -A "$name" -s "Print Notices $name for $RUN_DATE" "$EMAIL_ADDRESSES"
 done
 if [ -r "$EXCEPTIONS" ]; then
     # Now mail the exceptions list to someone who can fix the addresses.

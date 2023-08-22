@@ -31,6 +31,19 @@ ARGS_OVERD= -o --ifile=${OVERDUES}
 ARGS_PREFR= -r --ifile=${PREREFR}
 ARGS_PLOST= -p --ifile=${PRELOST}
 
+bills:
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
+	${LOCAL_BIN}/pstopdf.sh
+prereferral:
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PREFR}
+	${LOCAL_BIN}/pstopdf.sh
+overdues:
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_OVERD}
+	${LOCAL_BIN}/pstopdf.sh
+prelost:
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PLOST}
+	${LOCAL_BIN}/pstopdf.sh
+
 run: ${RELATED} clean
 	${LOCAL_BIN}/report.sh   # getting today's reports
 	${LOCAL_BIN}/bulletin.sh # getting Notices for today's reports.
