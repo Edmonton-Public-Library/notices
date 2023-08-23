@@ -281,7 +281,7 @@ else
         logit "* you are reprinting from a day that isn't the day the report"
         logit "* was run, find-and-replace the date in the PS file(s) before"
         logit "* running ps2pdf.sh."
-        logit "*************************************************************
+        logit "*************************************************************"
     else
         logit "*error use both --reprint and --code for a special report reprint"
         exit 1
