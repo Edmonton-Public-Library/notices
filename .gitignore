@@ -18,3 +18,4 @@ notice.log
 notice.py.log
 notices.log
 malformed_addr.txt
+*.pdf
