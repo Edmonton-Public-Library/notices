@@ -3,7 +3,7 @@
 # Purpose: Customer objects. Customers have a number of items (to be notified
 # about), and an address block.
 #
-#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2023 Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 #
@@ -24,6 +24,7 @@
 #
 # Date:    November 9, 2012
 # Rev:     
+#          0.2 - Update tests for python 3.1+
 #          0.1 - Updated license.
 #          0.0 - Dev.
 ##############################################################################
@@ -88,11 +89,11 @@ class Customer:
     def hasMoreItems( self ):
         """
         >>> c = Customer()
-        >>> print c.hasMoreItems()
+        >>> print( c.hasMoreItems())
         False
         >>> c.setItemText( "1" )
         >>> c.setItemText( "a" )
-        >>> print c.hasMoreItems()
+        >>> print( c.hasMoreItems())
         True
         """
         return len( self.items ) > 0
@@ -148,12 +149,12 @@ class Customer:
         >>> c = Customer()
         >>> c.setSummaryText( '1' )
         >>> c.setSummaryText( '2' )
-        >>> print str( c.summaryBlock )
+        >>> print( str( c.summaryBlock ))
         1 2
-        >>> print c.hasFooter()
+        >>> print( c.hasFooter())
         True
         >>> item = c.getFooter()
-        >>> print c.hasFooter()
+        >>> print( c.hasFooter())
         False
         """
         return not self.summaryBlock.isEmpty()
@@ -163,15 +164,15 @@ class Customer:
         >>> c = Customer()
         >>> c.setSummaryText( '1' )
         >>> c.setSummaryText( '2' )
-        >>> print str( c.summaryBlock )
+        >>> print( str( c.summaryBlock ))
         1 2
         >>> item = c.getFooter()
-        >>> print str( c.summaryBlock )
+        >>> print( str( c.summaryBlock ))
         <BLANKLINE>
-        >>> print str( item )
+        >>> print( str( item ))
         ['1', '2']
         >>> c.pushFooter( item )
-        >>> print str( c.summaryBlock )
+        >>> print( str( c.summaryBlock ))
         1 2
         """
         pushedItem = ItemBlock()
@@ -186,10 +187,10 @@ class Customer:
         >>> c = Customer()
         >>> c.setSummaryText( '      =======================================================================' )
         >>> c.setSummaryText( '                                  TOTAL FINES/FEES AND UNPAID BILLS:     $2.00' )
-        >>> print str( c.getTotalBills() )
+        >>> print( str( c.getTotalBills() ))
         2.0
         >>> c.setSummaryText( '                                  some accidental line with no dollar value mentioned. ' )
-        >>> print str( c.getTotalBills() )
+        >>> print( str( c.getTotalBills() ))
         0.0
         """
         lastLine = self.summaryBlock.getLastLine()
@@ -197,7 +198,7 @@ class Customer:
             return 0.0
         try:
             return (float)(lastLine.split( '$' )[-1].rstrip())
-        except IndexError:
+        except (IndexError, ValueError):
             return 0.0
         
     # Returns the address block as an array of strings.
@@ -211,19 +212,19 @@ class Customer:
         >>> c.setItemText( "a" )
         >>> c.setItemText( "2" )
         >>> c.setItemText( "b" )
-        >>> print len(c.items)
+        >>> print( len(c.items))
         2
-        >>> print str(c.items[0])
+        >>> print( str(c.items[0]))
         1 a
         >>> item = c.getNextItem()
-        >>> print item
+        >>> print( item)
         ['1', 'a']
-        >>> print len(c.items)
+        >>> print( len(c.items))
         1
         >>> c.pushItem( item )
-        >>> print len(c.items)
+        >>> print( len(c.items))
         2
-        >>> print str(c.items[0])
+        >>> print( str(c.items[0]))
         1 a
         """
         replacementItem = ItemBlock()
@@ -236,16 +237,16 @@ class Customer:
         """
         >>> c = Customer()
         >>> c.setItemText( "  1 this and that" )
-        >>> print c.items[0]
+        >>> print( c.items[0])
           1 this and that
-        >>> print len(c.items)
+        >>> print( len(c.items))
         1
         >>> c.setItemText( "     another line" )
-        >>> print len(c.items)
+        >>> print( len(c.items))
         1
         >>> c.setItemText( "  2 this and that" )
         >>> c.setItemText( "     another second line" )
-        >>> print len(c.items)
+        >>> print( len(c.items))
         2
         """
         if len( text.strip() ) < 1:
@@ -273,11 +274,11 @@ class Customer:
         >>> c.setItemText( "a" )
         >>> c.setItemText( "2" )
         >>> c.setItemText( "b" )
-        >>> print len(c.items)
+        >>> print(( len(c.items)))
         2
         >>> c.getNextItem()
         ['1', 'a']
-        >>> print str( len( c.getNextItem() ) )
+        >>> print( str( len( c.getNextItem() ) ))
         2
         >>> c.getNextItem()
         []
@@ -301,22 +302,22 @@ class Customer:
         """
         >>> c = Customer()
         >>> c.setAddressText( "  Funky Monkey" )
-        >>> print c.isWellFormed()
+        >>> print( c.isWellFormed())
         False
         >>> c.setAddressText( "  12345 123 Street" )
-        >>> print c.isWellFormed()
+        >>> print( c.isWellFormed())
         False
         >>> c.setAddressText( "  Edmonton, Alberta" )
-        >>> print c.isWellFormed()
+        >>> print( c.isWellFormed())
         False
         >>> c.setAddressText( "  TgG jkl" )
-        >>> print c.isWellFormed()
+        >>> print( c.isWellFormed())
         False
         >>> c.setAddressText( "  T6G 0KY" )
-        >>> print c.isWellFormed()
+        >>> print( c.isWellFormed())
         False
         >>> c.setAddressText( "  T6G 0g4" )
-        >>> print c.isWellFormed()
+        >>> print( c.isWellFormed())
         True
         """
         # check if the matcher returned a non-None object when compared to the last line of the address block
