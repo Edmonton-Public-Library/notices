@@ -4,7 +4,7 @@
 # Purpose: Notice object definition, from which sub-classes such as
 # pre-referral, and bill notices can be generated.
 #
-#    Copyright (C) 2012 - 2022 Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2023 Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 #
@@ -34,7 +34,7 @@ import os  # for os specific file bulletin reading.
 import sys # for exit
 from customer import Customer
 from datetime import date
-from noticeformatter import PostscriptFormatter
+from noticeformatter import NoticeFormatter
 
 ## Global name of the file that contains broken snail-mail addresses.
 UNMAILABLE_REPORT_FILE = 'unmailable_customers.txt'
@@ -61,7 +61,7 @@ class Notice:
     # street addresses corrected.
     # param:
     # return:
-    def outputReport( self ):
+    def reportResults( self ):
         print('=========')
         print('notice report for ' + self.iFileName + ' for ' + self.humanDate)
         # output the results
@@ -80,12 +80,7 @@ class Notice:
     def parseReport( self, suppress_malformed_customer=True ):
         return self.pagesPrinted
 
-    def setOutputFormat( self, formatter ):
-        self.formatter = formatter
-
-    def writeToFile( self, debug=False ):
-        # get the formatter to set up the postscript
-        formatter = PostscriptFormatter( self.oFileName )
+    def writeToFile( self, formatter:NoticeFormatter, debug=False ):
         # Title
         formatter.setGlobalTitle( self.title )
         # read the opening bulletin
@@ -96,6 +91,7 @@ class Notice:
         for customer in self.customers:
             formatter.setCustomer( customer )
         formatter.format( debug )
+        formatter.outputNotices()
         # after formatting we collect pages printed.
         for customer in self.customers:
             self.pagesPrinted += customer.getPagesPrinted()
@@ -137,8 +133,8 @@ class Notice:
             customerFunc( line )
 
     def __str__( self ):
-        outstring  = '   report: ' + self.iFileName + '\n'
-        return outstring
+        custs = [str(x) for x in self.customers]
+        return f"{type(self).__name__} Notice using: {self.iFileName}\n{custs}"
 
     # Reads a bulletin, or Notice, to be used as a header or footer for a notice.
     # param:  path - path to file. Looks in the local bulletin directory.
@@ -162,9 +158,6 @@ class Hold( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_holds_' )
         self.title = 'PICKUP NOTICE'
-
-    def __str__( self ):
-        return 'Hold Notice using: ' + self.iFileName
 
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
@@ -256,16 +249,13 @@ class Hold( Notice ):
                 hasEmail = True
                 customer.setEmail( line )
         # print self.customers[0]
-        return True
+        return len(self.customers) > 0
 
 ############## Overdue Reminder #################### 
 class Overdue( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
         self.title = 'OVERDUE REMINDER'
-
-    def __str__( self ):
-        return 'Overdue Reminder Notice using: ' + self.iFileName
 
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
@@ -349,7 +339,6 @@ class Overdue( Notice ):
                 customer.setEmail( line )
         return True
 
-
 ############## Bills ####################
 class Bill( Notice ):
     def __init__( self, inFile, bulletinDir, printDir, billLimit=10.0 ):
@@ -357,46 +346,48 @@ class Bill( Notice ):
         self.minimumBillValue = billLimit
         self.title            = 'NEW BILLINGS' # we set this since the report doesn't have it explicitely.
 
-    def __str__( self ):
-        return 'Bill Notice using: ' + self.iFileName + '\nminimum bill value = ' + str( self.minimumBillValue )
-
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
     def parseReport( self, suppressMalformedCustomer=False ):
+        # .report
+        # .col 5l,1,73
+        # .language ENGLISH
+        # $<wednesday:u>, $<may:u> 31, 2023
+
+
+
+
+
+
+
+
+
+
         # .block
-        # Luckie Luke
-        # 12345 120 Street
-        # Edmonton, AB
-        # T5X 5N8
+        #         Booker Tunerville
+        #         JOELLE Tunerville-Bontemp
+        #         13990 162 A Avenue NW
+        #         Edmonton, AB
+        #         T6V 1W1
         # .endblock
-        # .read /s/sirsi/Unicorn/Notices/blankmessage
+
+
+        # .read /software/EDPL/Unicorn/Notices/blankmessage
+
         # .block
-        # 1   A woman betrayed / Barbara Delinsky.
-        # Delinsky, Barbara.
-        # $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
+        # 1   Back to the past / by Cigdem Knebel.
+        #     Knebel, Cigdem.
+        #     $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $22.24
         # .endblock
+
         # .block
-        # 2   Jump! / Jilly Cooper.
-        # Cooper, Jilly.
-        # $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
+        #     =======================================================================
+
+        #                                 $<total_fines_bills:3>    $22.24
         # .endblock
+
         # .block
-        # 3   A perfect proposal / Katie Fforde.
-        # Fforde, Katie.
-        # $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
-        # .endblock
-        # .block
-        # 4   Looking for Peyton Place : a novel / Barbara Delinsky.
-        # Delinsky, Barbara.
-        # $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $0.75
-        # .endblock
-        # .block
-        # =======================================================================
-        #
-        #                    $<total_fines_bills:3>     $3.00
-        # .endblock
-        # .block
-        # .read /s/sirsi/Unicorn/Notices/eclosing
+        # .read /software/EDPL/Unicorn/Notices/eclosing
         # .endblock
         # read in the report and parse it.
         lines = self.__get_lines__()
@@ -450,9 +441,6 @@ class PreReferral( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prereferral_' )
         self.title = 'PRE-REFERRAL NOTICE' # PreReferral Bill notice for mailing.
-
-    def __str__( self ):
-        return 'Pre-referral Notice using: ' + self.iFileName
 
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
@@ -569,10 +557,7 @@ class PreReferral( Notice ):
             elif line.startswith( '.email' ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
-        # for testing print out the customers and what you have set.
-        print(self.customers[0])
         return True
-
 
 ############## Pre-Lost #################### 
 class PreLost( Notice ):
@@ -580,9 +565,6 @@ class PreLost( Notice ):
         Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prelost_' )
         # Report name change as requested by staff April 27, 2022. Was PRE-LOST NOTICE.
         self.title = 'OVERDUE NOTICE'
-
-    def __str__( self ):
-        return 'Pre-Lost Notice using: ' + self.iFileName
 
     # Reads the report and parses it into customer related notices.
     # Returns number of pages that will be printed.
@@ -644,3 +626,4 @@ class PreLost( Notice ):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    doctest.testfile("reportreader.tst")
