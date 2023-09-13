@@ -31,25 +31,7 @@
 
 POINTS = 72.0
 class Page:
-    def __init__( self ):
-        self.page = ''
-    def setTitle( self ):
-        pass
-    def setBoldTextBlock( self, text ):
-        pass
-    def setLine( self, text ):
-        pass
-    def __str__( self ):
-        return self.page
-
-class PdfPage(Page):
-    # Configuration dict currently must contain font, fontsize, and kerning.
-    def __init__(self, pageNumber:int, configs:dict, debug:bool=False):
-        pass
-    
-class PostscriptPage( Page ):
-    # Configuration dict currently must contain font, fontsize, and kerning.
-    def __init__( self, pageNumber, configs:dict, debug=False):
+    def __init__(self, pageNumber:int, configs:dict, debug:bool):
         self.page            = ''
         self.configDict      = configs
         self.font            = self.configDict.get('font')
@@ -71,13 +53,19 @@ class PostscriptPage( Page ):
         self.itemYMin        = 5.0
         # The first page is set to the bottom of the header, the second page will print just below the statement
         self.nextLine        = self.yDate
-        if debug == True:
-            self.page  = '%!PS-Adobe-2.0\n\n'
-            self.page  = '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
-            self.page += '%%Pages: 1\n'
-        self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
-        self.isIncomplete      = True # marker that page has been finalized.
-            
+        self.isIncomplete    = True # marker that page has been finalized or not.
+
+    # Writes a line of text to the location given. Origin (0,0) is at the
+    # bottom left of the page for both PS and PDF.
+    # param:  line - string to be laid out on the page
+    # param:  x - x coordinate of the string.
+    # param:  y - y coordinate.
+    # param: bold:bool - True if bold text to be used and false otherwise. 
+    # param: fontSize:float - Optional if provided will set font size.  
+    # return: y coordinate of the next line of text. 
+    def __set_text__(self, line:str, x:float, y:float, fontSize:float=None) ->float:
+        pass
+
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
     # param:  x - x coordinate of the first line of the array of strings. The first
@@ -85,61 +73,64 @@ class PostscriptPage( Page ):
     #         line. In Postscript bottom refers to the lowest point on a non-decending character.
     # param:  y - y coordinate with origin (0,0) at the lower left corner of the page.
     # return: float - the y location of the last line printed.
-    def __set_text_block__( self, lines, x, y ):
-        for line in lines:
-            y = self.__set_text__( line, x, y )
-        return y
-    
-    # Writes a line of text to the location given.
-    # param:  line - string to be laid out on the page
-    # param:  x - x coordinate of the string.
-    # param:  y - y coordinate with origin (0,0) at the lower left corner of the page. 
-    def __set_text__( self, line, x, y ):
-        x_s = self.__to_points__( x )
-        y_s = self.__to_points__( y )
-        # sanitize the line
-        line = line.replace( '(', '\(' )
-        line = line.replace( ')', '\)' )
-        self.page += 'newpath\n' + x_s + ' ' + y_s + ' moveto\n(' + line + ') show\n'
-        return y - ( self.kerning / POINTS ) # convert points to inches to keep y in sync
-    
-    # Returns a minimized string of the first characters an ellipsis and last 10 characters
-    # of a line like: 'This is how a very long line would be printed ... end of the line.'
-    # param:  string text to shorten
-    # param:  Maximum number of characters allowed - default 83. 
-    # return: string text shortened
-    # def __minimize_line__( self, text, maxCharacters=65 ):
-        # """
-        # >>> nf = Customer()
-        # >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 40) + '"'
-        # "1234567890123456789012345 ... 1234567890"
-        # >>> print '"' + nf.__minimize_line__('1234567890123456789012345678901234567890', 40) + '"'
-        # "1234567890123456789012345678901234567890"
-        # >>> print '"' + nf.__minimize_line__('123456789012345678901234567890123456789', 40) + '"'
-        # "123456789012345678901234567890123456789"
-        # >>> print '"' + nf.__minimize_line__('12345678901234567890123456789012345678901', 40) + '"'
-        # "1234567890123456789012345 ... 2345678901"
-        # """
-        # if len( text ) <= maxCharacters:
-            # return text
-        # ellipsis = len( '...' )
-        # endLine = 10
-        # beginLine = maxCharacters - (endLine + ellipsis)
-        # return text[0:beginLine] + ' ... ' + text[-endLine:].rstrip()
-    
-    # Default method that stringifies object.
-    # param:  
-    # return: the postscript string of this object.
-    def __str__( self ):
-        self.page += 'showpage\n'
-        return self.page
+    def __set_text_block__(self, lines:list, x:float, y:float, bold:bool=False) ->float:
+        pass
+
+    # Sets the title on the page in bold.
+    # param:  text - Title string
+    def setTitle( self, text:str ):
+        self.__set_text__(text, self.xTitle, self.yTitle, bold=True, fontSize=self.fontSizeTitle)
+
+    # Returns the height of the block of text in inches.
+    # param:  list of lines of address text.
+    # return: None, but sets the self.nextLine in the super class.
+    def setAddress( self, textBlock ):
+        # TODO: Do we need this var and how it is set??
+        self.nextLine = self.__set_text_block__( textBlock, self.xAddressBlock, self.yAddressBlock )
         
-    # Converts the argument into points
-    # param:  n float - the value to convert.
-    # return: n * 72 as a string
-    def __to_points__( self, n ):
-        return str( n * POINTS )
+    # Prints the argument text at the appropriate position
+    # param:  text - single string.
+    def setStatementDate( self, text:str ):
+        return self.__set_text__(text, self.xDate, self.yDate)
     
+    # Sets the 'page n of m' message.
+    # param: text:str statement.
+    # return: None 
+    def setStatementCount( self, text:str ):
+        self.__set_text__( text, self.xFooter, self.yFooter )
+
+    # Sets an item text block.
+    # param:  List of strings that make up an item description.
+    # param:  x - x coordinate of the text block (in.).
+    # param:  y - y coord in inches.
+    # return: y position of the next line of text.
+    def setItem(self, textBlock:list, x:float, y:float):
+        myBlock = self.__break_lines__(textBlock)
+        return self.__set_text_block__( myBlock, x, y, True )
+        
+    # Signals that the caller is finished with the page.
+    # param:  None
+    # return: None, sets the super class' isIncomplete flag to false.
+    def finalize(self):
+        self.isIncomplete = False
+    
+    # This page returns True if the argument item can be fit on this page and False
+    # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
+    # to zero y gets the closer to the bottom of the page. Items can't print below 
+    # the itemYMin which is currently set to 5.0 inches from the bottom of the form.
+    def isRoomForItem( self, textBlock, lastYPosition ):
+        myBlock = self.__break_lines__( textBlock )
+        y = lastYPosition - ( len( myBlock ) * ( self.kerning / POINTS ))
+        if y >= self.itemYMin:
+            return True
+        else:
+            return False
+
+    # Used for PostScript, but and is optional in the subclass.
+    # param: instruction:str - Inserts an arbitrary instruction in the output file code. 
+    def setInstruction(self, instruction:str):
+        pass
+
     # Breaks long lines from a block of text into chunks that will fit within
     # the notice boundaries (line length < 6.5").
     # param:  block - array of strings.
@@ -206,102 +197,103 @@ class PostscriptPage( Page ):
             spcWords.append( sentence[start:end] )
             start = end
         return spcWords
+
+    # The string version of this object.
+    def __str__( self ):
+        return self.page
+
+class PdfPage(Page):
+    # Configuration dict currently must contain font, fontsize, and kerning.
+    def __init__(self, pageNumber:int, configs:dict, debug:bool=False):
+        super().__init__(pageNumber, configs, debug)
+
+    # Writes a line of text to the location given. Origin (0,0) is at the
+    # bottom left of the page for both PS and PDF.
+    # param:  line - string to be laid out on the page
+    # param:  x - x coordinate of the string.
+    # param:  y - y coordinate.
+    # param: bold:bool - True if bold text to be used and false otherwise. 
+    # param: fontSize:float - Optional if provided will set font size.  
+    # return: y coordinate of the next line of text. 
+    def __set_text__(self, line:str, x:float, y:float, fontSize:float=None) ->float:
+        pass
     
-    # Sets the title on the page in bold.
-    # param:  text - Title string
-    # param:  x - coordinate in inches.
-    # param:  y - coordinate in inches.
-    # param:  size - float of size of text for the title in points.
-    # param:  centre - True if the text is to be centered and false otherwise.
-    # return: 
-    def setTitle( self, text ):
-        x      = self.xTitle
-        y      = self.yTitle
-        size   = self.fontSizeTitle
-        midPage = 4.25 * POINTS
-        # this is a loosy-goosy method of centring the string.
-        x = midPage - ( len( text ) * ( size * 0.75 ) ) / 2.0
-        x_s = str( x )
-        y_s = self.__to_points__( y )
-        self.page += 'gsave\n'
-        self.page += '/' + self.font + '-Bold findfont\n' + str( size ) + ' scalefont\nsetfont\n'
-        self.page += 'newpath\n'
-        self.page += x_s + ' ' + y_s + ' moveto\n'
-        self.page += '(' + text + ') show\n'
-        self.page += 'grestore\n'
+    # Sets a list of strings at the appropriate location
+    # param:  lines - array of strings to be laid out on the page
+    # param:  x - x coordinate of the first line of the array of strings. The first
+    #         placement is based on the bottom left corner of the first character of the first
+    #         line. In Postscript bottom refers to the lowest point on a non-decending character.
+    # param:  y - y coordinate with origin (0,0) at the lower left corner of the page.
+    # return: float - the y location of the last line printed.
+    def __set_text_block__(self, lines:list, x:float, y:float, bold:bool=False) ->float:
+        pass
+    
+class PostscriptPage( Page ):
+    # Configuration dict currently must contain font, fontsize, and kerning.
+    def __init__( self, pageNumber:int, configs:dict, debug=False):
+        super().__init__(pageNumber, configs, debug)
+        if debug == True:
+            self.page  = '%!PS-Adobe-2.0\n\n'
+            self.page  = '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+            self.page += '%%Pages: 1\n'
+        self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
+        self.isIncomplete = True # marker that page is complete.
     
     # Sets a page specific instruction.
     # param:  instruction - make sure it has been predefined in the head of the PS file.
     # return: 
     def setInstruction( self, instruction ):
         self.page += instruction + '\n'
-    
-    # Sets a block of text returning the y location of the last line in inches.
-    # param:  list of strings of a block
-    # param:  x - x coord.
-    # param:  y - y coord in inches.
-    # return: last y coord in inches.
-    def setBoldTextBlock( self, block, x, y ):
-        self.page += 'gsave\n'
-        self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
-        lastY = self.__set_text_block__( block, x, y )
-        self.page += 'grestore\n'
-        return lastY
         
-    # Sets a single line of text.
-    # param:  String to place.
-    # param:  x - x coord.
-    # param:  y - y coord in inches.
-    # return: 
-    def setLine( self, text, x, y, bold=False ):
-        if bold == True:
+    # Writes a line of text to the location given. Origin (0,0) is at the
+    # bottom left of the page for both PS and PDF.
+    # param:  line - string to be laid out on the page
+    # param:  x - x coordinate of the string.
+    # param:  y - y coordinate.
+    # param: bold:bool - True if bold text to be used and false otherwise. 
+    # param: fontSize:float - Optional if provided will set font size.  
+    # return: y coordinate of the next line of text. 
+    def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
+        if fontSize:
+            myFontSize = fontSize
+        else:
+            myFontSize = self.fontSize
+        if bold:
+            self.page += f"gsave\n"
+            self.page += f"/{self.font}-Bold findfont\n{str(myFontSize)} scalefont\nsetfont\n"
+        x_s = str( x * POINTS )
+        y_s = str( y * POINTS )
+        # sanitize the line parens are special symbols in PS.
+        line = line.replace( '(', '\(' )
+        line = line.replace( ')', '\)' )
+        self.page += f"newpath\n{x_s} {y_s} moveto\n({line}) show\n"
+        if bold:
+            self.page += f"grestore\n"
+        return y - ( self.kerning / POINTS ) # convert points to inches to keep y in sync
+    
+    # Sets a list of strings at the appropriate location
+    # param:  lines - array of strings to be laid out on the page
+    # param:  x - x coordinate of the first line of the array of strings. The first
+    #         placement is based on the bottom left corner of the first character of the first
+    #         line. In Postscript bottom refers to the lowest point on a non-decending character.
+    # param:  y - y coordinate with origin (0,0) at the lower left corner of the page.
+    # return: float - the y location of the last line printed.
+    def __set_text_block__(self, lines:list, x:float, y:float, bold:bool=False) ->float:
+        if bold:
             self.page += 'gsave\n'
             self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
-        y = self.__set_text__( text, x, y )
-        if bold == True:
+        for line in lines:
+            y = self.__set_text__(line, x, y)
+        if bold:
             self.page += 'grestore\n'
         return y
-       
-    # Returns the height of the block of text in inches.
-    # param:  list of lines of text.
-    # return: total height in inches.
-    def setAddress( self, textBlock ):
-        self.nextLine = self.__set_text_block__( textBlock, self.xAddressBlock, self.yAddressBlock )
-        
-    # Prints the argument text at the appropriate position
-    # param:  text - single string.
-    def setStatementDate( self, text ):
-        return self.setLine( text, self.xDate, self.yDate, False )
-        
-    # Sets the block of text as item text.
-    # param:  List of strings of an items
-    # param:  x - x coord.
-    # param:  y - y coord in inches.
-    # return: True if the item could fit on the page and False otherwise.
-    def setItem( self, textBlock, x, y ):
-        myBlock = self.__break_lines__( textBlock )
-        return self.setBoldTextBlock( myBlock, x, y )
-        
-    # Sets the complete flag.
+
+    # Default method that stringifies object.
     # param:  
-    # return:
-    def finalize( self ):
-        self.isIncomplete = False
-    
-    # This page returns True if the argument item can be fit on this page and False
-    # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
-    # to zero y gets the closer to the bottom of the page. Items can't print below 
-    # the itemYMin which is currently set to 5.0 inches from the bottom of the form.
-    def isRoomForItem( self, textBlock, lastYPosition ):
-        myBlock = self.__break_lines__( textBlock )
-        y = lastYPosition - ( len( myBlock ) * ( self.kerning / POINTS ))
-        if y >= self.itemYMin:
-            return True
-        else:
-            return False
-    
-    def setStatementCount( self, text ):
-        self.setLine( text, self.xFooter, self.yFooter )
+    # return: the postscript string of this object.
+    def __str__( self ):
+        self.page += f"showpage\n"
+        return self.page
 
 if __name__ == "__main__":
     import doctest
@@ -309,9 +301,9 @@ if __name__ == "__main__":
     # Configuration dict currently must contain font, fontsize, kerning, and leftmargin.
     page = PostscriptPage( 1, {'font': 'Courier', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875}, True )
     # page = PostscriptPage( 1, {'font': 'Helvetica', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875}, True ) 
-    page.setBoldTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
+    page.__set_text_block__( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75, True )
     msg = ['Statement produced: Friday, August 24 2012']
-    nextLine = page.setBoldTextBlock( msg, 0.875, 9.875 )
+    nextLine = page.__set_text_block__( msg, 0.875, 9.875, True )
     msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.',  
     'This may block your ability to borrow or to place holds or to renew materials online or via our',
     'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
@@ -323,9 +315,9 @@ if __name__ == "__main__":
     msg = [f"  1   The lion king 1 1/2 [videorecording] / [directed by Kristen J. Sollée {special}].",
     '      Raymond, Bradley.',
     '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
-    nextLine = page.setBoldTextBlock( msg, 0.875, (nextLine - 0.18) )
+    nextLine = page.__set_text_block__( msg, 0.875, (nextLine - 0.18), True )
     page.setTitle( 'Test Title' )
-    page.setLine('Statement 1 of 2', 0.875, 4.5 )
+    page.__set_text__('Statement 1 of 2', 0.875, 4.5 )
     # encoding = 'iso8859_2'
     encoding = 'utf_8'
     with open('test.ps', encoding=encoding, mode='w') as f:
