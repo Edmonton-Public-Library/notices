@@ -45,30 +45,35 @@ import sys
 import getopt
 import os
 # from reportreader import Notice # for base class calls.
-from reportreader import Hold
-from reportreader import Bill
-from reportreader import Overdue
-from reportreader import PreReferral
-from reportreader import PreLost
-from noticeformatter import PostscriptFormatter
+from reportreader import Hold, Bill, Overdue, PreReferral, PreLost
+from noticeformatter import PostscriptFormatter, PdfFormatter
 
 LOCAL_BULLETIN_FOLDER = 'bulletins'
 LOCAL_PRINT_FOLDER    = 'print'
 
 def usage():
-    sys.stderr.write( 'Usage:\n' )
-    sys.stderr.write( '  notice.py [-b[10]hors] -i <inputfile>\n' )
-    sys.stderr.write( '  Processes Symphony reports into printable notice format\n' )
-    sys.stderr.write( '  -b[n] - Produce bill notices using bill threshold \'n\', as an integer\n' )
-    sys.stderr.write( '  dollar value, like \'10\' for $10.00.\n' )
-    sys.stderr.write( '  -h - Produce hold notices. We don\'t send these by mail anymore.\n' )
-    sys.stderr.write( '  -i --ifile - Argument file shall contain the raw report data to consume.\n' )
-    sys.stderr.write( '  -o - Produce overdue report.\n' )
-    sys.stderr.write( '  -p - Produce pre-lost report.\n' )
-    sys.stderr.write( '  -r - Produce pre-referral report.\n' )
-    sys.stderr.write( '  -s - Turns the \'isCustomerSuppressionDesired\' flag on.\n' )
-    sys.stderr.write( '  In this mode customers with malformed mailing addresses are not printed\n' )
-    sys.stderr.write( '  since it just costs to print and mail, just to be returned by the post office.\n' )
+    message = """
+Usage:
+    
+  notice.py [-b[10]hors] -i <inputfile>
+  Processes Symphony reports into printable notice format. Currently 
+  notices are created in PostScript (PS) and then converted to PDF.
+
+    -b[n] --dollars=n - Produce bill notices using bill threshold 'n', as an integer
+      dollar value, like '10' for $10.00.
+    -h - Produce hold notices. We don't send these by mail anymore.
+    -i --ifile - Argument file shall contain the raw report data to consume.
+    -o - Produce overdue report.
+    -p - Produce pre-lost report.
+    -r - Produce pre-referral report.
+    -s - Turns the 'isCustomerSuppressionDesired' flag on.
+    --pdf - Output notice as a PDF directly (skip the PS conversion).
+    -x - Outputs this usage message.
+  
+  In this mode customers with malformed mailing addresses are not printed
+  since it just costs to print and mail, just to be returned by the post office.
+    """
+    print(f"{message}")
     
 # Take valid command line arguments -b'n', -h, -i, -o, -r, -p, and -s.
 def main( argv ):
@@ -76,8 +81,9 @@ def main( argv ):
     noticeType = 'INIT'
     billLimit  = 10.0
     isCustomerSuppressionDesired = False
+    isPdfOutput = False
     try:
-        opts, args = getopt.getopt( argv, "ohb:i:rps", [ "dollars=", "ifile=" ] )
+        opts, args = getopt.getopt( argv, "ohb:i:rps", [ "dollars=", "ifile=", "pdf" ] )
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -101,6 +107,11 @@ def main( argv ):
         elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
+        elif opt in ( "--pdf" ): # output pdf directly to the provided path.
+            isPdfOutput = True
+        elif opt == '-x':
+            usage()
+            sys.exit()
     print('Input file is = ', inputFile)
     sys.stderr.write('running file ' + inputFile + '\n')
     if os.path.isfile( inputFile ) == False:
@@ -126,14 +137,19 @@ def main( argv ):
         sys.stderr.write( 'nothing to do; notice type not selected\n' )
         usage()
         sys.exit()
-    print(noticeReader)
-    psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
-    noticeReader.setOutputFormat( psFormatter )
-    if noticeReader.parseReport( isCustomerSuppressionDesired ) == False:
-        sys.stderr.write( 'error: unable to parse report\n' )
+    if not noticeReader:
+        usage()
         sys.exit()
-    noticeReader.writeToFile()
-    noticeReader.outputReport()
+    print(noticeReader)
+    if isPdfOutput:
+        noticeFormatter = PdfFormatter(noticeReader.getOutFileBaseName())
+    else:
+        noticeFormatter = PostscriptFormatter(noticeReader.getOutFileBaseName())
+    if not noticeReader.parseReport(isCustomerSuppressionDesired):
+        sys.stderr.write(f"*warning, not data parsed from {noticeType}\n")
+    else:
+        noticeReader.writeToFile(noticeFormatter)
+    noticeReader.reportResults()
 
 # Initial entry point for program
 if __name__ == "__main__":
