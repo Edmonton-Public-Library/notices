@@ -61,7 +61,7 @@ class NoticeFormatter:
             self.fontSize = 10.0
         self.kerning         = configs.get('kerning')  # points
         if not self.kerning:
-            self.kerning = 12.0
+            self.kerning = 11.0
         self.blockSpacing    = self.kerning / POINTS   # inches
         self.leftMargin      = configs.get('leftMargin') # inches
         if not self.leftMargin:
