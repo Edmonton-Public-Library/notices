@@ -1,0 +1,22 @@
+.folddata
+.report
+.col 5l,1,73
+.language ENGLISH
+$<wednesday:u>, $<april:u> 13, 2022
+<blank lines>
+.block
+            Arbry Adult
+            1234 5678 Saskatchewan DR NW
+            Edmonton, AB
+            T6T 4R7
+.endblock
+<blank lines>
+.read /software/EDPL/Unicorn/Notices/overdue8daysprint
+<blank lines>
+    1  $<call_num:3>927.8242 JON                              $<id:3U>31221317743289  
+        Last chance Texaco : chronicles of an American troubadour / Rickie Lee
+        Jones.
+        Jones, Rickie Lee.
+        $<due:3>4/5/2022,23:59  
+<blank lines>
+.read /software/EDPL/Unicorn/Notices/eclosing8daysprint

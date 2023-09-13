@@ -1,0 +1,44 @@
+.folddata
+.report
+.language ENGLISH
+.col 5l,1,73
+Friday, December 7, 2012
+.block
+Whitemud Crossing Branch
+.endblock
+.block
+            Georgia I Grant
+            11227 58 Avenue
+            Edmonton, AB
+            T6H 1C3
+.endblock
+.read /s/sirsi/Unicorn/Notices/1stpickup
+.block
+.block
+    1   Holiday crafts.
+.endblock
+        $<call_num:3>745.5941 HOL 2004                           $<copy:3>1
+        $<pickup_by:3>1/20/2013
+.endblock
+.block
+.block
+    2   Holiday crafts.
+.endblock
+        $<call_num:3>745.5941 HOL 2005                           $<copy:3>2
+        $<pickup_by:3>1/20/2013
+.endblock
+.block
+.block
+    3   Holiday crafts.
+.endblock
+        $<call_num:3>745.5941 HOL 2006                           $<copy:3>2
+        $<pickup_by:3>1/20/2013
+.endblock
+.block
+.block
+    4   Holiday crafts.
+.endblock
+        $<call_num:3>745.5941 HOL 2008                           $<copy:3>1
+        $<pickup_by:3>1/20/2013
+.endblock
+.report
