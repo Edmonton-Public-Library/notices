@@ -42,14 +42,20 @@ class Page:
     def __str__( self ):
         return self.page
 
-        
+class PdfPage(Page):
+    # Configuration dict currently must contain font, fontsize, and kerning.
+    def __init__(self, pageNumber:int, configs:dict, debug:bool=False):
+        pass
+    
 class PostscriptPage( Page ):
-    def __init__( self, pageNumber, font, fontsize, kerning, debug=False):
+    # Configuration dict currently must contain font, fontsize, and kerning.
+    def __init__( self, pageNumber, configs:dict, debug=False):
         self.page            = ''
-        self.font            = font
-        self.fontSize        = fontsize
-        self.kerning         = kerning # points.
-        self.leftMargin      = 0.875   # inches
+        self.configDict      = configs
+        self.font            = self.configDict.get('font')
+        self.fontSize        = self.configDict.get('fontSize')
+        self.kerning         = self.configDict.get('kerning')  # points.
+        self.leftMargin      = self.configDict.get('leftMargin')    # inches
         self.fontSizeTitle   = 18.0    # points
         # self.fontSizeText    = 10.0    # points
         self.xTitle          = 3.3125  # inches was 4.25, 10.1875
@@ -300,7 +306,9 @@ class PostscriptPage( Page ):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    page = PostscriptPage( 1, 'Courier', 10.0, 11.0, True )
+    # Configuration dict currently must contain font, fontsize, kerning, and leftmargin.
+    page = PostscriptPage( 1, {'font': 'Courier', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875}, True )
+    # page = PostscriptPage( 1, {'font': 'Helvetica', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875}, True ) 
     page.setBoldTextBlock( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75 )
     msg = ['Statement produced: Friday, August 24 2012']
     nextLine = page.setBoldTextBlock( msg, 0.875, 9.875 )
@@ -309,13 +317,16 @@ if __name__ == "__main__":
     'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
     myBlock = page.__break_lines__( msg )
     print(myBlock)
-    nextLine = page.setItem( myBlock, 0.875, (nextLine - 0.18), False )
-    msg = ['  1   The lion king 1 1/2 [videorecording] / [directed by Bradley Raymond].',
+    nextLine = page.setItem( myBlock, 0.875, (nextLine - 0.18) )
+    special = "\u00e9"
+    # special = "\u00d8" # This is the 'O' with strike-through. Python says character maps to undefined. 
+    msg = [f"  1   The lion king 1 1/2 [videorecording] / [directed by Kristen J. Sollée {special}].",
     '      Raymond, Bradley.',
     '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
     nextLine = page.setBoldTextBlock( msg, 0.875, (nextLine - 0.18) )
     page.setTitle( 'Test Title' )
     page.setLine('Statement 1 of 2', 0.875, 4.5 )
-    f = open( 'test.ps', 'w' )
-    f.write( str(page) )
-    f.close()
+    # encoding = 'iso8859_2'
+    encoding = 'utf_8'
+    with open('test.ps', encoding=encoding, mode='w') as f:
+        f.write( str(page) )
