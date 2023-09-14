@@ -292,7 +292,7 @@ class PostscriptPage( Page ):
     # param:  
     # return: the postscript string of this object.
     def __str__( self ):
-        self.page += f"showpage\n"
+        self.page += f"showpage"
         return self.page
 
 if __name__ == "__main__":
@@ -322,3 +322,6 @@ if __name__ == "__main__":
     encoding = 'utf_8'
     with open('test.ps', encoding=encoding, mode='w') as f:
         f.write( str(page) )
+
+    doctest.testfile("page.tst")
+    
