@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ###########################################################################
 #
-#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2023  Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 # Collects all the notices required for the day and coordinates convertion to PDF.
@@ -26,7 +26,8 @@
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
 # Rev:     
-#          0.0 - Dev.
+#          1.0 - Refactored classes to simplify interfaces and balance 
+#                method responsibilities.
 ###########################################################################
 
 POINTS = 72.0
@@ -216,6 +217,7 @@ class PdfPage(Page):
     # param: fontSize:float - Optional if provided will set font size.  
     # return: y coordinate of the next line of text. 
     def __set_text__(self, line:str, x:float, y:float, fontSize:float=None) ->float:
+        # TODO: Finish me.
         pass
     
     # Sets a list of strings at the appropriate location
@@ -226,6 +228,7 @@ class PdfPage(Page):
     # param:  y - y coordinate with origin (0,0) at the lower left corner of the page.
     # return: float - the y location of the last line printed.
     def __set_text_block__(self, lines:list, x:float, y:float, bold:bool=False) ->float:
+        # TODO: Finish me.
         pass
     
 class PostscriptPage( Page ):
