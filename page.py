@@ -29,8 +29,10 @@
 #          1.0 - Refactored classes to simplify interfaces and balance 
 #                method responsibilities.
 ###########################################################################
+import sys
+from reportlab.pdfgen.canvas import Canvas
 
-POINTS = 72.0
+INCH = 72.0
 class Page:
     def __init__(self, pageNumber:int, configs:dict, debug:bool):
         self.page            = ''
@@ -40,18 +42,17 @@ class Page:
         self.kerning         = self.configDict.get('kerning')  # points.
         self.leftMargin      = self.configDict.get('leftMargin')    # inches
         self.fontSizeTitle   = 18.0    # points
-        # self.fontSizeText    = 10.0    # points
         self.xTitle          = 3.3125  # inches was 4.25, 10.1875
         self.yTitle          = 10.1875 # inches
-        self.yHeader         = 9.5625
-        self.xHeader         = self.leftMargin
-        self.xDate           = self.leftMargin
-        self.yDate           = 9.875
-        self.xFooter         = self.leftMargin
-        self.yFooter         = 4.5
-        self.xAddressBlock   = 3.25
-        self.yAddressBlock   = 1.75
-        self.itemYMin        = 5.0
+        self.yHeader         = 9.5625  # inches
+        self.xHeader         = self.leftMargin # inches
+        self.xDate           = self.leftMargin # inches
+        self.yDate           = 9.875   # inches
+        self.xFooter         = self.leftMargin # inches
+        self.yFooter         = 4.5     # inches
+        self.xAddressBlock   = 3.25    # inches
+        self.yAddressBlock   = 1.75    # inches
+        self.itemYMin        = 5.0     # inches
         # The first page is set to the bottom of the header, the second page will print just below the statement
         self.nextLine        = self.yDate
         self.isIncomplete    = True # marker that page has been finalized or not.
@@ -64,7 +65,7 @@ class Page:
     # param: bold:bool - True if bold text to be used and false otherwise. 
     # param: fontSize:float - Optional if provided will set font size.  
     # return: y coordinate of the next line of text. 
-    def __set_text__(self, line:str, x:float, y:float, fontSize:float=None) ->float:
+    def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
         pass
 
     # Sets a list of strings at the appropriate location
@@ -85,7 +86,7 @@ class Page:
     # Returns the height of the block of text in inches.
     # param:  list of lines of address text.
     # return: None, but sets the self.nextLine in the super class.
-    def setAddress( self, textBlock ):
+    def setAddress( self, textBlock:list ):
         # TODO: Do we need this var and how it is set??
         self.nextLine = self.__set_text_block__( textBlock, self.xAddressBlock, self.yAddressBlock )
         
@@ -106,8 +107,7 @@ class Page:
     # param:  y - y coord in inches.
     # return: y position of the next line of text.
     def setItem(self, textBlock:list, x:float, y:float):
-        myBlock = self.__break_lines__(textBlock)
-        return self.__set_text_block__( myBlock, x, y, True )
+        return self.__set_text_block__(textBlock, x, y, bold=True)
         
     # Signals that the caller is finished with the page.
     # param:  None
@@ -119,9 +119,9 @@ class Page:
     # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
     # to zero y gets the closer to the bottom of the page. Items can't print below 
     # the itemYMin which is currently set to 5.0 inches from the bottom of the form.
-    def isRoomForItem( self, textBlock, lastYPosition ):
+    def isRoomForItem( self, textBlock:list, lastYPosition:float ):
         myBlock = self.__break_lines__( textBlock )
-        y = lastYPosition - ( len( myBlock ) * ( self.kerning / POINTS ))
+        y = lastYPosition - ( len( myBlock ) * ( self.kerning / INCH ))
         if y >= self.itemYMin:
             return True
         else:
@@ -136,8 +136,8 @@ class Page:
     # the notice boundaries (line length < 6.5").
     # param:  block - array of strings.
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
-    def __break_lines__( self, block ):
-        maxCharsPerLine = ( 6.5 * POINTS ) / ( self.fontSize * 0.55 )
+    def __break_lines__( self, block:list ):
+        maxCharsPerLine = ( 6.5 * INCH ) / ( self.fontSize * 0.55 )
         textBlock = []
         prevLine = ''
         while ( True ):
@@ -167,7 +167,7 @@ class Page:
     # param:  text string of text
     # param:  preserveWhitespace  - if True all white space is presevered, and if False words are separated by a single whitespace.
     # return: list of split strings.
-    def __break_line__( self, text, maxCharsPerLine ):
+    def __break_line__( self, text:str, maxCharsPerLine:int ):
         thisLine = ''
         textBlock = []
         if len( text ) <= maxCharsPerLine:
@@ -188,7 +188,7 @@ class Page:
     # Splits a line into words but keeps the leading spacing.
     # param:  sentence - string of words
     # return: array of words with leading spaces intact.
-    def __split__( self, sentence ):
+    def __split__( self, sentence:str ):
         words    = sentence.split()
         start    = 0
         end      = 0
@@ -207,6 +207,12 @@ class PdfPage(Page):
     # Configuration dict currently must contain font, fontsize, and kerning.
     def __init__(self, pageNumber:int, configs:dict, debug:bool=False):
         super().__init__(pageNumber, configs, debug)
+        self.canvas = configs.get('canvas')
+        if not self.canvas:
+            print(f"*error, PdfPage expected canvas object to be a member of the configs dictionary.")
+            # Signal the shell there was a problem.
+            sys.exit(-1)
+        self.isIncomplete = True
 
     # Writes a line of text to the location given. Origin (0,0) is at the
     # bottom left of the page for both PS and PDF.
@@ -216,9 +222,20 @@ class PdfPage(Page):
     # param: bold:bool - True if bold text to be used and false otherwise. 
     # param: fontSize:float - Optional if provided will set font size.  
     # return: y coordinate of the next line of text. 
-    def __set_text__(self, line:str, x:float, y:float, fontSize:float=None) ->float:
-        # TODO: Finish me.
-        pass
+    def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
+        tmpFontSize = round(self.fontSize)
+        tmpFont = self.font
+        if fontSize or bold:
+            self.canvas.saveState()
+            if fontSize:
+                tmpFontSize = round(fontSize)
+            if bold:
+                tmpFont = f"{self.font}-Bold"
+        self.canvas.setFont(tmpFont, tmpFontSize)
+        self.canvas.drawString(x * INCH, y * INCH, line)
+        if fontSize or bold:
+            self.canvas.restoreState()
+        return y - (self.kerning / INCH)
     
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
@@ -228,8 +245,10 @@ class PdfPage(Page):
     # param:  y - y coordinate with origin (0,0) at the lower left corner of the page.
     # return: float - the y location of the last line printed.
     def __set_text_block__(self, lines:list, x:float, y:float, bold:bool=False) ->float:
-        # TODO: Finish me.
-        pass
+        textBlock = self.__break_lines__(lines)
+        for line in textBlock:
+            y = self.__set_text__(line, x, y, bold)
+        return y
     
 class PostscriptPage( Page ):
     # Configuration dict currently must contain font, fontsize, and kerning.
@@ -257,22 +276,22 @@ class PostscriptPage( Page ):
     # param: fontSize:float - Optional if provided will set font size.  
     # return: y coordinate of the next line of text. 
     def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
-        if fontSize:
-            myFontSize = fontSize
-        else:
-            myFontSize = self.fontSize
-        if bold:
+        myFontSize = self.fontSize
+        if fontSize or bold:
             self.page += f"gsave\n"
-            self.page += f"/{self.font}-Bold findfont\n{str(myFontSize)} scalefont\nsetfont\n"
-        x_s = str( x * POINTS )
-        y_s = str( y * POINTS )
+            if fontSize:
+                myFontSize = fontSize
+            if bold:
+                self.page += f"/{self.font}-Bold findfont\n{str(myFontSize)} scalefont\nsetfont\n"
+        x_s = str( x * INCH )
+        y_s = str( y * INCH )
         # sanitize the line parens are special symbols in PS.
         line = line.replace( '(', '\(' )
         line = line.replace( ')', '\)' )
         self.page += f"newpath\n{x_s} {y_s} moveto\n({line}) show\n"
-        if bold:
+        if fontSize or bold:
             self.page += f"grestore\n"
-        return y - ( self.kerning / POINTS ) # convert points to inches to keep y in sync
+        return y - ( self.kerning / INCH ) # convert points to inches to keep y in sync
     
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
@@ -301,30 +320,6 @@ class PostscriptPage( Page ):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    # Configuration dict currently must contain font, fontsize, kerning, and leftmargin.
-    page = PostscriptPage( 1, {'font': 'Courier', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875}, True )
-    # page = PostscriptPage( 1, {'font': 'Helvetica', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875}, True ) 
-    page.__set_text_block__( ['Name Here', 'Address line one', 'Address line two', 'Address line Three', 'P0S 7A1'], 4, 1.75, True )
-    msg = ['Statement produced: Friday, August 24 2012']
-    nextLine = page.__set_text_block__( msg, 0.875, 9.875, True )
-    msg = ['Our records indicate that the following amount(s) is outstanding by more than 15 days.',  
-    'This may block your ability to borrow or to place holds or to renew materials online or via our',
-    'telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.']
-    myBlock = page.__break_lines__( msg )
-    print(myBlock)
-    nextLine = page.setItem( myBlock, 0.875, (nextLine - 0.18) )
-    special = "\u00e9"
-    # special = "\u00d8" # This is the 'O' with strike-through. Python says character maps to undefined. 
-    msg = [f"  1   The lion king 1 1/2 [videorecording] / [directed by Kristen J. Sollée {special}].",
-    '      Raymond, Bradley.',
-    '      $<date_billed:3>10/23/2012   $<bill_reason:3>OVERDUE      $<amt_due:3>     $1.60']
-    nextLine = page.__set_text_block__( msg, 0.875, (nextLine - 0.18), True )
-    page.setTitle( 'Test Title' )
-    page.__set_text__('Statement 1 of 2', 0.875, 4.5 )
-    # encoding = 'iso8859_2'
-    encoding = 'utf_8'
-    with open('test.ps', encoding=encoding, mode='w') as f:
-        f.write( str(page) )
-
+    # Then do the Postscript page tests. 
     doctest.testfile("page.tst")
-    
+    print(f"Done, check files")
