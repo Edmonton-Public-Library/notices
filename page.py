@@ -81,26 +81,26 @@ class Page:
 
     # Sets the title on the page in bold.
     # param:  text - Title string
-    def setTitle( self, text:str ):
+    def setTitle(self, text:str):
         self.__set_text__(text, self.xTitle, self.yTitle, bold=True, fontSize=self.fontSizeTitle)
 
     # Returns the height of the block of text in inches.
     # param:  list of lines of address text.
     # return: None, but sets the self.nextLine in the super class.
-    def setAddress( self, textBlock:list ):
+    def setAddress(self, textBlock:list):
         # TODO: Do we need this var and how it is set??
-        self.nextLine = self.__set_text_block__( textBlock, self.xAddressBlock, self.yAddressBlock )
+        self.nextLine = self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
         
     # Prints the argument text at the appropriate position
     # param:  text - single string.
-    def setStatementDate( self, text:str ):
+    def setStatementDate(self, text:str):
         return self.__set_text__(text, self.xDate, self.yDate)
     
     # Sets the 'page n of m' message.
     # param: text:str statement.
     # return: None 
-    def setStatementCount( self, text:str ):
-        self.__set_text__( text, self.xFooter, self.yFooter )
+    def setStatementCount(self, text:str):
+        self.__set_text__(text, self.xFooter, self.yFooter)
 
     # Sets an item text block.
     # param:  List of strings that make up an item description.
@@ -120,9 +120,9 @@ class Page:
     # otherwise. Postscript's origin (0, 0) is in the lower left corner, so the closer
     # to zero y gets the closer to the bottom of the page. Items can't print below 
     # the itemYMin which is currently set to 5.0 inches from the bottom of the form.
-    def isRoomForItem( self, textBlock:list, lastYPosition:float ):
-        myBlock = self.__break_lines__( textBlock )
-        y = lastYPosition - ( len( myBlock ) * ( self.kerning / INCH ))
+    def isRoomForItem(self, textBlock:list, lastYPosition:float):
+        myBlock = self.__break_lines__(textBlock)
+        y = lastYPosition - (len(myBlock) * (self.kerning / INCH))
         if y >= self.itemYMin:
             return True
         else:
@@ -137,30 +137,30 @@ class Page:
     # the notice boundaries (line length < 6.5").
     # param:  block - array of strings.
     # return: New array of strings chopped nearest word boundary fitted to page boundary.
-    def __break_lines__( self, block:list ):
-        maxCharsPerLine = ( 6.5 * INCH ) / ( self.fontSize * 0.55 )
+    def __break_lines__(self, block:list):
+        maxCharsPerLine = (6.5 * INCH) / (self.fontSize * 0.55)
         textBlock = []
         prevLine = ''
-        while ( True ):
+        while (True):
             line1 = prevLine
             try:
-                if len( line1 ) == 0: # This stops an intial ' ' character for the first string.
-                    line2 = block.pop( 0 )
-                    if len( line2 ) <= maxCharsPerLine: # don't wrap lines that are smaller than max size.
-                        textBlock.append( line2 )
+                if len(line1) == 0: # This stops an intial ' ' character for the first string.
+                    line2 = block.pop(0)
+                    if len(line2) <= maxCharsPerLine: # don't wrap lines that are smaller than max size.
+                        textBlock.append(line2)
                         continue
                 else:
-                    line2 = line1 + ' ' + block.pop( 0 )
+                    line2 = line1 + ' ' + block.pop(0)
             except IndexError:
-                newLines = self.__break_line__( line1, maxCharsPerLine )
-                textBlock.extend( newLines )
+                newLines = self.__break_line__(line1, maxCharsPerLine)
+                textBlock.extend(newLines)
                 break
-            newLines = self.__break_line__( line2, maxCharsPerLine )
+            newLines = self.__break_line__(line2, maxCharsPerLine)
             # extend the array to include all but the last line, it becomes the first line next time.
-            textBlock.extend( newLines[:-1] ) 
+            textBlock.extend(newLines[:-1]) 
             prevLine = newLines[-1]
         for line in textBlock:
-            block.append( line )
+            block.append(line)
         return textBlock
     
     # Breaks a single string into an block of text (array) of one element if the 
@@ -168,40 +168,40 @@ class Page:
     # param:  text string of text
     # param:  preserveWhitespace  - if True all white space is presevered, and if False words are separated by a single whitespace.
     # return: list of split strings.
-    def __break_line__( self, text:str, maxCharsPerLine:int ):
+    def __break_line__(self, text:str, maxCharsPerLine:int):
         thisLine = ''
         textBlock = []
-        if len( text ) <= maxCharsPerLine:
-            if len( text) > 0: # this stops excessive spacing between items.
-                textBlock.append( text )
+        if len(text) <= maxCharsPerLine:
+            if len(text) > 0: # this stops excessive spacing between items.
+                textBlock.append(text)
             return textBlock
         else: # we will split the long strings.
-            words = self.__split__( text )
+            words = self.__split__(text)
             for word in words:
-                if len( thisLine ) + len( word ) <= maxCharsPerLine:
+                if len(thisLine) + len(word) <= maxCharsPerLine:
                     thisLine += word
                 else: # if the word doesn't fit, append what's on the line now and then make a new one starting with the current word.
-                    textBlock.append( thisLine )
+                    textBlock.append(thisLine)
                     thisLine = word.lstrip()
-            textBlock.append( thisLine )
+            textBlock.append(thisLine)
         return textBlock
     
     # Splits a line into words but keeps the leading spacing.
     # param:  sentence - string of words
     # return: array of words with leading spaces intact.
-    def __split__( self, sentence:str ):
+    def __split__(self, sentence:str):
         words    = sentence.split()
         start    = 0
         end      = 0
         spcWords = []
         for word in words:
-            end = sentence.find( word, start ) + len(word)
-            spcWords.append( sentence[start:end] )
+            end = sentence.find(word, start) + len(word)
+            spcWords.append(sentence[start:end])
             start = end
         return spcWords
 
     # The string version of this object.
-    def __str__( self ):
+    def __str__(self):
         return self.page
 
 class PdfPage(Page):
@@ -266,7 +266,7 @@ class PdfPage(Page):
     # Sets the statement page number message.
     # param: text:str statement.
     # return: None 
-    def setStatementCount( self, text:str ):
+    def setStatementCount(self, text:str):
         # Goofy, but PDF needs to set this whenever a new page is created.
         # We overload this because I don't want to start in the rabbit hole
         # of making pdf stories and paragraphs, I wan't to control the 
@@ -277,26 +277,26 @@ class PdfPage(Page):
     # Returns the height of the block of text in inches.
     # param:  list of lines of address text.
     # return: None, but sets the self.nextLine in the super class.
-    def setAddress( self, textBlock:list ):
+    def setAddress(self, textBlock:list):
         self.__set_text__(f"Statement page {self.pageNumber}", self.xFooter, self.yFooter)
         # TODO: Do we need this var and how it is set??
         self.nextLine = self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
     
-class PostscriptPage( Page ):
+class PostscriptPage(Page):
     # Configuration dict currently must contain font, fontsize, and kerning.
-    def __init__( self, pageNumber:int, configs:dict, debug=False):
+    def __init__(self, pageNumber:int, configs:dict, debug=False):
         super().__init__(pageNumber, configs, debug)
         if debug == True:
             self.page  = '%!PS-Adobe-2.0\n\n'
-            self.page  = '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+            self.page  = '/' + self.font + ' findfont\n' + str(self.fontSize) + ' scalefont\nsetfont\n'
             self.page += '%%Pages: 1\n'
-        self.page += '%%Page: ' + str( pageNumber ) + ' ' + str( pageNumber ) + '\n'
+        self.page += '%%Page: ' + str(pageNumber) + ' ' + str(pageNumber) + '\n'
         self.isIncomplete = True # marker that page is complete.
     
     # Sets a page specific instruction.
     # param:  instruction - make sure it has been predefined in the head of the PS file.
     # return: 
-    def setInstruction( self, instruction ):
+    def setInstruction(self, instruction):
         self.page += instruction + '\n'
         
     # Writes a line of text to the location given. Origin (0,0) is at the
@@ -315,15 +315,15 @@ class PostscriptPage( Page ):
                 myFontSize = fontSize
             if bold:
                 self.page += f"/{self.font}-Bold findfont\n{str(myFontSize)} scalefont\nsetfont\n"
-        x_s = str( x * INCH )
-        y_s = str( y * INCH )
+        x_s = str(x * INCH)
+        y_s = str(y * INCH)
         # sanitize the line parens are special symbols in PS.
-        line = line.replace( '(', '\(' )
-        line = line.replace( ')', '\)' )
+        line = line.replace('(', '\(')
+        line = line.replace(')', '\)')
         self.page += f"newpath\n{x_s} {y_s} moveto\n({line}) show\n"
         if fontSize or bold:
             self.page += f"grestore\n"
-        return y - ( self.kerning / INCH ) # convert points to inches to keep y in sync
+        return y - (self.kerning / INCH) # convert points to inches to keep y in sync
     
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
@@ -335,7 +335,7 @@ class PostscriptPage( Page ):
     def __set_text_block__(self, lines:list, x:float, y:float, bold:bool=False) ->float:
         if bold:
             self.page += 'gsave\n'
-            self.page += '/' + self.font + '-Bold findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n'
+            self.page += '/' + self.font + '-Bold findfont\n' + str(self.fontSize) + ' scalefont\nsetfont\n'
         for line in lines:
             y = self.__set_text__(line, x, y)
         if bold:
@@ -345,7 +345,7 @@ class PostscriptPage( Page ):
     # Default method that stringifies object.
     # param:  
     # return: the postscript string of this object.
-    def __str__( self ):
+    def __str__(self):
         self.page += f"showpage"
         return self.page
 
