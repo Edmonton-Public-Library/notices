@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 ###########################################################################
 #
-#    Copyright (C) 2012  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2012 - 2023 Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 #
@@ -35,10 +35,33 @@
 ###########################################################################
 from datetime import date
 from page import PostscriptPage, PdfPage
-from page import POINTS
+from page import INCH
 from customer import Customer
+import sys
+try:
+    from reportlab.pdfgen.canvas import Canvas
+    from reportlab.lib.units import inch
+    from reportlab.lib.pagesizes import letter
+except:
+    errMsg = '''
+    Missing reportlib library. It's used to write PDFs. This application
+    was written and tested agains version 4.0.x. Install it locally using
+    the following sequence of commands.
+    0) python -m venv venv
+    1) . venv/bin/activate
+    2) pip install reportlab
+    or alternatively
+    1) python -m pip install reportlab
+    '''
+    print(f"*error:\n{errMsg}")
+    sys.exit(-1)
+
 
 SENTINAL = '#PICKUP_LIBRARY#'
+AUTHOR = 'Edmonton Public Library'
+WARNING_MSG = ["This file contains personal information about customers of Edmonton Public Library",
+    "This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed",
+    "permission from the management of EPL."]
 
 class NoticeFormatter:
     def __init__(self, fileBaseName:str, configs:dict, reportDate=None, debug=True):
@@ -62,12 +85,17 @@ class NoticeFormatter:
         self.kerning         = configs.get('kerning')  # points
         if not self.kerning:
             self.kerning = 11.0
-        self.blockSpacing    = self.kerning / POINTS   # inches
+        self.blockSpacing    = self.kerning / INCH     # inches
         self.leftMargin      = configs.get('leftMargin') # inches
         if not self.leftMargin:
             self.leftMargin = 0.875
         self.debug           = debug
         self.isPdfOutput     = False
+
+    # Outputs the notices to a single either PS or PDF file.
+    # Override is required in all subclasses.
+    def outputNotices(self):
+        pass
 
     # Sets the customer data to be printed to the final notices.
     # Formats customers into multi-sheet notices if necessary.
@@ -113,9 +141,6 @@ class NoticeFormatter:
                 self.customerNotices.append( page )
             customer.setPageTotal(customersPageCount)
 
-    def outputNotices(self):
-        pass
-
     # Creates additional pages of a customer notice.
     # param:  pageNumber - Integer, over-all page number used by PS and PDF to deliniate pages.
     # param:  Customer object - is valid and gets printed notices.
@@ -144,7 +169,7 @@ class NoticeFormatter:
         # Output all the items for a customer
         while ( customer.hasMoreItems() ):
             item = customer.getNextItem()
-            if page.isRoomForItem( item, yPos ) == False:
+            if not page.isRoomForItem( item, yPos ):
                 customer.pushItem( item )
                 return page # we have to make another page to fit it all.
             yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
@@ -163,8 +188,23 @@ class NoticeFormatter:
 
 class PdfFormatter(NoticeFormatter):
     def __init__(self, fileBaseName:str, configs:dict={'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}, reportDate=None, debug=True):
+        # This is a little convoluted, but create the PDF canvas object and add it to the 
+        # config dict. This doesn't disturb the PS code and doesn't need the implementor 
+        # to know anything about the details of how we do PDF.
+        pdfFile = f"{fileBaseName}.pdf"
+        self.canvas = Canvas(pdfFile, pagesize=letter)
+        self.canvas.setAuthor(f"Created for {AUTHOR}")
+        warning = ' '.join(WARNING_MSG)
+        self.canvas.setSubject(f"{warning}")
+        configs['canvas'] = self.canvas
         super().__init__(fileBaseName, configs=configs, reportDate=reportDate, debug=debug)
+        self.canvas.setTitle(f"Report for {self.today}")
         self.isPdfOutput = True
+
+    # Finalizes all the pages into a single PS file.
+    # return: None, but outputs the PDF file.
+    def outputNotices(self):
+        self.canvas.save()
 
     def __str__( self ):
         return 'PDF formatter: ' + self.fileName
@@ -174,18 +214,15 @@ class PostscriptFormatter(NoticeFormatter):
         super().__init__(fileBaseName, configs=configs, reportDate=reportDate, debug=debug)
 
     # Finalizes all the pages into a single PS file.
-    # param:  customerNotices - array of pages all notice pages.
     # return: 
     def outputNotices(self):
         myFile = open( self.fileBaseName + '.ps', 'w' )
         myFile.write( '%!PS-Adobe-3.0\n' )
         # Tell the PS file how many pages in total there will be
         myFile.write( '%%Pages: ' + str( len( self.customerNotices ) ) + '\n' )
-        myFile.write( '%% Created for Edmonton Public Library ' + str( self.today ) + '\n' )
-        WARNING_MSG  = "%% This file contains personal information about customers of Edmonton Public Library\n" 
-        WARNING_MSG += "%% This information is protected by EPL's FOIP policy, and must NOT be distributed with expressed\n" 
-        WARNING_MSG += "%% permission from the management of EPL.\n"
-        myFile.write( WARNING_MSG )
+        myFile.write(f"%% Created for {AUTHOR} {str( self.today )}\n")
+        for warning in WARNING_MSG:
+            myFile.write(f"%% {warning}\n")
         myFile.write( '%%EndComments\n' )
         myFile.write( '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n' )
         registrationMarkProcedureCall = ''
@@ -256,13 +293,31 @@ class PostscriptFormatter(NoticeFormatter):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    noticeFormatter = PostscriptFormatter('testFormatPage', configs={'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}, debug=True)
-    # noticeFormatter = PostscriptFormatter('testFormatPage', debug=True)
+    baseFileName = 'testformatpage'
+    configs = {'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}
+    ### Test Postscript notice formatter. 
+    noticeFormatter = PostscriptFormatter(f"{baseFileName}PS", configs, debug=True)
     noticeFormatter.setGlobalTitle( 'Test Page' )
-    noticeFormatter.setGlobalHeader( 'Our records indicate that the following amount(s) is outstanding by more than 15 days.  This may block your ability to borrow or to place holds or to renew materials online or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.' )
+    noticeFormatter.setGlobalHeader( 'Our records indicate that the following amount(s) is outstanding by more than 15 days.' )
+    noticeFormatter.setGlobalHeader( 'This may block your ability to borrow or to place holds or to renew materials online ' )
+    noticeFormatter.setGlobalHeader( 'or via our telephone renewal line. Please go to My Account at' )
+    noticeFormatter.setGlobalHeader( 'http://www.epl.ca/myaccount for full account details.' )
     c = Customer()
     customer = c.__create_customer__()
     noticeFormatter.setCustomer( customer )
     noticeFormatter.format()
     noticeFormatter.outputNotices()
     print('=>' + str(customer.getPagesPrinted()))
+    ### Test the PDF notice formatter. 
+    noticeFormatter = PdfFormatter(f"{baseFileName}PDF", configs, debug=True) 
+    noticeFormatter.setGlobalTitle( 'Test Page' )
+    noticeFormatter.setGlobalHeader( 'Our records indicate that the following amount(s) is outstanding by more than 15 days.' )
+    noticeFormatter.setGlobalHeader( 'This may block your ability to borrow or to place holds or to renew materials online ' )
+    noticeFormatter.setGlobalHeader( 'or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.' )
+    c = Customer()
+    customer = c.__create_customer__()
+    noticeFormatter.setCustomer( customer )
+    noticeFormatter.format()
+    noticeFormatter.outputNotices()
+    print('=>' + str(customer.getPagesPrinted()))
+    print(f"Test files:\n {baseFileName}PS.ps\n {baseFileName}PDF.pdf")

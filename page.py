@@ -56,6 +56,7 @@ class Page:
         # The first page is set to the bottom of the header, the second page will print just below the statement
         self.nextLine        = self.yDate
         self.isIncomplete    = True # marker that page has been finalized or not.
+        self.pageNumber      = pageNumber
 
     # Writes a line of text to the location given. Origin (0,0) is at the
     # bottom left of the page for both PS and PDF.
@@ -213,6 +214,11 @@ class PdfPage(Page):
             # Signal the shell there was a problem.
             sys.exit(-1)
         self.isIncomplete = True
+        # Pdf will wrap over the top of the page again if this is not set.
+        if self.pageNumber > 1:
+            self.canvas.showPage()
+        else:
+            self.__set_text__(f"Statement page {self.pageNumber}", self.xFooter, self.yFooter)
 
     # Writes a line of text to the location given. Origin (0,0) is at the
     # bottom left of the page for both PS and PDF.
@@ -249,6 +255,32 @@ class PdfPage(Page):
         for line in textBlock:
             y = self.__set_text__(line, x, y, bold)
         return y
+
+    # Signals that the caller is finished with the page.
+    # param:  None
+    # return: None, sets the super class' isIncomplete flag to false.
+    def finalize(self):
+        self.canvas.showPage()
+        self.isIncomplete = False
+
+    # Sets the statement page number message.
+    # param: text:str statement.
+    # return: None 
+    def setStatementCount( self, text:str ):
+        # Goofy, but PDF needs to set this whenever a new page is created.
+        # We overload this because I don't want to start in the rabbit hole
+        # of making pdf stories and paragraphs, I wan't to control the 
+        # placement in the PdfPage constructor and when the address is placed. 
+        # and change as little code in noticeformatter.py as possible. 
+        pass
+
+    # Returns the height of the block of text in inches.
+    # param:  list of lines of address text.
+    # return: None, but sets the self.nextLine in the super class.
+    def setAddress( self, textBlock:list ):
+        self.__set_text__(f"Statement page {self.pageNumber}", self.xFooter, self.yFooter)
+        # TODO: Do we need this var and how it is set??
+        self.nextLine = self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
     
 class PostscriptPage( Page ):
     # Configuration dict currently must contain font, fontsize, and kerning.
