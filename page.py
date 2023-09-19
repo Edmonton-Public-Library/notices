@@ -53,8 +53,6 @@ class Page:
         self.xAddressBlock   = 3.25    # inches
         self.yAddressBlock   = 1.75    # inches
         self.itemYMin        = 5.0     # inches
-        # The first page is set to the bottom of the header, the second page will print just below the statement
-        self.nextLine        = self.yDate
         self.isIncomplete    = True # marker that page has been finalized or not.
         self.pageNumber      = pageNumber
 
@@ -86,15 +84,15 @@ class Page:
 
     # Returns the height of the block of text in inches.
     # param:  list of lines of address text.
-    # return: None, but sets the self.nextLine in the super class.
+    # return: None.
     def setAddress(self, textBlock:list):
-        # TODO: Do we need this var and how it is set??
-        self.nextLine = self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
+        self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
         
     # Prints the argument text at the appropriate position
     # param:  text - single string.
+    # return: None
     def setStatementDate(self, text:str):
-        return self.__set_text__(text, self.xDate, self.yDate)
+        self.__set_text__(text, self.xDate, self.yDate)
     
     # Sets the 'page n of m' message.
     # param: text:str statement.
@@ -276,11 +274,10 @@ class PdfPage(Page):
 
     # Returns the height of the block of text in inches.
     # param:  list of lines of address text.
-    # return: None, but sets the self.nextLine in the super class.
+    # return: None.
     def setAddress(self, textBlock:list):
         self.__set_text__(f"Statement page {self.pageNumber}", self.xFooter, self.yFooter)
-        # TODO: Do we need this var and how it is set??
-        self.nextLine = self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
+        self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
     
 class PostscriptPage(Page):
     # Configuration dict currently must contain font, fontsize, and kerning.
