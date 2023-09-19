@@ -56,7 +56,6 @@ except:
     print(f"*error:\n{errMsg}")
     sys.exit(-1)
 
-
 SENTINAL = '#PICKUP_LIBRARY#'
 AUTHOR = 'Edmonton Public Library'
 WARNING_MSG = ["This file contains personal information about customers of Edmonton Public Library",
@@ -192,6 +191,7 @@ class PdfFormatter(NoticeFormatter):
         # config dict. This doesn't disturb the PS code and doesn't need the implementor 
         # to know anything about the details of how we do PDF.
         pdfFile = f"{fileBaseName}.pdf"
+        # reportlib default page size is A4 so change it to match Ghostscript's default: US Letter. 
         self.canvas = Canvas(pdfFile, pagesize=letter)
         self.canvas.setAuthor(f"Created for {AUTHOR}")
         warning = ' '.join(WARNING_MSG)
