@@ -47,7 +47,9 @@ import os
 # from reportreader import Notice # for base class calls.
 from reportreader import Hold, Bill, Overdue, PreReferral, PreLost
 from noticeformatter import PostscriptFormatter, PdfFormatter
-
+# Test to see if fonts are available to both Ghostscript and reportlab 
+# before adding to this dictionary.
+FONTS = {'courier': 'Courier', 'helvetica': 'Helvetica', 'times': 'Times'}
 LOCAL_BULLETIN_FOLDER = 'bulletins'
 LOCAL_PRINT_FOLDER    = 'print'
 
@@ -61,6 +63,8 @@ Usage:
 
     -b[n] --dollars=n - Produce bill notices using bill threshold 'n', as an integer
       dollar value, like '10' for $10.00.
+    --font='font_name' - Sets a different font for notices. Currently supported:
+         Helvetica, Times, and Courier. Can be extended in the future.
     -h - Produce hold notices. We don't send these by mail anymore.
     -i --ifile - Argument file shall contain the raw report data to consume.
     -o - Produce overdue report.
@@ -82,8 +86,10 @@ def main( argv ):
     billLimit  = 10.0
     isCustomerSuppressionDesired = False
     isPdfOutput = False
+    configs = {}
+    configs['font'] = 'Courier'
     try:
-        opts, args = getopt.getopt( argv, "ohb:i:rps", [ "dollars=", "ifile=", "pdf" ] )
+        opts, args = getopt.getopt( argv, "ohb:f:i:rps", [ "dollars=", "font=", "ifile=", "pdf" ] )
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -109,6 +115,10 @@ def main( argv ):
             isCustomerSuppressionDesired = True
         elif opt in ( "--pdf" ): # output pdf directly to the provided path.
             isPdfOutput = True
+        elif opt in ( "--font" ): # Change font in notices. Some care and testing should be used.
+            preferredFont = FONTS.get(arg.lower())
+            if preferredFont:
+                configs['font'] = preferredFont
         elif opt == '-x':
             usage()
             sys.exit()
@@ -142,9 +152,9 @@ def main( argv ):
         sys.exit()
     print(noticeReader)
     if isPdfOutput:
-        noticeFormatter = PdfFormatter(noticeReader.getOutFileBaseName())
+        noticeFormatter = PdfFormatter(noticeReader.getOutFileBaseName(), configs=configs)
     else:
-        noticeFormatter = PostscriptFormatter(noticeReader.getOutFileBaseName())
+        noticeFormatter = PostscriptFormatter(noticeReader.getOutFileBaseName(), configs=configs)
     if not noticeReader.parseReport(isCustomerSuppressionDesired):
         sys.stderr.write(f"*warning, not data parsed from {noticeType}\n")
     else:
