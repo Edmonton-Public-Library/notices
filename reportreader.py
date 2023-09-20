@@ -354,15 +354,6 @@ class Bill( Notice ):
         # .language ENGLISH
         # $<wednesday:u>, $<may:u> 31, 2023
 
-
-
-
-
-
-
-
-
-
         # .block
         #         Booker Tunerville
         #         JOELLE Tunerville-Bontemp
@@ -370,7 +361,6 @@ class Bill( Notice ):
         #         Edmonton, AB
         #         T6V 1W1
         # .endblock
-
 
         # .read /software/EDPL/Unicorn/Notices/blankmessage
 
@@ -432,8 +422,6 @@ class Bill( Notice ):
             elif line.startswith( '.email' ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
-        # for testing print out the customers and what you have set.
-        # print self.customers[0]
         return True
 
 ############## PreReferral ####################
