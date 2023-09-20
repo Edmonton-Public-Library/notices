@@ -34,7 +34,7 @@
 #          0.0 - Dev.
 ###########################################################################
 from datetime import date
-from page import PostscriptPage, PdfPage
+from page import PostScriptPage, PdfPage
 from page import INCH
 from customer import Customer
 import sys
@@ -63,7 +63,18 @@ WARNING_MSG = ["This file contains personal information about customers of Edmon
     "permission from the management of EPL."]
 
 class NoticeFormatter:
-    def __init__(self, fileBaseName:str, configs:dict, reportDate=None, debug=True):
+    # Base class constructor. NoticeFormatter is an abstract class. Use sub-classes 
+    # PostScriptFormatter and PdfFormatter.
+    # param: fileBaseName:str - File path and name of the output file type without '.ps' or '.pdf'. 
+    # param: configs:dict - Dictionary of minimal settings for outputting both PDF and PS. Values
+    #   the dictionary should contains are 'font', 'fontSize', 'kerning', and 'leftMargin'. 
+    # param: reportDate:str - This allows you to overwrite the default today's date. This is useful
+    #   when you are reprinting a report other than the one produced today. 
+    # param: debug:bool - Turns on debugging information. Default is 'True'. 
+    def __init__(self, fileBaseName:str, 
+      configs:dict={'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}, 
+      reportDate:str=None, debug:bool=True):
+        self.debug           = debug
         if reportDate:
             self.today       = reportDate
         else:
@@ -74,24 +85,24 @@ class NoticeFormatter:
         self.customers       = []
         self.customerNotices = []
         self.fileBaseName    = fileBaseName
-        if configs:
-            self.configDict  = configs
-        else:
-            self.configDict  = {}
+        self.configDict      = configs
         self.font            = self.configDict.get('font')
         if not self.font:
             self.font = 'Courier'
+            print(f"Using default font value '{self.font}'")
         self.fontSize        = self.configDict.get('fontSize') # points
         if not self.fontSize:
             self.fontSize = 10.0
+            print(f"Using default fontSize value '{self.fontSize}'")
         self.kerning         = self.configDict.get('kerning')  # points
         if not self.kerning:
             self.kerning = 11.0
+            print(f"Using default kerning value '{self.kerning}'")
         self.blockSpacing    = self.kerning / INCH     # inches
         self.leftMargin      = self.configDict.get('leftMargin') # inches
         if not self.leftMargin:
             self.leftMargin = 0.875
-        self.debug           = debug
+            print(f"Using default leftMargin value '{self.leftMargin}'")
         self.isPdfOutput     = False
 
     # Outputs the notices to a single either PS or PDF file.
@@ -102,45 +113,51 @@ class NoticeFormatter:
     # Sets the customer data to be printed to the final notices.
     # Formats customers into multi-sheet notices if necessary.
     # Customers must be valid customers.
-    def setCustomer( self, customer ):
-        self.customers.append( customer )
+    def setCustomer(self, customer):
+        self.customers.append(customer)
         
-    def setGlobalTitle( self, text ):
+    # Sets the title in the output file. Only one title is allowed
+    # param: text:str - Title text.  
+    def setGlobalTitle(self, text:str):
         self.title = text
+    
+    # Sets the header that all customers in this report will receive. 
+    # param: text:str - Title text which is put on a list. 
+    def setGlobalHeader(self, text:str):
+        self.header.append(text)
         
-    def setGlobalHeader( self, text ):
-        self.header.append( text )
-        
-    def setGlobalFooter( self, text ):
-        self.footer.append( text )
+    # Sets the footer that all customers in this report will receive. 
+    # param: text:str - Footer text which is put on a list.
+    def setGlobalFooter(self, text:str):
+        self.footer.append(text)
     
     # this method actually formats the customers data into pages.
-    def format( self ):
+    def format(self):
         # now we are ready to output pages.
         # customerNotices = []
         totalPageCount  = 1
         for customer in self.customers:
             customerPages = []
             # make the customers initial page - they all have at least one.
-            page = self.getAdditionalPage( totalPageCount, customer, True )
-            customerPages.append( page )
+            page = self.getAdditionalPage(totalPageCount, customer, True)
+            customerPages.append(page)
             totalPageCount += 1
             # but if the page was incomplete, create a new one and keep going until it is complete.
-            while( page.isIncomplete ):
-                page = self.getAdditionalPage( totalPageCount, customer )
-                customerPages.append( page )
+            while(page.isIncomplete):
+                page = self.getAdditionalPage(totalPageCount, customer)
+                customerPages.append(page)
                 totalPageCount += 1
             # add the statement page of pages notice
-            pageTotal           = len( customerPages )
+            pageTotal           = len(customerPages)
             customersPageNumber = 1
             customersPageCount  = 0
             for page in customerPages:
                 # now we know the total pages for a customer we can output the statement count
-                page.setStatementCount( 'Statement ' + str( customersPageNumber ) + ' of '+ str( pageTotal ) )
+                page.setStatementCount('Statement ' + str(customersPageNumber) + ' of '+ str(pageTotal))
                 customersPageNumber += 1
                 customersPageCount  += 1
                 # place the customer notice onto the list of notices.
-                self.customerNotices.append( page )
+                self.customerNotices.append(page)
             customer.setPageTotal(customersPageCount)
 
     # Creates additional pages of a customer notice.
@@ -148,49 +165,49 @@ class NoticeFormatter:
     # param:  Customer object - is valid and gets printed notices.
     # param:  isFirstPage - True if the call is for the first page of multi-page customer notice and False otherwise.
     # return: A Page object in valid Postscript.
-    def getAdditionalPage( self, pageNumber, customer, isFirstPage=False ):
+    def getAdditionalPage(self, pageNumber, customer, isFirstPage=False):
         if self.isPdfOutput:
-            page = PdfPage(pageNumber, self.configDict)
+            page = PdfPage(pageNumber, self.configDict, debug=self.debug)
         else:
-            page = PostscriptPage( pageNumber, self.configDict )
+            page = PostScriptPage(pageNumber, self.configDict, debug=self.debug)
         # every page gets these
-        page.setTitle( self.title )
-        page.setAddress( customer.getAddress() )
-        page.setStatementDate( 'Statement produced: ' + str( self.today ) ) 
+        page.setTitle(self.title)
+        page.setAddress(customer.getAddress())
+        page.setStatementDate('Statement produced: ' + str(self.today)) 
         yPos = page.yDate- self.blockSpacing
         # Each customer gets only one header message so set that now
         if isFirstPage:
             # This code replaces what ever is defined as a sentinal with the customer's pickup library.
             header = []
-            if len( customer.header ) > 0:
+            if len(customer.header) > 0:
                 for line in self.header:
-                    header.append( line.replace( SENTINAL, customer.header ) )
+                    header.append(line.replace(SENTINAL, customer.header))
             else:
                 header = self.header
-            if len( header ) > 0:
-                yPos = page.setItem( header, self.leftMargin, yPos ) - self.blockSpacing
+            if len(header) > 0:
+                yPos = page.setItem(header, self.leftMargin, yPos) - self.blockSpacing
         # Output all the items for a customer
-        while ( customer.hasMoreItems() ):
+        while (customer.hasMoreItems()):
             item = customer.getNextItem()
-            if not page.isRoomForItem( item, yPos ):
-                customer.pushItem( item )
+            if not page.isRoomForItem(item, yPos):
+                customer.pushItem(item)
                 return page # we have to make another page to fit it all.
-            yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
+            yPos = page.setItem(item, self.leftMargin, yPos) - self.blockSpacing
         # Add any footer the customer has, usually a bill summary.
         if customer.hasFooter():
             item = customer.getFooter()
-            if page.isRoomForItem( item, yPos ) == False:
-                customer.pushFooter( item )
+            if page.isRoomForItem(item, yPos) == False:
+                customer.pushFooter(item)
                 return page # we have to make another page to fit it all.
-            yPos = page.setItem( item, self.leftMargin, yPos ) - self.blockSpacing
+            yPos = page.setItem(item, self.leftMargin, yPos) - self.blockSpacing
         # Add the page's footer
-        if page.isRoomForItem( self.footer, yPos ):
-            page.setItem( self.footer, self.leftMargin, yPos ) # This sets the page complete flag.
+        if page.isRoomForItem(self.footer, yPos):
+            page.setItem(self.footer, self.leftMargin, yPos) # This sets the page complete flag.
             page.finalize()
         return page
 
 class PdfFormatter(NoticeFormatter):
-    def __init__(self, fileBaseName:str, configs:dict={'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}, reportDate=None, debug=True):
+    def __init__(self, fileBaseName:str, configs:dict={}, reportDate=None, debug=True):
         # This is a little convoluted, but create the PDF canvas object and add it to the 
         # config dict. This doesn't disturb the PS code and doesn't need the implementor 
         # to know anything about the details of how we do PDF.
@@ -210,87 +227,30 @@ class PdfFormatter(NoticeFormatter):
     def outputNotices(self):
         self.canvas.save()
 
-    def __str__( self ):
+    def __str__(self):
         return 'PDF formatter: ' + self.fileName
 
-class PostscriptFormatter(NoticeFormatter):
-    def __init__(self, fileBaseName:str, configs:dict={'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}, reportDate=None, debug=True):
+class PostScriptFormatter(NoticeFormatter):
+    def __init__(self, fileBaseName:str, configs:dict={}, reportDate=None, debug=True):
         super().__init__(fileBaseName, configs=configs, reportDate=reportDate, debug=debug)
 
     # Finalizes all the pages into a single PS file.
     # return: 
     def outputNotices(self):
-        myFile = open( self.fileBaseName + '.ps', 'w' )
-        myFile.write( '%!PS-Adobe-3.0\n' )
+        myFile = open(self.fileBaseName + '.ps', 'w')
+        myFile.write('%!PS-Adobe-3.0\n')
         # Tell the PS file how many pages in total there will be
-        myFile.write( '%%Pages: ' + str( len( self.customerNotices ) ) + '\n' )
-        myFile.write(f"%% Created for {AUTHOR} {str( self.today )}\n")
+        myFile.write('%%Pages: ' + str(len(self.customerNotices)) + '\n')
+        myFile.write(f"%% Created for {AUTHOR} {str(self.today)}\n")
         for warning in WARNING_MSG:
             myFile.write(f"%% {warning}\n")
-        myFile.write( '%%EndComments\n' )
-        myFile.write( '/' + self.font + ' findfont\n' + str( self.fontSize ) + ' scalefont\nsetfont\n' )
-        registrationMarkProcedureCall = ''
-        if self.debug == True:
-            registrationMarkProcedureCall = self.__add_registration_marks__( myFile )
+        myFile.write('%%EndComments\n')
+        myFile.write('/' + self.font + ' findfont\n' + str(self.fontSize) + ' scalefont\nsetfont\n')
         for page in self.customerNotices:
-            if self.debug == True:
-                page.setInstruction( registrationMarkProcedureCall )
-            myFile.write( str( page ) )  
+            myFile.write(str(page))  
         myFile.close()
-    
-    # Adds the fold lines as dashed lines, for registration comparison during debugging.        
-    def __add_registration_marks__( self, myFile ):
-        myFile.write( '/inch {\n\t72.0 mul\n} def\n' )
-        myFile.write( '/perfline {\n' )
-        myFile.write( '[6 3] 3 setdash\n' )
-        myFile.write( 'stroke\n' )
-        myFile.write( 'newpath\n' )
-        myFile.write( '} def\n' )
-        myFile.write( '/fineperfline {\n' )
-        myFile.write( 'gsave\n' )
-        myFile.write( '0.5 setgray\n' )
-        myFile.write( '[4 2] 0 setdash\n' )
-        myFile.write( 'stroke\n' )
-        myFile.write( 'grestore\n' )
-        myFile.write( 'newpath\n' )
-        myFile.write( '} def\n' )
-        myFile.write( '/pageborder{\n' )
-        # Outline of the page
-        myFile.write( '0.5 inch 0  inch moveto\n' )
-        myFile.write( '0.5 inch 11 inch lineto\n' )
-        myFile.write( '8   inch 0  inch moveto\n' )
-        myFile.write( '8   inch 11 inch lineto\n' )
-        myFile.write( '0.5 setlinewidth\n' )
-        myFile.write( 'perfline\n' )
-        # Lowest perferation line
-        myFile.write( '0   inch 3.09375 inch moveto\n' )
-        myFile.write( '8.5 inch 3.09375 inch lineto\n' )
-        myFile.write( '0.25 setlinewidth\n' )
-        myFile.write( 'fineperfline\n' )
-        # Fold line lower 1/3
-        myFile.write( '0   inch 3.5625 inch moveto\n' )
-        myFile.write( '8.5 inch 3.5625 inch lineto\n' )
-        myFile.write( 'perfline\n' )
-        # Fine perforation above fold lower fold line.
-        myFile.write( '0   inch 4.09375 inch moveto\n' )
-        myFile.write( '8.5 inch 4.09375 inch lineto\n' )
-        myFile.write( 'fineperfline\n' )
-        # Fine perferation below top fold line.
-        myFile.write( '0   inch 6.84375 inch moveto\n' )
-        myFile.write( '8.5 inch 6.84375 inch lineto\n' )
-        myFile.write( 'fineperfline\n' )
-        # Top fold line
-        myFile.write( '0   inch 7.275  inch moveto\n' )
-        myFile.write( '8.5 inch 7.275  inch lineto\n' )
-        myFile.write( 'perfline\n' )
-        # Top-most tear line perferation.
-        myFile.write( '0   inch 10.4375    inch moveto\n' )
-        myFile.write( '8.5 inch 10.4375    inch lineto\n' )
-        myFile.write( 'fineperfline\n' )
-        myFile.write( '} def\n' )
-        return 'pageborder\n'
         
-    def __str__( self ):
+    def __str__(self):
         return 'PostScript formatter: ' + self.fileName
     
 # Initial entry point for program
@@ -300,28 +260,28 @@ if __name__ == "__main__":
     baseFileName = 'testformatpage'
     configs = {'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}
     ### Test Postscript notice formatter. 
-    noticeFormatter = PostscriptFormatter(f"{baseFileName}PS", configs, debug=True)
-    noticeFormatter.setGlobalTitle( 'Test Page' )
-    noticeFormatter.setGlobalHeader( 'Our records indicate that the following amount(s) is outstanding by more than 15 days.' )
-    noticeFormatter.setGlobalHeader( 'This may block your ability to borrow or to place holds or to renew materials online ' )
-    noticeFormatter.setGlobalHeader( 'or via our telephone renewal line. Please go to My Account at' )
+    noticeFormatter = PostScriptFormatter(f"{baseFileName}PS", configs, debug=True)
+    noticeFormatter.setGlobalTitle(f"Test Page")
+    noticeFormatter.setGlobalHeader(f"Our records indicate that the following amount(s) is outstanding by more than 15 days.")
+    noticeFormatter.setGlobalHeader(f"This may block your ability to borrow or to place holds or to renew materials online ")
+    noticeFormatter.setGlobalHeader(f"or via our telephone renewal line. Please go to My Account at")
     # This is broken to fit - PDF just wraps long lines.
-    noticeFormatter.setGlobalHeader( 'http://www.epl.ca/myaccount for full account details.' )
+    noticeFormatter.setGlobalHeader(f"http://www.epl.ca/myaccount for full account details.")
     c = Customer()
     customer = c.__create_customer__()
-    noticeFormatter.setCustomer( customer )
+    noticeFormatter.setCustomer(customer)
     noticeFormatter.format()
     noticeFormatter.outputNotices()
     print('=>' + str(customer.getPagesPrinted()))
     ### Test the PDF notice formatter. 
     noticeFormatter = PdfFormatter(f"{baseFileName}PDF", configs, debug=True) 
-    noticeFormatter.setGlobalTitle( 'Test Page' )
-    noticeFormatter.setGlobalHeader( 'Our records indicate that the following amount(s) is outstanding by more than 15 days.' )
-    noticeFormatter.setGlobalHeader( 'This may block your ability to borrow or to place holds or to renew materials online ' )
-    noticeFormatter.setGlobalHeader( 'or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.' )
+    noticeFormatter.setGlobalTitle(f"Test Page")
+    noticeFormatter.setGlobalHeader(f"Our records indicate that the following amount(s) is outstanding by more than 15 days.")
+    noticeFormatter.setGlobalHeader(f"This may block your ability to borrow or to place holds or to renew materials online ")
+    noticeFormatter.setGlobalHeader(f"or via our telephone renewal line. Please go to My Account at http://www.epl.ca/myaccount for full account details.")
     c = Customer()
     customer = c.__create_customer__()
-    noticeFormatter.setCustomer( customer )
+    noticeFormatter.setCustomer(customer)
     noticeFormatter.format()
     noticeFormatter.outputNotices()
     print('=>' + str(customer.getPagesPrinted()))

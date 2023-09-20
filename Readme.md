@@ -1,11 +1,26 @@
+### Changes
+| **File** | **Changes** |
+|:---|:---|
+| notices.sh | Added `--pdf` switch. |
+| Makefile.remote | No change. |
+| report.sh | Added `--reprint` and `--code` switches for printing reports from dates other than today. |
+| notice.py | Added `--pdf` and `--font` switches. |
+| reportreader.py | Cleaned code and added `PdfNoticeFormatter`. |
+| bulletin.sh | No change. |
+| Makefile | Added `test` and `clean` rules. |
+| pstopdf.sh | Made optional if using `notice.py --pdf`. |
+| noticeformatter.py | No change. |
+| page.py | Now included debugging registration marks and `PdfPage`. |
+| customer.py | No change. |
+
 # Customer Notices
-'''August 22, 2023'''
+**August 22, 2023**
 Added argument handling for `report.sh` to allow it to process a specific report by sched ID. See `--reprint` and `--code` in `report.sh`.
 
 # TODO:
-* Change the code in the report generator to use the report date, not the current date.
+* Change the code in the report generator to use the report date, not the current date - Done.
 
-'''December 21, 2012'''
+**December 21, 2012**
 The process of running print notices is a series of steps, all of which have been automated with scripts in this directory.
 
 Normally the ILS team receives the notices in their inbox at ilsteam@epl.ca. The notices are produced each weekday moring and sent as an attachment by cron. To see if the job is scheduled type ```crontab -l```.
@@ -25,24 +40,31 @@ ils@epl-ils $ make # or make run
 5) Optional: email reports. You will need uuencode in the sharutils package to do this.
 
 ## Helper scripts
-- ```Makefile(.remote)``` - prepares the notices from the command line if required. Normally ```report.sh``` would be scheduled to do this.
-- ```report.sh``` - fetches the latest mail notice reports, translates them and 'scp's them to the 'reports' directory.
-- ```bulletin.sh``` - checks any reports in the 'report' directory for all the bulletins that are needed for the reports and 'scp's them to the 'bulletins' directory.
-- ```pstopdf.sh``` - converts any PS file in the 'print' directory into PDF.
+- ```Makefile(.remote)``` - **Required** prepares the notices from the command line if required. Normally ```report.sh``` would be scheduled to do this.
+- ```report.sh``` - **Required** fetches the latest mail notice reports, translates them and 'scp's them to the 'reports' directory.
+- ```bulletin.sh``` - **Required** checks any reports in the 'report' directory for all the bulletins that are needed for the reports and 'scp's them to the 'bulletins' directory.
+- ```pstopdf.sh``` - Optional, converts any PS file in the 'print' directory into PDF. Not required if `--pdf` switch is used on `notice.py`.
 
 ## Installation
+1) The current version uses `reportlab` pdf libraries with `pip install reportlab`. This can be done in a virtual environment.
+2) Clone the [git repo from here](https://github.com/Edmonton-Public-Library/notices).
+3) Configure the `Makefile` to suit your site.
+4) Test the application with `make test`.
+5) Type `make production`.
+
+
 The project is managed from the repos server, which at this time is ```ilsdev1.epl.ca```. The Makefile is used to install the scripts into ```ils@epl-ils.epl.ca:/home/ils/notices/bin```. The Makefile.remote is used to run the process by hand on ```ils@epl-ils.epl.ca``` should that be necessary for testing if the scripts need to be re-run. Re-running notices.sh is not dangerous but it will email the PDFs to the mail clerks so let them know before you run it, or just use the ```--test``` switch, and the PDFs will be sent to an alternate address of your choice. See ```notice.sh --help``` for more details.
 
 ## Dependencies
-The server where this runs as production needs '''ps2pdf14''' which is part of '''GhostScript'''.
+If you are generating PDFs from an intermediate PS files the server will need `ps2pdf` which is part of `GhostScript`. It can be installed as follows.
 ```bash
 $> sudo apt install ghostscript
 ```
 
-## Debugging Tips
-* Many of the python files contain unit tests to check their own integrity. You can run them with 'python <file>.py [-c]'.
+If you are generating PDFs directly, install [reportlab as described here](#installation).
 
-* Some useful tests already exist in the make file. 
+## Debugging Tips
+* Many of the python files contain unit tests to check their own integrity. You can run them with 'python <file>.py [-c]', `make test` from the cloned repo directory. 
 
 * REMEMBER: when debugging esp. bills, the script will withhold bills that are less than $10.00. This can be confusing because
 The sirsi report contains all bills - the results from notice.py will be different. 
@@ -60,18 +82,3 @@ New notices in effect **April 26**. There _may_ be a requirement to conditionall
 1) Create '**Overdue Reminder - 8 Days Print**' which uses 'overdue8daysprint' and 'eclosing8daysprint' as notice text.
 2) Create '**PreLost Overdue Notice - HTG Print**' Which uses 'prelostoverdue1stprint' and 'prelostoverdueclosingprint'.
 3) Retire '**Overdue Notices - Weekdays**' which used 'stoverdue.print' and 'eplmailclosing'.
-
-### Changes
-| **File** | **Changes** |
-|:---|:---|
-| notices.sh | Modify overdues, add pre-lost. See pre-referral as template. |
-| Makefile.remote | Add ```PRE_LOST``` handling. ```ARGS_OVERD``` becomes 8 day notice. |
-| report.sh | Modify Overdues, add new section for Pre-Lost. |
-| notice.py | Add new report and update overdue code. See pre-referral as template. |
-| reportreader.py | Add new report, change overdues. |
-| bulletin.sh | no change |
-| Makefile | no change |
-| pstopdf.sh | no change |
-| noticeformatter.py | no change |
-| page.py | no change |
-| customer.py | no change |
