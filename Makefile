@@ -23,8 +23,24 @@ REMOTE_DIR=/home/ils/notices
 REMOTE_BIN_DIR=/home/ils/notices/bin
 CODE_FILES=notice.py customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh notices.sh
 HELPER_FILES=Readme.md Makefile.remote
+PYTHON=../venv/bin/python
+PS2PDF=/usr/bin/ps2pdf
+
+.PHONY: clean production test
 
 production: ${CODE_FILES} ${HELPER_FILES}
 	scp ${CODE_FILES} ${SERVER}:${REMOTE_BIN_DIR}
 	scp Readme.md ${SERVER}:${REMOTE_DIR}
 	scp Makefile.remote ${SERVER}:${REMOTE_DIR}/Makefile
+
+test: clean page.tst reportreader.tst
+	${PYTHON} page.py 
+	${PYTHON} noticeformatter.py 
+	${PYTHON} reportreader.py 
+	${PYTHON} customer.py
+	-${PS2PDF} testpagePS.ps testpagePS.pdf
+	-${PS2PDF} testformatpagePS.ps testformatpagePS.pdf
+
+clean:
+	-rm *.pdf
+	-rm *.ps

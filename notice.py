@@ -45,39 +45,51 @@ import sys
 import getopt
 import os
 # from reportreader import Notice # for base class calls.
-from reportreader import Hold
-from reportreader import Bill
-from reportreader import Overdue
-from reportreader import PreReferral
-from reportreader import PreLost
-from noticeformatter import PostscriptFormatter
-
+from reportreader import Hold, Bill, Overdue, PreReferral, PreLost
+from noticeformatter import PostScriptFormatter, PdfFormatter
+# Test to see if fonts are available to both Ghostscript and reportlab 
+# before adding to this dictionary.
+FONTS = {'courier': 'Courier', 'helvetica': 'Helvetica', 'times': 'Times'}
 LOCAL_BULLETIN_FOLDER = 'bulletins'
 LOCAL_PRINT_FOLDER    = 'print'
 
 def usage():
-    sys.stderr.write( 'Usage:\n' )
-    sys.stderr.write( '  notice.py [-b[10]hors] -i <inputfile>\n' )
-    sys.stderr.write( '  Processes Symphony reports into printable notice format\n' )
-    sys.stderr.write( '  -b[n] - Produce bill notices using bill threshold \'n\', as an integer\n' )
-    sys.stderr.write( '  dollar value, like \'10\' for $10.00.\n' )
-    sys.stderr.write( '  -h - Produce hold notices. We don\'t send these by mail anymore.\n' )
-    sys.stderr.write( '  -i --ifile - Argument file shall contain the raw report data to consume.\n' )
-    sys.stderr.write( '  -o - Produce overdue report.\n' )
-    sys.stderr.write( '  -p - Produce pre-lost report.\n' )
-    sys.stderr.write( '  -r - Produce pre-referral report.\n' )
-    sys.stderr.write( '  -s - Turns the \'isCustomerSuppressionDesired\' flag on.\n' )
-    sys.stderr.write( '  In this mode customers with malformed mailing addresses are not printed\n' )
-    sys.stderr.write( '  since it just costs to print and mail, just to be returned by the post office.\n' )
+    message = """
+Usage:
+    
+  notice.py [-b[10]hors] -i <inputfile>
+  Processes Symphony reports into printable notice format. Currently 
+  notices are created in PostScript (PS) and then converted to PDF.
+
+    -b[n] --dollars=n - Produce bill notices using bill threshold 'n', as an integer
+      dollar value, like '10' for $10.00.
+    --font='font_name' - Sets a different font for notices. Currently supported:
+         Helvetica, Times, and Courier. Can be extended in the future.
+    -h - Produce hold notices. We don't send these by mail anymore.
+    -i --ifile - Argument file shall contain the raw report data to consume.
+    -o - Produce overdue report.
+    -p - Produce pre-lost report.
+    -r - Produce pre-referral report.
+    -s - Turns the 'isCustomerSuppressionDesired' flag on.
+    --pdf - Output notice as a PDF directly (skip the PS conversion).
+    -x - Outputs this usage message.
+  
+  In this mode customers with malformed mailing addresses are not printed
+  since it just costs to print and mail, just to be returned by the post office.
+    """
+    print(f"{message}")
     
 # Take valid command line arguments -b'n', -h, -i, -o, -r, -p, and -s.
-def main( argv ):
+def main(argv):
     inputFile  = ''
     noticeType = 'INIT'
     billLimit  = 10.0
     isCustomerSuppressionDesired = False
+    isPdfOutput = False
+    configs = {}
+    configs['font'] = 'Courier'
     try:
-        opts, args = getopt.getopt( argv, "ohb:i:rps", [ "dollars=", "ifile=" ] )
+        opts, args = getopt.getopt(argv, "ohb:f:i:rps", [ "dollars=", "font=", "ifile=", "pdf" ])
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -90,10 +102,10 @@ def main( argv ):
         elif opt == '-r':
             # pre-referral; notices that customers are about to be sent to collections.
             noticeType = 'REFR' # pre-referral.
-        elif opt in ( "-b", "--dollars" ): # bills
-            billLimit = float( arg )
+        elif opt in ("-b", "--dollars"): # bills
+            billLimit = float(arg)
             noticeType = 'BILL' # bills.
-        elif opt in ( "-i", "--ifile" ):
+        elif opt in ("-i", "--ifile"):
             inputFile = arg
         elif opt == '-p':
             # pre-lost; notices that charges are old enough to be thought of as LOST and a bill may be in their future.
@@ -101,40 +113,50 @@ def main( argv ):
         elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
-    print('Input file is = ', inputFile)
-    sys.stderr.write('running file ' + inputFile + '\n')
-    if os.path.isfile( inputFile ) == False:
-        sys.stderr.write( 'error: input report file ' + inputFile + ' does not exist. Did the report run?\n' )
-        sys.exit()
-    if os.path.getsize( inputFile ) == 0:
-        sys.stderr.write( 'error: input report file ' + inputFile + ' is empty. Did the report run?\n' )
+        elif opt in ("--pdf"): # output pdf directly to the provided path.
+            isPdfOutput = True
+        elif opt in ("--font"): # Change font in notices. Some care and testing should be used.
+            preferredFont = FONTS.get(arg.lower())
+            if preferredFont:
+                configs['font'] = preferredFont
+        elif opt == '-x':
+            usage()
+            sys.exit()
+    print(f"Input file is = '{inputFile}'")
+    if not os.path.isfile(inputFile) or os.path.getsize(inputFile) == 0:
+        sys.stderr.write(f"error: report {inputFile} not specified, doesn't exist, or is empty. Were the report have snail-mail customers?\n")
         sys.exit()
     
     # basic checks done, let's get down to business.
     noticeReader = None
     if noticeType == 'HOLD':
-        noticeReader = Hold( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
+        noticeReader = Hold(inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER)
     elif noticeType == 'BILL':
-        noticeReader = Bill( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER, billLimit )
+        noticeReader = Bill(inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER, billLimit)
     elif noticeType == 'ODUE':
-        noticeReader = Overdue( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
+        noticeReader = Overdue(inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER)
     elif noticeType == 'REFR':
-        noticeReader = PreReferral( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
+        noticeReader = PreReferral(inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER)
     elif noticeType == 'PLOS':
-        noticeReader = PreLost( inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER )
+        noticeReader = PreLost(inputFile, LOCAL_BULLETIN_FOLDER, LOCAL_PRINT_FOLDER)
     else:
-        sys.stderr.write( 'nothing to do; notice type not selected\n' )
+        sys.stderr.write(f"nothing to do; notice type not selected\n")
+        usage()
+        sys.exit()
+    if not noticeReader:
         usage()
         sys.exit()
     print(noticeReader)
-    psFormatter = PostscriptFormatter( noticeReader.getOutFileBaseName() )
-    noticeReader.setOutputFormat( psFormatter )
-    if noticeReader.parseReport( isCustomerSuppressionDesired ) == False:
-        sys.stderr.write( 'error: unable to parse report\n' )
-        sys.exit()
-    noticeReader.writeToFile()
-    noticeReader.outputReport()
+    if isPdfOutput:
+        noticeFormatter = PdfFormatter(noticeReader.getOutFileBaseName(), configs=configs)
+    else:
+        noticeFormatter = PostScriptFormatter(noticeReader.getOutFileBaseName(), configs=configs)
+    if not noticeReader.parseReport(isCustomerSuppressionDesired):
+        sys.stderr.write(f"*warning, not data parsed from {noticeType}\n")
+    else:
+        noticeReader.writeToFile(noticeFormatter)
+    noticeReader.reportResults()
 
 # Initial entry point for program
 if __name__ == "__main__":
-    main( sys.argv[1:] )
+    main(sys.argv[1:])

@@ -1,0 +1,194 @@
+.folddata
+.report
+.col 5l,1,73
+.language ENGLISH
+$<wednesday:u>, $<may:u> 31, 2023
+
+
+
+
+
+
+
+
+
+
+.block
+          Be Kinder Lee
+          14220 23 St NW
+          Edmonton, AB
+          T5Y 1N1
+.endblock
+
+
+.read /software/EDPL/Unicorn/Notices/blankmessage
+
+.block
+  1   The butterfly girl : a novel / Rene Denfeld.
+      Denfeld, Rene.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $27.77
+.endblock
+
+.block
+  2   The noise / James Patterson and J. D. Barker.
+      Patterson, James, 1947-
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $28.65
+.endblock
+
+.block
+  3   The unseen / Heather Graham.
+      Graham, Heather.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $27.95
+.endblock
+
+.block
+      =======================================================================
+
+                                 $<total_fines_bills:3>    $84.37
+.endblock
+
+.block
+.read /software/EDPL/Unicorn/Notices/eclosing
+.endblock
+
+.report
+.col 5l,1,73
+.language ENGLISH
+$<wednesday:u>, $<may:u> 31, 2023
+
+
+
+
+
+
+
+
+
+
+.block
+          Barn A Burner
+          15005 60 Street NW
+          Edmonton, AB
+          T5A 1Z6
+.endblock
+
+
+.read /software/EDPL/Unicorn/Notices/blankmessage
+
+.block
+  1   The lessons of history / by Will and Ariel Durant.
+      Durant, Will, 1885-1981.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $25.60
+.endblock
+
+.block
+      =======================================================================
+
+                                 $<total_fines_bills:3>    $25.60
+.endblock
+
+.block
+.read /software/EDPL/Unicorn/Notices/eclosing
+.endblock
+
+.report
+.col 5l,1,73
+.language ENGLISH
+$<wednesday:u>, $<may:u> 31, 2023
+
+
+
+
+
+
+
+
+
+
+.block
+          Warren Beaty
+          111-11636 102 Avenue NW
+          Edmonton, AB
+          T5K 0R4
+.endblock
+
+
+.read /software/EDPL/Unicorn/Notices/blankmessage
+
+.block
+  1   Big girls go potty / written and illustrated by Marianne Richmond. --.
+      Richmond, Marianne.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $16.84
+.endblock
+
+.block
+  2   COMICBOOK.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>     $4.00
+.endblock
+
+.block
+  3   COMICBOOK.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>     $4.00
+.endblock
+
+.block
+  4   Criss Cross / James Patterson.
+      Patterson, James, 1947-
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $29.83
+.endblock
+
+.block
+  5   Lone star law / edited by Robert J. Randisi.
+      Randisi, Robert J.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>     $7.48
+.endblock
+
+.block
+  6   Puppies.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>     $6.89
+.endblock
+
+.block
+  7   Deadly cross / James Patterson.
+      Patterson, James, 1947-
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $30.42
+.endblock
+
+.block
+  8   The empty land : a novel / Louis L'Amour ; postscript by Beau L'Amour.
+      L'Amour, Louis, 1908-1988.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>     $6.61
+.endblock
+
+.block
+  9   Fear no evil / James Patterson.
+      Patterson, James, 1947-
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $29.83
+.endblock
+
+.block
+ 10   Baby animals first shapes book / Alexandra Claire.
+      Claire, Alexandra.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>     $8.64
+.endblock
+
+.block
+ 11   Catch Kid Curry [large print] / W. R. Garwood.
+      Garwood, W. R. (William R.)
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>    $53.08
+.endblock
+
+.block
+ 12   COMICBOOK.
+      $<date_billed:3>5/16/2023    $<bill_reason:3>LOST         $<amt_due:3>     $4.00
+.endblock
+
+.block
+      =======================================================================
+
+                                 $<total_fines_bills:3>   $201.62
+.endblock
+
+.block
+.read /software/EDPL/Unicorn/Notices/eclosing
+.endblock

@@ -36,8 +36,9 @@ export PATH=$PATH:/usr/bin:/bin:/home/ils/notices/bin
 export PYTHONPATH=${LOCAL_BIN_DIR}
 export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
-# Updated mail requires -r 'ils@epl.ca' not -a 'From:ils@ils-epl.epl.ca'
-VERSION="1.03.02"
+IS_PDF=false
+# Added --pdf switch.
+VERSION="1.04.00"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
 
@@ -64,15 +65,17 @@ logit()
 usage()
 {
     cat << EOFU!
- Usage: $0 [-h -x -t -v]
+ Usage: $0 [options]
   Creates the notice reports that are snail-mailed to customers by
   the mail clerks.
    
-  Flags:
+  Options:
     -h, -help, --help - prints this help message and exits.
+    -p, -pdf, --pdf - Prints output notices to PDF directly.
     -t, -test, --test[email@example.com] - Run notices in test mode, and
       send results to an email address of your choice instead of the mail clerks.
       Example: $0 --test="ils.account@epl.ca"
+    -v, -version, --version - Prints the version number.
     -x, -xhelp, --xhelp - prints this help message and exits
 	  (default action) from a given date.
              
@@ -84,7 +87,7 @@ EOFU!
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -l "help,test:,version,xhelp" -o "ht:vx" -a -- "$@")
+options=$(getopt -l "help,pdf,test:,version,xhelp" -o "hpt:vx" -a -- "$@")
 if [ $? != 0 ] ; then echo "Failed to parse options...exiting." >&2 ; exit 1 ; fi
 # set --:
 # If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters
@@ -98,6 +101,9 @@ do
         usage
         exit 0
         ;;
+    -p|--pdf)
+        export IS_PDF=true
+		logit "=== PDF MODE"
 	-t|--test)
         export IS_TEST=true
         shift
@@ -158,20 +164,26 @@ logit " "
 ${LOCAL_BIN_DIR}/report.sh   # get today's reports.
 logit " "
 ${LOCAL_BIN_DIR}/bulletin.sh # get Notices for today.
+xtra_args=''
+if [ "$IS_PDF" == true ]; then
+    xtra_args='--pdf'
+fi
 logit "DRIVER SCRIPT: compiling bill notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS}  >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} "$xtra_args" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling overdue notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} "$xtra_args" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-referral notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL}  >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} "$xtra_args" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-lost notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST}  >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} "$xtra_args" >>${LOG_FILE}
 logit " "
-${LOCAL_BIN_DIR}/pstopdf.sh
-logit " "
+if [ "$IS_PDF" == false ]; then
+    ${LOCAL_BIN_DIR}/pstopdf.sh
+    logit " "
+fi
 cd ${PRINT_DIR} || { logit "missing $PRINT_DIR, exiting."; exit 1; }
 RUN_DATE=$(date +'%Y-%m-%d')
 for name in *.pdf

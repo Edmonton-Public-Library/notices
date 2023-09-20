@@ -1,0 +1,67 @@
+.folddata
+.report
+.email jackyo@gmail.com
+.col 5l,1,73
+.language ENGLISH
+Tuesday, August 22, 2017
+.block
+Jacqueline Onasis
+403-12345 Saskatchewan Drive NW
+Edmonton, AB
+T6E 4R9
+.endblock
+.read /s/sirsi/Unicorn/Notices/blankmessage
+.block
+1   Vikings. Season 4, Volume 1 [videorecording].
+Fimmel, Travis, 1979-
+date billed:8/8/2017     bill reason:OVERDUE      amount due:     $5.00
+.endblock
+.block
+2   Outlander. Season two [videorecording].
+Balfe, Caitriona.
+date billed:8/8/2017     bill reason:OVERDUE      amount due:     $5.00
+.endblock
+.block
+=======================================================================
+TOTAL FINES/FEES AND UNPAID BILLS:    $10.00
+.endblock
+.block
+.read /s/sirsi/Unicorn/Notices/prereferralbillclosing
+.endblock
+.endemail
+.report
+.col 5l,1,73
+.language ENGLISH
+Tuesday, August 22, 2017
+.block
+Some customer
+25-1655 49 Street NW
+Edmonton, AB
+T6L 2R8
+.endblock
+.read /s/sirsi/Unicorn/Notices/blankmessage
+.block
+1   Grammy nominees. 2015 [sound recording].
+date billed:8/8/2017     bill reason:LOST         amount due:    $24.49
+.endblock
+.block
+2   Big Hero 6 [videorecording] / directors, Don Hall, Chris Williams.
+Hall, Don.
+date billed:8/8/2017     bill reason:LOST         amount due:    $30.49
+.endblock
+.block
+3   Tony Hawk's pro skater 5 [game] / Robomodo.
+Hawk, Tony.
+date billed:8/8/2017     bill reason:LOST         amount due:    $55.99
+.endblock
+.block
+4   Grammy nominees. 2017 [sound recording].
+date billed:8/8/2017     bill reason:LOST         amount due:    $22.24
+.endblock
+.block
+=======================================================================
+TOTAL FINES/FEES AND UNPAID BILLS:   $133.21
+.endblock
+.block
+.read /s/sirsi/Unicorn/Notices/prereferralbillclosing
+.endblock

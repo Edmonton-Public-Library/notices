@@ -1,0 +1,21 @@
+.folddata
+.report
+.col 5l,1,73
+.language ENGLISH
+$<wednesday:u>, $<april:u> 13, 2022
+<blank lines>
+.block
+            Arbry Adult
+            1234 5678 Saskatchewan DR NW
+            Edmonton, AB
+            T6T 4R7
+.endblock
+<blank lines>
+.read /software/EDPL/Unicorn/Notices/prelostoverdue1stprint
+<blank lines>
+1  $<call_num:3>OSM                                       $<id:3U>31221317323405  
+        The Thursday murder club / Richard Osman.
+        Osman, Richard, 1970-
+        $<due:3>4/5/2022,23:59      $<price:3>$28.65    
+<blank lines>
+.read /software/EDPL/Unicorn/Notices/prelostoverdueclosingprint
