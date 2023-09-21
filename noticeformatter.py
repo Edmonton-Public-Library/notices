@@ -75,10 +75,11 @@ class NoticeFormatter:
       configs:dict={'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}, 
       reportDate:str=None, debug:bool=True):
         self.debug           = debug
+        self.todaysDate      = date.today().strftime("%A, %B %d, %Y")
         if reportDate:
-            self.today       = reportDate
+            self.reportDate  = reportDate
         else:
-            self.today       = date.today().strftime("%A, %B %d, %Y")
+            self.reportDate  = self.todaysDate
         self.title           = '' # text string for title
         self.header          = [] # text string for header
         self.footer          = [] # text strings for footer
@@ -173,7 +174,7 @@ class NoticeFormatter:
         # every page gets these
         page.setTitle(self.title)
         page.setAddress(customer.getAddress())
-        page.setStatementDate('Statement produced: ' + str(self.today)) 
+        page.setStatementDate('Statement produced: ' + str(self.reportDate)) 
         yPos = page.yDate- self.blockSpacing
         # Each customer gets only one header message so set that now
         if isFirstPage:
@@ -219,7 +220,7 @@ class PdfFormatter(NoticeFormatter):
         self.canvas.setSubject(f"{warning}")
         configs['canvas'] = self.canvas
         super().__init__(fileBaseName, configs=configs, reportDate=reportDate, debug=debug)
-        self.canvas.setTitle(f"Report for {self.today}")
+        self.canvas.setTitle(f"Report for {self.reportDate}")
         self.isPdfOutput = True
 
     # Finalizes all the pages into a single PS file.
@@ -241,7 +242,7 @@ class PostScriptFormatter(NoticeFormatter):
         myFile.write('%!PS-Adobe-3.0\n')
         # Tell the PS file how many pages in total there will be
         myFile.write('%%Pages: ' + str(len(self.customerNotices)) + '\n')
-        myFile.write(f"%% Created for {AUTHOR} {str(self.today)}\n")
+        myFile.write(f"%% Created for {AUTHOR} {str(self.todaysDate)}\n")
         for warning in WARNING_MSG:
             myFile.write(f"%% {warning}\n")
         myFile.write('%%EndComments\n')

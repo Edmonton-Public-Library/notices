@@ -35,18 +35,19 @@ import sys # for exit
 from customer import Customer
 from datetime import date
 from noticeformatter import NoticeFormatter
+import re
 
 ## Global name of the file that contains broken snail-mail addresses.
 UNMAILABLE_REPORT_FILE = 'unmailable_customers.txt'
+DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
 ############## Base Class ####################
 class Notice:
     def __init__( self, inFile, bulletinDir, printDir, outFilePrefix ):
         self.today            = date.today()
-        self.humanDate        = self.today.strftime("%A, %B %d, %Y")
+        self.reportDate       = ''
         self.iFileName        = inFile
         self.oFileName        = printDir + os.sep + outFilePrefix + str( self.today ) # If we see this file the subclass screwed up.
-        self.statementDate    = 'Statement produced: ' + self.humanDate
         self.bulletinDir      = bulletinDir # path of the open bulletin
         self.printDir         = printDir
         self.startNoticePath  = ''
@@ -56,14 +57,18 @@ class Notice:
         self.pagesPrinted     = 0
         self.customersWithBadAddress = []
 
+    def getReportDate(self):
+        return self.reportDate
+
     # Prints out key information about the running report such as total pages printed
     # number of customers mailed and outputs a list of customers that need to have
     # street addresses corrected.
     # param:
     # return:
     def reportResults( self ):
-        print('=========')
-        print('notice report for ' + self.iFileName + ' for ' + self.humanDate)
+        dateToday = self.today.strftime("%A, %B %d, %Y")
+        print(f"========= {dateToday}")
+        print(f"notice: {self.iFileName} report date: {self.reportDate}")
         # output the results
         print('total pages printed: %d' % self.pagesPrinted)
         print('customers mailed:    %d' % len( self.customers ))
@@ -96,8 +101,27 @@ class Notice:
         for customer in self.customers:
             self.pagesPrinted += customer.getPagesPrinted()
 
+    # Returns the base path and name of the final output file 
+    # For example; /foo/bar for /foo/bar.ps or /foo/bar.pdf. 
     def getOutFileBaseName( self ):
         return self.oFileName
+
+    # Takes a string, determines if it matches a long date and returns it.
+    # Symphony uses two types of date strings in reports; 
+    # $<wednesday:u>, $<april:u> 13, 2022
+    # and 
+    # Friday, December 7, 2012
+    # param: report line string.
+    # return: the cleaned date from the string or None of the string doesn't have a long date.
+    def __get_report_date__(self, rpt_lines:list) ->str:
+        for line in rpt_lines:
+            if len(line.split(', ')) == 3:
+                for day in DAYS:
+                    if day in line.lower():
+                        line = re.sub(r'(\$<)', "", line)
+                        return re.sub(r'(:u>)', "", line).title().rstrip()
+        print(f"I get called but don't find anything in this report!")
+        return ''
 
     def __get_lines__( self ):
         # read in the report and parse it.
@@ -105,6 +129,7 @@ class Notice:
         # print 'reading reading reading .... '
         lines = iFile.readlines()
         iFile.close()
+        self.reportDate = self.__get_report_date__(lines)
         # reverse the order so we just use
         lines.reverse()
         return lines

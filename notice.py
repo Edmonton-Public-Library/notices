@@ -63,6 +63,8 @@ Usage:
 
     -b[n] --dollars=n - Produce bill notices using bill threshold 'n', as an integer
       dollar value, like '10' for $10.00.
+    --debug - Turn on debugging information. Adds registration marks to reports 
+         so don't use this switch in production.
     --font='font_name' - Sets a different font for notices. Currently supported:
          Helvetica, Times, and Courier. Can be extended in the future.
     -h - Produce hold notices. We don't send these by mail anymore.
@@ -79,7 +81,7 @@ Usage:
     """
     print(f"{message}")
     
-# Take valid command line arguments -b'n', -h, -i, -o, -r, -p, and -s.
+# Take valid command line arguments --debug -b'n', --font='font_name', -h, -i, -o, -p, --pdf, -r, -s, and -x.
 def main(argv):
     inputFile  = ''
     noticeType = 'INIT'
@@ -88,6 +90,7 @@ def main(argv):
     isPdfOutput = False
     configs = {}
     configs['font'] = 'Courier'
+    debugMode = False
     try:
         opts, args = getopt.getopt(argv, "ohb:f:i:rps", [ "dollars=", "font=", "ifile=", "pdf" ])
     except getopt.GetoptError:
@@ -96,6 +99,8 @@ def main(argv):
     for opt, arg in opts:
         if opt == '-h':
             noticeType = 'HOLD' # holds.
+        elif opt == '--debug':
+            debugMode = True
         elif opt == '-o':
             # overdues
             noticeType = 'ODUE' # overdues.
@@ -147,10 +152,12 @@ def main(argv):
         usage()
         sys.exit()
     print(noticeReader)
+    fPrefix = noticeReader.getOutFileBaseName()
+    rptDate = noticeReader.getReportDate()
     if isPdfOutput:
-        noticeFormatter = PdfFormatter(noticeReader.getOutFileBaseName(), configs=configs)
+        noticeFormatter = PdfFormatter(fileBaseName=fPrefix, configs=configs, reportDate=rptDate, debug=debugMode)
     else:
-        noticeFormatter = PostScriptFormatter(noticeReader.getOutFileBaseName(), configs=configs)
+        noticeFormatter = PostScriptFormatter(fileBaseName=fPrefix, configs=configs, reportDate=rptDate, debug=debugMode)
     if not noticeReader.parseReport(isCustomerSuppressionDesired):
         sys.stderr.write(f"*warning, not data parsed from {noticeType}\n")
     else:
