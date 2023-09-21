@@ -72,7 +72,7 @@ class NoticeFormatter:
     #   when you are reprinting a report other than the one produced today. 
     # param: debug:bool - Turns on debugging information. Default is 'True'. 
     def __init__(self, fileBaseName:str, 
-      configs:dict={'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}, 
+      configs:dict={'font': 'Courier', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875}, 
       reportDate:str=None, debug:bool=True):
         self.debug           = debug
         self.todaysDate      = date.today().strftime("%A, %B %d, %Y")
@@ -91,20 +91,24 @@ class NoticeFormatter:
         if not self.font:
             self.font = 'Courier'
             print(f"Using default font value '{self.font}'")
-        self.fontSize        = self.configDict.get('fontSize') # points
+            self.configDict['font'] = self.font
+        self.fontSize = self.configDict.get('fontSize') # points
         if not self.fontSize:
             self.fontSize = 10.0
             print(f"Using default fontSize value '{self.fontSize}'")
-        self.kerning         = self.configDict.get('kerning')  # points
+            self.configDict['fontSize'] = self.fontSize
+        self.kerning = self.configDict.get('kerning')  # points
         if not self.kerning:
             self.kerning = 11.0
             print(f"Using default kerning value '{self.kerning}'")
-        self.blockSpacing    = self.kerning / INCH     # inches
-        self.leftMargin      = self.configDict.get('leftMargin') # inches
+            self.configDict['kerning'] = self.kerning
+        self.blockSpacing = self.kerning / INCH     # inches
+        self.leftMargin   = self.configDict.get('leftMargin') # inches
         if not self.leftMargin:
             self.leftMargin = 0.875
             print(f"Using default leftMargin value '{self.leftMargin}'")
-        self.isPdfOutput     = False
+            self.configDict['leftMargin'] = self.leftMargin
+        self.isPdfOutput = False
 
     # Outputs the notices to a single either PS or PDF file.
     # Override is required in all subclasses.
@@ -136,18 +140,18 @@ class NoticeFormatter:
     def format(self):
         # now we are ready to output pages.
         # customerNotices = []
-        totalPageCount  = 1
+        sheetNumber  = 1
         for customer in self.customers:
             customerPages = []
             # make the customers initial page - they all have at least one.
-            page = self.getAdditionalPage(totalPageCount, customer, True)
+            page = self.getAdditionalPage(sheetNumber, customer, True)
             customerPages.append(page)
-            totalPageCount += 1
+            sheetNumber += 1
             # but if the page was incomplete, create a new one and keep going until it is complete.
             while(page.isIncomplete):
-                page = self.getAdditionalPage(totalPageCount, customer)
+                page = self.getAdditionalPage(sheetNumber, customer)
                 customerPages.append(page)
-                totalPageCount += 1
+                sheetNumber += 1
             # add the statement page of pages notice
             pageTotal           = len(customerPages)
             customersPageNumber = 1

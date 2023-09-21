@@ -73,7 +73,7 @@ Usage:
     -p - Produce pre-lost report.
     -r - Produce pre-referral report.
     -s - Turns the 'isCustomerSuppressionDesired' flag on.
-    --pdf - Output notice as a PDF directly (skip the PS conversion).
+    -P - Output notice as a PDF directly (skip the PS conversion).
     -x - Outputs this usage message.
   
   In this mode customers with malformed mailing addresses are not printed
@@ -88,11 +88,11 @@ def main(argv):
     billLimit  = 10.0
     isCustomerSuppressionDesired = False
     isPdfOutput = False
-    configs = {}
-    configs['font'] = 'Courier'
+    configsDict = {}
+    configsDict['font'] = 'Courier'
     debugMode = False
     try:
-        opts, args = getopt.getopt(argv, "ohb:f:i:rps", [ "dollars=", "font=", "ifile=", "pdf" ])
+        opts, args = getopt.getopt(argv, "ohb:f:i:rpPs", [ "dollars=", "font=", "ifile=" ])
     except getopt.GetoptError:
         usage()
         sys.exit()
@@ -118,12 +118,12 @@ def main(argv):
         elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
-        elif opt in ("--pdf"): # output pdf directly to the provided path.
+        elif opt in ("-P"): # output pdf directly to the provided path.
             isPdfOutput = True
         elif opt in ("--font"): # Change font in notices. Some care and testing should be used.
             preferredFont = FONTS.get(arg.lower())
             if preferredFont:
-                configs['font'] = preferredFont
+                configsDict['font'] = preferredFont
         elif opt == '-x':
             usage()
             sys.exit()
@@ -151,13 +151,13 @@ def main(argv):
     if not noticeReader:
         usage()
         sys.exit()
-    print(noticeReader)
+    # print(noticeReader)
     fPrefix = noticeReader.getOutFileBaseName()
     rptDate = noticeReader.getReportDate()
     if isPdfOutput:
-        noticeFormatter = PdfFormatter(fileBaseName=fPrefix, configs=configs, reportDate=rptDate, debug=debugMode)
+        noticeFormatter = PdfFormatter(fileBaseName=fPrefix, configs=configsDict, reportDate=rptDate, debug=debugMode)
     else:
-        noticeFormatter = PostScriptFormatter(fileBaseName=fPrefix, configs=configs, reportDate=rptDate, debug=debugMode)
+        noticeFormatter = PostScriptFormatter(fileBaseName=fPrefix, configs=configsDict, reportDate=rptDate, debug=debugMode)
     if not noticeReader.parseReport(isCustomerSuppressionDesired):
         sys.stderr.write(f"*warning, not data parsed from {noticeType}\n")
     else:

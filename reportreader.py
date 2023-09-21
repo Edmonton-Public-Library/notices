@@ -85,7 +85,7 @@ class Notice:
     def parseReport( self, suppress_malformed_customer=True ):
         return self.pagesPrinted
 
-    def writeToFile( self, formatter:NoticeFormatter, debug=False ):
+    def writeToFile(self, formatter:NoticeFormatter):
         # Title
         formatter.setGlobalTitle( self.title )
         # read the opening bulletin
@@ -95,7 +95,7 @@ class Notice:
         self.totalCustomers   = len( self.customers )
         for customer in self.customers:
             formatter.setCustomer( customer )
-        formatter.format( debug )
+        formatter.format()
         formatter.outputNotices()
         # after formatting we collect pages printed.
         for customer in self.customers:
@@ -125,10 +125,8 @@ class Notice:
 
     def __get_lines__( self ):
         # read in the report and parse it.
-        iFile = open( self.iFileName, 'r' )
-        # print 'reading reading reading .... '
-        lines = iFile.readlines()
-        iFile.close()
+        with open( self.iFileName, 'r' ) as iFile:
+            lines = [line.rstrip('\n') for line in iFile]
         self.reportDate = self.__get_report_date__(lines)
         # reverse the order so we just use
         lines.reverse()

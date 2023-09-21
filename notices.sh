@@ -41,6 +41,7 @@ IS_PDF=false
 VERSION="1.04.00"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
+X_ARGS=''
 
 ## Set up logging.
 LOG_FILE=/home/ils/notices/notices.log
@@ -103,9 +104,11 @@ do
         ;;
     -p|--pdf)
         export IS_PDF=true
+        X_ARGS="$X_ARGS -P"
 		logit "=== PDF MODE"
 	-t|--test)
         export IS_TEST=true
+        X_ARGS="$X_ARGS --debug"
         shift
         export TEST_ACCOUNTS="$1"
 		logit "=== TEST MODE"
@@ -164,21 +167,17 @@ logit " "
 ${LOCAL_BIN_DIR}/report.sh   # get today's reports.
 logit " "
 ${LOCAL_BIN_DIR}/bulletin.sh # get Notices for today.
-xtra_args=''
-if [ "$IS_PDF" == true ]; then
-    xtra_args='--pdf'
-fi
 logit "DRIVER SCRIPT: compiling bill notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} "$xtra_args" >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} "$X_ARGS" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling overdue notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} "$xtra_args" >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} "$X_ARGS" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-referral notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} "$xtra_args" >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} "$X_ARGS" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-lost notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} "$xtra_args" >>${LOG_FILE}
+python3 ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} "$X_ARGS" >>${LOG_FILE}
 logit " "
 if [ "$IS_PDF" == false ]; then
     ${LOCAL_BIN_DIR}/pstopdf.sh

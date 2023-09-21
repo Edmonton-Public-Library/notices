@@ -214,7 +214,7 @@ class PdfPage(Page):
         self.isIncomplete = True
         if self.debug:
             self.addRegistrationMarks()
-        # Pdf will wrap over the top of the page again if this is not set.
+        # Finish the previous sheet or Pdf will wrap over the top of the page again if this is not set.
         if self.pageNumber > 1:
             self.canvas.showPage()
         else:
@@ -262,7 +262,6 @@ class PdfPage(Page):
     def finalize(self):
         if self.debug:
             self.addRegistrationMarks()
-        self.canvas.showPage()
         self.isIncomplete = False
 
     # Sets the statement page number message.
@@ -282,6 +281,7 @@ class PdfPage(Page):
     def setAddress(self, textBlock:list):
         self.__set_text__(f"Statement page {self.pageNumber}", self.xFooter, self.yFooter)
         self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
+        
     
     # Adds folds, perferations, and registration marks for debugging. 
     def addRegistrationMarks(self):
