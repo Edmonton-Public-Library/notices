@@ -72,6 +72,7 @@ Usage:
     -o - Produce overdue report.
     -p - Produce pre-lost report.
     -r - Produce pre-referral report.
+    -R - Add registration marks to the files (for debugging formatting).
     -s - Turns the 'isCustomerSuppressionDesired' flag on.
     -P - Output notice as a PDF directly (skip the PS conversion).
     -x - Outputs this usage message.
@@ -81,7 +82,7 @@ Usage:
     """
     print(f"{message}")
     
-# Take valid command line arguments --debug -b'n', --font='font_name', -h, -i, -o, -p, --pdf, -r, -s, and -x.
+# Take valid command line arguments -b'n', --font='font_name', -h, -i, -o, -p, -P, -r, -R, -s, and -x.
 def main(argv):
     inputFile  = ''
     noticeType = 'INIT'
@@ -92,14 +93,14 @@ def main(argv):
     configsDict['font'] = 'Courier'
     debugMode = False
     try:
-        opts, args = getopt.getopt(argv, "ohb:f:i:rpPs", [ "dollars=", "font=", "ifile=" ])
+        opts, args = getopt.getopt(argv, "ohb:f:i:rpPRs", [ "dollars=", "font=", "ifile=" ])
     except getopt.GetoptError:
         usage()
         sys.exit()
     for opt, arg in opts:
         if opt == '-h':
             noticeType = 'HOLD' # holds.
-        elif opt == '--debug':
+        elif opt == '-R':
             debugMode = True
         elif opt == '-o':
             # overdues
@@ -118,9 +119,9 @@ def main(argv):
         elif opt == '-s': # Suppress customers with malformed addresses.
             # suppress malformed customers.
             isCustomerSuppressionDesired = True
-        elif opt in ("-P"): # output pdf directly to the provided path.
+        elif opt in ('-P'): # output pdf directly to the provided path.
             isPdfOutput = True
-        elif opt in ("--font"): # Change font in notices. Some care and testing should be used.
+        elif opt in ('-f', '--font'): # Change font in notices. Some care and testing should be used.
             preferredFont = FONTS.get(arg.lower())
             if preferredFont:
                 configsDict['font'] = preferredFont
