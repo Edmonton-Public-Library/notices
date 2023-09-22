@@ -63,8 +63,6 @@ Usage:
 
     -b[n] --dollars=n - Produce bill notices using bill threshold 'n', as an integer
       dollar value, like '10' for $10.00.
-    --debug - Turn on debugging information. Adds registration marks to reports 
-         so don't use this switch in production.
     --font='font_name' - Sets a different font for notices. Currently supported:
          Helvetica, Times, and Courier. Can be extended in the future.
     -h - Produce hold notices. We don't send these by mail anymore.

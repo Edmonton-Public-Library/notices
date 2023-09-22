@@ -39,7 +39,7 @@ export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
 IS_PDF=false
 # Added --pdf switch.
-VERSION="1.04.00"
+VERSION="1.05.00"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
 X_ARGS=''
@@ -110,7 +110,7 @@ do
         ;;
     -t|--test)
         export IS_TEST=true
-        X_ARGS="$X_ARGS --debug"
+        X_ARGS="$X_ARGS -R"
         shift
         export TEST_ACCOUNTS="$1"
         logit "=== TEST MODE"
