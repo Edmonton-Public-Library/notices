@@ -230,6 +230,8 @@ class PdfFormatter(NoticeFormatter):
     # Finalizes all the pages into a single PS file.
     # return: None, but outputs the PDF file.
     def outputNotices(self):
+        for pages in self.customerNotices:
+            print(pages)
         self.canvas.save()
 
     def __str__(self):
@@ -242,18 +244,17 @@ class PostScriptFormatter(NoticeFormatter):
     # Finalizes all the pages into a single PS file.
     # return: 
     def outputNotices(self):
-        myFile = open(self.fileBaseName + '.ps', 'w')
-        myFile.write('%!PS-Adobe-3.0\n')
-        # Tell the PS file how many pages in total there will be
-        myFile.write('%%Pages: ' + str(len(self.customerNotices)) + '\n')
-        myFile.write(f"%% Created for {AUTHOR} {str(self.todaysDate)}\n")
-        for warning in WARNING_MSG:
-            myFile.write(f"%% {warning}\n")
-        myFile.write('%%EndComments\n')
-        myFile.write('/' + self.font + ' findfont\n' + str(self.fontSize) + ' scalefont\nsetfont\n')
-        for page in self.customerNotices:
-            myFile.write(str(page))  
-        myFile.close()
+        with open(self.fileBaseName + '.ps', 'w') as myFile:
+            myFile.write('%!PS-Adobe-3.0\n')
+            # Tell the PS file how many pages in total there will be
+            myFile.write('%%Pages: ' + str(len(self.customerNotices)) + '\n')
+            myFile.write(f"%% Created for {AUTHOR} {str(self.todaysDate)}\n")
+            for warning in WARNING_MSG:
+                myFile.write(f"%% {warning}\n")
+            myFile.write('%%EndComments\n')
+            myFile.write('/' + self.font + ' findfont\n' + str(self.fontSize) + ' scalefont\nsetfont\n')
+            for page in self.customerNotices:
+                myFile.write(str(page))
         
     def __str__(self):
         return 'PostScript formatter: ' + self.fileName

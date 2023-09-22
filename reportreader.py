@@ -126,7 +126,7 @@ class Notice:
     def __get_lines__( self ):
         # read in the report and parse it.
         with open( self.iFileName, 'r' ) as iFile:
-            lines = [line.rstrip('\n') for line in iFile]
+            lines = [line.rstrip() for line in iFile]
         self.reportDate = self.__get_report_date__(lines)
         # reverse the order so we just use
         lines.reverse()
@@ -169,7 +169,7 @@ class Notice:
         try:
             with open( newPath, 'r' ) as f:
                 for line in f.readlines():
-                    func( line )
+                    func(line.rstrip())
                 f.close()
 
         except IOError:

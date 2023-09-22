@@ -202,10 +202,13 @@ class Page:
     def addRegistrationMarks(self):
         pass
 
+# This class stores all the instructions on a list and then executes 
+# the PDF generation code as lambda instructions.
 class PdfPage(Page):
     # Configuration dict currently must contain font, fontsize, and kerning.
     def __init__(self, pageNumber:int, configs:dict, debug:bool=False):
         super().__init__(pageNumber, configs, debug)
+        self.page = []
         self.canvas = configs.get('canvas')
         if not self.canvas:
             print(f"*error, PdfPage expected canvas object to be a member of the configs dictionary.")
@@ -216,9 +219,7 @@ class PdfPage(Page):
             self.addRegistrationMarks()
         # Finish the previous sheet or Pdf will wrap over the top of the page again if this is not set.
         if self.pageNumber > 1:
-            self.canvas.showPage()
-        else:
-            self.__set_text__(f"Statement page {self.pageNumber}", self.xFooter, self.yFooter)
+            self.page.append(lambda: self.canvas.showPage())
 
     # Writes a line of text to the location given. Origin (0,0) is at the
     # bottom left of the page for both PS and PDF.
@@ -232,15 +233,15 @@ class PdfPage(Page):
         tmpFontSize = round(self.fontSize)
         tmpFont = self.font
         if fontSize or bold:
-            self.canvas.saveState()
+            self.page.append(lambda: self.canvas.saveState())
             if fontSize:
                 tmpFontSize = round(fontSize)
             if bold:
                 tmpFont = f"{self.font}-Bold"
-        self.canvas.setFont(tmpFont, tmpFontSize)
-        self.canvas.drawString(x * INCH, y * INCH, line)
+        self.page.append(lambda: self.canvas.setFont(tmpFont, tmpFontSize))
+        self.page.append(lambda: self.canvas.drawString(x * INCH, y * INCH, line))
         if fontSize or bold:
-            self.canvas.restoreState()
+            self.page.append(lambda: self.canvas.restoreState())
         return y - (self.kerning / INCH)
     
     # Sets a list of strings at the appropriate location
@@ -256,7 +257,7 @@ class PdfPage(Page):
             y = self.__set_text__(line, x, y, bold)
         return y
 
-    # Signals that the caller is finished with the page.
+    # Signals that the caller is finished with the sheet.
     # param:  None
     # return: None, sets the super class' isIncomplete flag to false.
     def finalize(self):
@@ -264,47 +265,51 @@ class PdfPage(Page):
             self.addRegistrationMarks()
         self.isIncomplete = False
 
-    # Sets the statement page number message.
-    # param: text:str statement.
-    # return: None 
-    def setStatementCount(self, text:str):
-        # Goofy, but PDF needs to set this whenever a new page is created.
-        # We overload this because I don't want to start in the rabbit hole
-        # of making pdf stories and paragraphs, I wan't to control the 
-        # placement in the PdfPage constructor and when the address is placed. 
-        # and change as little code in noticeformatter.py as possible. 
-        pass
-
     # Returns the height of the block of text in inches.
     # param:  list of lines of address text.
     # return: None.
     def setAddress(self, textBlock:list):
-        self.__set_text__(f"Statement page {self.pageNumber}", self.xFooter, self.yFooter)
         self.__set_text_block__(textBlock, self.xAddressBlock, self.yAddressBlock)
         
     
     # Adds folds, perferations, and registration marks for debugging. 
     def addRegistrationMarks(self):
-        self.canvas.saveState()
-        self.canvas.setStrokeColorRGB(0, 0, 0)
-        self.canvas.setLineWidth(0.5)
-        self.canvas.setDash([6,3], 3)
+        self.page.append(lambda: self.canvas.saveState())
+        self.page.append(lambda: self.canvas.setStrokeColorRGB(0, 0, 0))
+        self.page.append(lambda: self.canvas.setLineWidth(0.5))
+        self.page.append(lambda: self.canvas.setDash([6,3], 3))
         # Left and right page boundaries
-        self.canvas.line(0.5 * INCH, 0.0 * INCH, 0.5 * INCH, 11.0 * INCH)
-        self.canvas.line(8.0 * INCH, 0.0 * INCH, 8.0 * INCH, 11.0 * INCH)
+        self.page.append(lambda: self.canvas.line(0.5 * INCH, 0.0 * INCH, 0.5 * INCH, 11.0 * INCH))
+        self.page.append(lambda: self.canvas.line(8.0 * INCH, 0.0 * INCH, 8.0 * INCH, 11.0 * INCH))
         # Lowest perferation line
-        self.canvas.line(0.0 * INCH, 3.09375 * INCH, 8.5 * INCH, 3.09375 * INCH)
+        self.page.append(lambda: self.canvas.line(0.0 * INCH, 3.09375 * INCH, 8.5 * INCH, 3.09375 * INCH))
         # Fold line lower 1/3
-        self.canvas.line(0.0 * INCH, 3.5625 * INCH, 8.5 * INCH, 3.5625 * INCH)
+        self.page.append(lambda: self.canvas.line(0.0 * INCH, 3.5625 * INCH, 8.5 * INCH, 3.5625 * INCH))
         # Fine perforation above fold lower fold line.
-        self.canvas.line(0.0 * INCH, 4.09375 * INCH, 8.5 * INCH, 4.09375 * INCH)
+        self.page.append(lambda: self.canvas.line(0.0 * INCH, 4.09375 * INCH, 8.5 * INCH, 4.09375 * INCH))
         # Fine perferation below top fold line.
-        self.canvas.line(0.0 * INCH, 6.84375 * INCH, 8.5 * INCH, 6.84375 * INCH)
+        self.page.append(lambda: self.canvas.line(0.0 * INCH, 6.84375 * INCH, 8.5 * INCH, 6.84375 * INCH))
         # Top fold line
-        self.canvas.line(0.0 * INCH, 7.275 * INCH, 8.5 * INCH, 7.275 * INCH)
+        self.page.append(lambda: self.canvas.line(0.0 * INCH, 7.275 * INCH, 8.5 * INCH, 7.275 * INCH))
         # Top-most tear line perferation.
-        self.canvas.line(0.0 * INCH, 10.4375 * INCH, 8.5 * INCH, 10.4375 * INCH)
-        self.canvas.restoreState()
+        self.page.append(lambda: self.canvas.line(0.0 * INCH, 10.4375 * INCH, 8.5 * INCH, 10.4375 * INCH))
+        self.page.append(lambda: self.canvas.restoreState())
+
+    def __str__(self):
+        """ 
+        >>> from reportlab.lib.pagesizes import letter
+        >>> canvas = Canvas("lambdatest.pdf", pagesize=letter)
+        >>> cfg = {'font': 'Courier', 'fontSize': 10.0, 'kerning': 11.0, 'leftMargin': 0.875, 'canvas': canvas}
+        >>> testText = "Statement 1 of 2"
+        >>> page = PdfPage(1, cfg, True)
+        >>> page.setStatementCount(testText)
+        >>> page.__str__()
+        'page 1'
+        >>> canvas.save()
+        """
+        for func in self.page:
+            func()
+        return f"page {self.pageNumber}"
 
 class PostScriptPage(Page):
     # Configuration dict currently must contain font, fontsize, and kerning.
