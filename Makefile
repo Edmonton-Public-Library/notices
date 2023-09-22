@@ -21,7 +21,7 @@
 SERVER=ils@epl-ils.epl.ca
 REMOTE_DIR=/home/ils/notices
 REMOTE_BIN_DIR=${REMOTE_DIR}/bin
-CODE_FILES=notice.py customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh notices.sh
+CODE_FILES=notice.py customer.py reportreader.py page.py noticeformatter.py report.sh bulletin.sh pstopdf.sh notices.sh page.tst reportreader.tst testnotices.sh
 HELPER_FILES=Readme.md Makefile.remote
 PYTHON=../venv/bin/python
 PS2PDF=/usr/bin/ps2pdf

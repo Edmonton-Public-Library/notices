@@ -30,15 +30,18 @@
 ###
 ### Edit this file to include new reports.
 ###
-VERSION="1.00.00"
+VERSION="1.01.00"
 HOST=$(hostname)
-LOCAL_DIR=/home/anisbet/EPL/Notices/notices
-# PYTHON="/home/anisbet/EPL/Notices/venv/bin/python"
+
 # Activate the virtual environment.
-. /home/anisbet/EPL/Notices/venv/bin/activate
+if [ "$HOST" == 'ubuntu' ]; then
+   . /home/anisbet/EPL/Notices/venv/bin/activate
+   LOCAL_DIR=/home/anisbet/EPL/Notices/notices
+else # or on production...
+   . /home/ils/notices/venv/bin/activate
+   LOCAL_DIR=/home/ils/notices
+fi
 LOCAL_BIN_DIR="$LOCAL_DIR"
-# export PATH="$PATH:/usr/bin:/bin:$LOCAL_BIN_DIR"
-EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 X_ARGS=" -P -R"
 APP=notice.py
 PRINT_DIR=${LOCAL_DIR}/print
