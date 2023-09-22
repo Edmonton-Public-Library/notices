@@ -105,14 +105,14 @@ do
     -p|--pdf)
         export IS_PDF=true
         X_ARGS="$X_ARGS -P"
-		logit "=== PDF MODE"
-	-t|--test)
+        logit "=== PDF MODE"
+    -t|--test)
         export IS_TEST=true
         X_ARGS="$X_ARGS --debug"
         shift
         export TEST_ACCOUNTS="$1"
-		logit "=== TEST MODE"
-		;;
+        logit "=== TEST MODE"
+        ;;
     -v|--version)
         echo "$0 version: $VERSION"
         exit 0
@@ -187,7 +187,7 @@ cd ${PRINT_DIR} || { logit "missing $PRINT_DIR, exiting."; exit 1; }
 RUN_DATE=$(date +'%Y-%m-%d')
 for name in *.pdf
 do
-	logit "DRIVER SCRIPT: mailing $name."
+    logit "DRIVER SCRIPT: mailing $name."
     # using echo command makes sure that mailx will not ask you to enter subject and message body manually.
     # When you are using -a option, the mailx program will do all the necessary conversions to base64 and 
     # then to MIME format for you. No need to use uuencode. 

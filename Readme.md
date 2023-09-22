@@ -1,4 +1,4 @@
-### Changes
+# Changes
 | **File** | **Changes** |
 |:---|:---|
 | notices.sh | Added `--pdf` switch. |
@@ -12,6 +12,17 @@
 | noticeformatter.py | No change. |
 | page.py | Now included debugging registration marks and `PdfPage`. |
 | customer.py | No change. |
+
+## Testing
+There are several levels of tests that can be done on this application and its components. 
+* `notices.sh` has a `-t` switch which overrides the default mailing address, so you can run in the production setting and have them mailed.
+* You can run `testnotices.sh` which will create some test directories add some canned reports, and smoke test the system without fetching reports from the ILS.
+* At the lowest level you can run the doctests on all the files (except `notice.py`). That is done as follows.
+  1) Change into the bin directory.
+  2) Activate the virtual environment with `. ../venv/bin/activate`.
+  3) On the command line run `python page.py`... repeating for `*.py` files (except `notice.py`).
+  5) `reportreader.py` has canned reports as dependencies. They can be found in `bin_tests.tar`. Just untar the file in the current directory to install them, then run `python reportreader.py`. 
+  6) Optional: clean up these directories after checking the output. 
 
 # Customer Notices
 **August 22, 2023**
