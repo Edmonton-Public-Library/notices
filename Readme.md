@@ -15,7 +15,7 @@
 
 ## Testing
 There are several levels of tests that can be done on this application and its components. 
-* `notices.sh` has a `-t` switch which overrides the default mailing address, so you can run in the production setting and have them mailed.
+* `notices.sh` has a `-t` switch which overrides the default mailing address, so you can run in the production setting and have them mailed. **Running this script will remove any existing \*.ps and \*.pdf so back them up so you can compare output.**
 * You can run `testnotices.sh` which will create some test directories add some canned reports, and smoke test the system without fetching reports from the ILS.
 * At the lowest level you can run the doctests on all the files (except `notice.py`). That is done as follows.
   1) Change into the bin directory.
