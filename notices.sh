@@ -106,6 +106,7 @@ do
         export IS_PDF=true
         X_ARGS="$X_ARGS -P"
         logit "=== PDF MODE"
+        ;;
     -t|--test)
         export IS_TEST=true
         X_ARGS="$X_ARGS --debug"
