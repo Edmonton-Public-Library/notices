@@ -39,7 +39,7 @@ export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
 IS_PDF=false
 # Added --pdf switch.
-VERSION="1.05.00"
+VERSION="1.06.00"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
 X_ARGS=''
@@ -170,18 +170,19 @@ ${LOCAL_BIN_DIR}/report.sh   # get today's reports.
 logit " "
 ${LOCAL_BIN_DIR}/bulletin.sh # get Notices for today.
 logit "DRIVER SCRIPT: compiling bill notices"
-python ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} $X_ARGS >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling overdue notices"
-python ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} $X_ARGS >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-referral notices"
-python ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} $X_ARGS >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-lost notices"
-python ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} $X_ARGS >>${LOG_FILE}
 logit " "
 if [ "$IS_PDF" == false ]; then
+    logit "converting PS to PDF."
     ${LOCAL_BIN_DIR}/pstopdf.sh
     logit " "
 fi
