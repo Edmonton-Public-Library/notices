@@ -31,9 +31,10 @@
 ### Edit this file to include new reports.
 ###
 LOCAL_DIR=/home/ils/notices
+# Source the venv
+. $LOCAL_DIR/venv/bin/activate
 LOCAL_BIN_DIR=/home/ils/notices/bin
 export PATH=$PATH:/usr/bin:/bin:/home/ils/notices/bin
-export PYTHONPATH=${LOCAL_BIN_DIR}
 export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
 IS_PDF=false
@@ -169,16 +170,16 @@ ${LOCAL_BIN_DIR}/report.sh   # get today's reports.
 logit " "
 ${LOCAL_BIN_DIR}/bulletin.sh # get Notices for today.
 logit "DRIVER SCRIPT: compiling bill notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} "$X_ARGS" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling overdue notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} "$X_ARGS" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-referral notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} "$X_ARGS" >>${LOG_FILE}
 logit " "
 logit "DRIVER SCRIPT: compiling pre-lost notices"
-python3 ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} "$X_ARGS" >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} "$X_ARGS" >>${LOG_FILE}
 logit " "
 if [ "$IS_PDF" == false ]; then
     ${LOCAL_BIN_DIR}/pstopdf.sh
