@@ -146,13 +146,13 @@ Thursday, September 21, 2023
 .block
   1   Incredible hockey records / by Tom Glave.
       Glave, Tom.
-      date billed:9/6/2023     bill reason:LOST         amount due:    $30.20
+      date billed:9/6/2023     bill reason:LOST         amount due:    \$30.20
 .endblock
 
 .block
       =======================================================================
 
-                                 TOTAL FINES/FEES AND UNPAID BILLS:    $30.20
+                                 TOTAL FINES/FEES AND UNPAID BILLS:    \$30.20
 .endblock
 
 .block
@@ -174,10 +174,10 @@ Thursday, September 21, 2023
 
 
 .block
-          Mohamed Hosh
-          1603 203 Street NW
+          Hamish Hosh
+          1654 203 Street NW
           Edmonton, AB
-          T6M 1K8
+          T7M 1K8
 .endblock
 
 
@@ -186,26 +186,26 @@ Thursday, September 21, 2023
 .block
   1   Layla's luck / Jo Rooks.
       Rooks, Jo.
-      date billed:9/6/2023     bill reason:LOST         amount due:    $21.12
+      date billed:9/6/2023     bill reason:LOST         amount due:    \$21.12
 .endblock
 
 .block
   2   The nice dream truck / by Beth Ferry ; illustrated by Brigette Barrager.
       Ferry, Beth.
-      date billed:9/6/2023     bill reason:LOST         amount due:    $20.97
+      date billed:9/6/2023     bill reason:LOST         amount due:    \$20.97
 .endblock
 
 .block
   3   Home : a peek-through picture book / [text by Patricia Hegarty] ;
       illustrated by Britta Teckentrup.
       Hegarty, Patricia.
-      date billed:9/6/2023     bill reason:LOST         amount due:    $21.56
+      date billed:9/6/2023     bill reason:LOST         amount due:    \$21.56
 .endblock
 
 .block
       =======================================================================
 
-                                 TOTAL FINES/FEES AND UNPAID BILLS:    $63.65
+                                 TOTAL FINES/FEES AND UNPAID BILLS:    \$63.65
 .endblock
 
 .block
@@ -231,10 +231,10 @@ Thursday, September 21, 2023
 
 
 .block
-          William G Peake
-          4204 107 Street NW
+          Billy G Beaks
+          5554 107 Street NW
           Edmonton, AB
-          T6J 2R9
+          T7J 2R9
 .endblock
 
 
@@ -347,20 +347,20 @@ Thursday, September 21, 2023
 .block
   1   No one wins alone : a memoir / Mark Messier with Jimmy Roberts.
       Messier, Mark, 1961-
-      date billed:9/7/2023     bill reason:LOST         amount due:    $31.59
+      date billed:9/7/2023     bill reason:LOST         amount due:    \$31.59
 .endblock
 
 .block
   2   Freezing cold takes : NFL : football media's most inaccurate
       predictions--and the fascinating stories behind them / Fred Segal.
       Segal, Fred (Sports blogger)
-      date billed:9/7/2023     bill reason:LOST         amount due:    $22.74
+      date billed:9/7/2023     bill reason:LOST         amount due:    \$22.74
 .endblock
 
 .block
       =======================================================================
 
-                                 TOTAL FINES/FEES AND UNPAID BILLS:    $54.33
+                                 TOTAL FINES/FEES AND UNPAID BILLS:    \$54.33
 .endblock
 
 .block
@@ -394,39 +394,39 @@ Thursday, September 21, 2023
 .block
   1   Myths / Agatha Gregson.
       Gregson, Agatha.
-      date billed:9/7/2023     bill reason:LOST         amount due:    $26.67
+      date billed:9/7/2023     bill reason:LOST         amount due:    \$26.67
 .endblock
 
 .block
   2   Room on our rock : there are two sides to every story / Kate & Jol
       Temple ; [illustrated by] Terri Rose Baynton.
       Temple, Kate.
-      date billed:9/7/2023     bill reason:LOST         amount due:    $18.02
+      date billed:9/7/2023     bill reason:LOST         amount due:    \$18.02
 .endblock
 
 .block
   3   Asha and Baz meet Mary Sherman Morgan / by Caroline Fernandez ;
       illustrated by Dharmali Patel.
       Fernandez, Caroline (Blogger)
-      date billed:9/7/2023     bill reason:LOST         amount due:     $6.89
+      date billed:9/7/2023     bill reason:LOST         amount due:     \$6.89
 .endblock
 
 .block
   4   The cake escape / Swapna Haddow ; [illustrated by] Sheena Dempsey.
       Haddow, Swapna.
-      date billed:9/7/2023     bill reason:LOST         amount due:    $10.41
+      date billed:9/7/2023     bill reason:LOST         amount due:    \$10.41
 .endblock
 
 .block
   5   Big problemas / Juana Medina.
       Medina, Juana, 1980-
-      date billed:9/7/2023     bill reason:LOST         amount due:     $7.48
+      date billed:9/7/2023     bill reason:LOST         amount due:     \$7.48
 .endblock
 
 .block
       =======================================================================
 
-                                 TOTAL FINES/FEES AND UNPAID BILLS:    $69.47
+                                 TOTAL FINES/FEES AND UNPAID BILLS:    \$69.47
 .endblock
 
 .block
@@ -465,7 +465,7 @@ Thursday, September 21, 2023
   1  call number:CON                                       ID:31221320513224  
      Desert star / Michael Connelly.
      Connelly, Michael, 1956-
-     due:9/13/2023,23:59     price:$29.83    
+     due:9/13/2023,23:59     price:\$29.83    
 
 .read /software/EDPL/Unicorn/Notices/prelostoverdueclosingprint
 .report
@@ -495,12 +495,12 @@ Thursday, September 21, 2023
   1  call number:KIN                                       ID:31221318287120  
      Demon Copperhead : a novel / Barbara Kingsolver.
      Kingsolver, Barbara.
-     due:9/13/2023,23:59     price:$31.90    
+     due:9/13/2023,23:59     price:\$31.90    
 
   2  call number:338.2728 BEA                              ID:31221320517308  
      Ducks : two years in the oil sands / Kate Beaton.
      Beaton, Kate, 1983-
-     due:9/13/2023,23:59     price:$31.57    
+     due:9/13/2023,23:59     price:\$31.57    
 
 .read /software/EDPL/Unicorn/Notices/prelostoverdueclosingprint
 

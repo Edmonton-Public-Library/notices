@@ -56,6 +56,7 @@ class Notice:
         self.customers        = []
         self.pagesPrinted     = 0
         self.customersWithBadAddress = []
+        self.lines            = self.__get_lines__()
 
     def getReportDate(self):
         return self.reportDate
@@ -92,7 +93,7 @@ class Notice:
         self.__read_Bulletin__( self.startNoticePath, formatter.setGlobalHeader )
         # read the closing bulletin
         self.__read_Bulletin__( self.endNoticePath, formatter.setGlobalFooter )
-        self.totalCustomers   = len( self.customers )
+        self.totalCustomers = len( self.customers )
         for customer in self.customers:
             formatter.setCustomer( customer )
         formatter.format()
@@ -120,28 +121,27 @@ class Notice:
                     if day in line.lower():
                         line = re.sub(r'(\$<)', "", line)
                         return re.sub(r'(:u>)', "", line).title().rstrip()
-        print(f"I get called but don't find anything in this report!")
         return ''
 
     def __get_lines__( self ):
         # read in the report and parse it.
         with open( self.iFileName, 'r' ) as iFile:
-            lines = [line.rstrip() for line in iFile]
-        self.reportDate = self.__get_report_date__(lines)
+            self.lines = [line.rstrip() for line in iFile]
+        self.reportDate = self.__get_report_date__(self.lines)
         # reverse the order so we just use
-        lines.reverse()
-        return lines
+        self.lines.reverse()
+        return self.lines
 
     # Adds item text from the report to the customer.
-    # param:  the remainder of the lines from the report as a list
+    # param:  the remainder of the self.lines from the report as a list
     # param:  function to be called. Data dependant.
     # param:  the rtf tag that terminates data collection, usually an '.endblock'.
     # param:  ignoreFirstEndBlock - if set to true the first endBlockTag specified above is ignored This
     #         is used to handle nested rtf tags.
     def __set_customer_data__( self, lines, customerFunc, endBlockTag, ignoreFirstEndblock=False ):
         haveSeenFirstEndblock = False
-        while( len( lines ) > 0  ):
-            line = lines.pop()
+        while( len( self.lines ) > 0  ):
+            line = self.lines.pop()
             if line.startswith( '.read' ): # There may be another .read tag inside the customer block; it's the footer.
                 self.endNoticePath = line.split()[1]
                 continue
@@ -179,7 +179,7 @@ class Notice:
 ############## Holds ####################
 class Hold( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
-        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_holds_' )
+        super().__init__(inFile, bulletinDir, printDir, 'print_holds_')
         self.title = 'PICKUP NOTICE'
 
     # Reads the report and parses it into customer related notices.
@@ -231,24 +231,24 @@ class Hold( Notice ):
         # .report
         # ...
         #
-        lines = self.__get_lines__()
+        # self.lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer         = None
         hasEmail         = False
         isPickupLocation = False
         isAddress        = False
-        while( len( lines ) > 0 ):
-            line = lines.pop()
+        while( len( self.lines ) > 0 ):
+            line = self.lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
                 # print 'opening message and customer items'
                 isItemsBlocks = True
                 self.startNoticePath = line.split()[1]
                 # print self.startNoticePath
             elif line.startswith( '.block' ):
-                line = lines.pop()
+                line = self.lines.pop()
                 if isAddress:
                     customer.setAddressText( line )
-                    self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+                    self.__set_customer_data__( self.lines, customer.setAddressText, '.endblock' )
                     isAddress   = False
                     isItemBlock = True
                 elif isPickupLocation:
@@ -256,7 +256,7 @@ class Hold( Notice ):
                     isPickupLocation = False
                     isAddress        = True
                 elif isItemsBlocks:
-                    self.__set_customer_data__( lines, customer.setItemText, '.endblock', True )
+                    self.__set_customer_data__( self.lines, customer.setItemText, '.endblock', True )
             elif line.startswith( '.report' ):
                 if customer != None and hasEmail == False:
                     if not customer.isWellFormed() and suppress_malformed_customer:
@@ -277,7 +277,7 @@ class Hold( Notice ):
 ############## Overdue Reminder #################### 
 class Overdue( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
-        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_overdues_' )
+        super().__init__(inFile, bulletinDir, printDir, 'print_overdues_')
         self.title = 'OVERDUE REMINDER'
 
     # Reads the report and parses it into customer related notices.
@@ -290,21 +290,21 @@ class Overdue( Notice ):
         # .col 5l,1,73
         # .language ENGLISH
         # $<wednesday:u>, $<august:u> 1, 2018
-        # <blank lines>
+        # <blank self.lines>
         # .block
                   # Mary Madeleine Bennett
                   # 1162 Rutherford Close SW
                   # Edmonton AB
                   # T6W 1H6
         # .endblock
-        # <blank lines>
+        # <blank self.lines>
         # .read /s/sirsi/Unicorn/Notices/1stoverdue.print
-        # <blank lines>
+        # <blank self.lines>
           # 1  $<call_num:3>CD WOO                                    $<id:3U>312211045160                                                                                            62
              # Bellwether revivals [sound recording] / Benjamin Wood.
              # Wood, Benjamin, 1981-
              # $<due:3>7/17/2018,23:59
-             # <blank lines>
+             # <blank self.lines>
         # .read /s/sirsi/Unicorn/Notices/eplmailclosing
         ## END OLD OVERDUE NOTICE
         #########################
@@ -314,39 +314,39 @@ class Overdue( Notice ):
         # .col 5l,1,73
         # .language ENGLISH
         # $<wednesday:u>, $<april:u> 13, 2022
-        # <blank lines>
+        # <blank self.lines>
         # .block
         #           Arbry Adult
         #           1234 5678 Saskatchewan DR NW
         #           Edmonton, AB
         #           T6T 4R7
         # .endblock
-        # <blank lines>
+        # <blank self.lines>
         # .read /software/EDPL/Unicorn/Notices/overdue8daysprint
-        # <blank lines>
+        # <blank self.lines>
         #   1  $<call_num:3>927.8242 JON                              $<id:3U>31221317743289  
         #      Last chance Texaco : chronicles of an American troubadour / Rickie Lee
         #      Jones.
         #      Jones, Rickie Lee.
         #      $<due:3>4/5/2022,23:59  
-        # <blank lines>
+        # <blank self.lines>
         # .read /software/EDPL/Unicorn/Notices/eclosing8daysprint
         ## End OVERDUE REMINDER prn data.
 
-        lines = self.__get_lines__()
+        # self.lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer         = Customer()
         hasEmail         = False
         isPickupLocation = False
         isAddress        = False
         readTagsPerCustomer = 2
-        while( len( lines ) > 0 ):
-            line = lines.pop()
+        while( len( self.lines ) > 0 ):
+            line = self.lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block.
                 # print 'opening message and customer items'
                 self.startNoticePath = line.split()[1]
                 # The rest of the text until the next .report tag is items for the customer
-                self.__set_customer_data__( lines, customer.setItemText, '.report' )
+                self.__set_customer_data__( self.lines, customer.setItemText, '.report' )
                 if hasEmail == False:
                     if not customer.isWellFormed() and suppress_malformed_customer:
                         pass
@@ -355,7 +355,7 @@ class Overdue( Notice ):
                 hasEmail = False
                 customer = Customer()
             elif line.startswith( '.block' ):
-                self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+                self.__set_customer_data__( self.lines, customer.setAddressText, '.endblock' )
             elif line.startswith( '.email' ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True
@@ -365,7 +365,7 @@ class Overdue( Notice ):
 ############## Bills ####################
 class Bill( Notice ):
     def __init__( self, inFile, bulletinDir, printDir, billLimit=10.0 ):
-        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_bills_' )
+        super().__init__(inFile, bulletinDir, printDir, 'print_bills_')
         self.minimumBillValue = billLimit
         self.title            = 'NEW BILLINGS' # we set this since the report doesn't have it explicitely.
 
@@ -403,18 +403,18 @@ class Bill( Notice ):
         # .read /software/EDPL/Unicorn/Notices/eclosing
         # .endblock
         # read in the report and parse it.
-        lines = self.__get_lines__()
+        # self.lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer = Customer()
         isItemsBlocks = False
-        while( len( lines ) > 0 ):
-            line = lines.pop()
+        while( len( self.lines ) > 0 ):
+            line = self.lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
                 # print 'opening message and customer items'
                 isItemsBlocks = True
                 self.startNoticePath = line.split()[1]
             elif line.startswith( '.block' ):
-                line = lines.pop()
+                line = self.lines.pop()
                 if line.startswith( '.read' ): # closing message and end of customer.
                     # print 'found end message and end of customer'
                     # get the message and pass it to the noticeFormatter.
@@ -435,13 +435,13 @@ class Bill( Notice ):
                 elif line.find( '=====' ) > 0: # summary block.
                     # print 'found summary'
                     customer.setSummaryText( line )
-                    self.__set_customer_data__( lines, customer.setSummaryText, '.endblock' )
+                    self.__set_customer_data__( self.lines, customer.setSummaryText, '.endblock' )
                 elif isItemsBlocks == True:
                     customer.setItemText( line )
-                    self.__set_customer_data__( lines, customer.setItemText, '.endblock' )
+                    self.__set_customer_data__( self.lines, customer.setItemText, '.endblock' )
                 else:
                     customer.setAddressText( line )
-                    self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+                    self.__set_customer_data__( self.lines, customer.setAddressText, '.endblock' )
             elif line.startswith( '.email' ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
@@ -450,7 +450,7 @@ class Bill( Notice ):
 ############## PreReferral ####################
 class PreReferral( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
-        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prereferral_' )
+        super().__init__(inFile, bulletinDir, printDir, 'print_prereferral_')
         self.title = 'PRE-REFERRAL NOTICE' # PreReferral Bill notice for mailing.
 
     # Reads the report and parses it into customer related notices.
@@ -525,18 +525,18 @@ class PreReferral( Notice ):
         # .read /s/sirsi/Unicorn/Notices/prereferralbillclosing
         # .endblock
         # ...
-        lines = self.__get_lines__()
+        # self.lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer = Customer()
         isItemsBlocks = False
-        while( len( lines ) > 0 ):
-            line = lines.pop()
+        while( len( self.lines ) > 0 ):
+            line = self.lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block. Thanks Sirsi.
                 # print 'opening message and customer items'
                 isItemsBlocks = True
                 self.startNoticePath = line.split()[1]
             elif line.startswith( '.block' ):
-                line = lines.pop()
+                line = self.lines.pop()
                 if line.startswith( '.read' ): # closing message and end of customer.
                     # print 'found end message and end of customer'
                     # get the message and pass it to the noticeFormatter.
@@ -558,13 +558,13 @@ class PreReferral( Notice ):
                 elif line.find( '=====' ) > 0: # summary block.
                     # print 'found summary'
                     customer.setSummaryText( line )
-                    self.__set_customer_data__( lines, customer.setSummaryText, '.endblock' )
+                    self.__set_customer_data__( self.lines, customer.setSummaryText, '.endblock' )
                 elif isItemsBlocks == True:
                     customer.setItemText( line )
-                    self.__set_customer_data__( lines, customer.setItemText, '.endblock' )
+                    self.__set_customer_data__( self.lines, customer.setItemText, '.endblock' )
                 else:
                     customer.setAddressText( line )
-                    self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+                    self.__set_customer_data__( self.lines, customer.setAddressText, '.endblock' )
             elif line.startswith( '.email' ):
                 customer.setEmail( line )
             # ignore everything else it's just dross.
@@ -573,7 +573,7 @@ class PreReferral( Notice ):
 ############## Pre-Lost #################### 
 class PreLost( Notice ):
     def __init__( self, inFile, bulletinDir, printDir ):
-        Notice.__init__( self, inFile, bulletinDir, printDir, 'print_prelost_' )
+        super().__init__(inFile, bulletinDir, printDir, 'print_prelost_')
         # Report name change as requested by staff April 27, 2022. Was PRE-LOST NOTICE.
         self.title = 'OVERDUE NOTICE'
 
@@ -586,38 +586,38 @@ class PreLost( Notice ):
         # .col 5l,1,73
         # .language ENGLISH
         # $<wednesday:u>, $<april:u> 13, 2022
-        # <blank lines>
+        # <blank self.lines>
         # .block
         #           Arbry Adult
         #           1234 5678 Saskatchewan DR NW
         #           Edmonton, AB
         #           T6T 4R7
         # .endblock
-        # <blank lines>
+        # <blank self.lines>
         # .read /software/EDPL/Unicorn/Notices/prelostoverdue1stprint
-        # <blank lines>
+        # <blank self.lines>
         # 1  $<call_num:3>OSM                                       $<id:3U>31221317323405  
         #      The Thursday murder club / Richard Osman.
         #      Osman, Richard, 1970-
         #      $<due:3>4/5/2022,23:59      $<price:3>$28.65    
-        # <blank lines>
+        # <blank self.lines>
         # .read /software/EDPL/Unicorn/Notices/prelostoverdueclosingprint
         ## PRE-LOST OVERDUE REMINDER NOTICE (kxrk.prn)
 
-        lines = self.__get_lines__()
+        # self.lines = self.__get_lines__()
         # now pop off each line from the file and form it into a block of data
         customer         = Customer()
         hasEmail         = False
         isPickupLocation = False
         isAddress        = False
         readTagsPerCustomer = 2
-        while( len( lines ) > 0 ):
-            line = lines.pop()
+        while( len( self.lines ) > 0 ):
+            line = self.lines.pop()
             if line.startswith( '.read' ): # message read instruction not in block.
                 # print 'opening message and customer items'
                 self.startNoticePath = line.split()[1]
                 # The rest of the text until the next .report tag is items for the customer
-                self.__set_customer_data__( lines, customer.setItemText, '.report' )
+                self.__set_customer_data__( self.lines, customer.setItemText, '.report' )
                 if hasEmail == False:
                     if not customer.isWellFormed() and suppress_malformed_customer:
                         pass
@@ -626,7 +626,7 @@ class PreLost( Notice ):
                 hasEmail = False
                 customer = Customer()
             elif line.startswith( '.block' ):
-                self.__set_customer_data__( lines, customer.setAddressText, '.endblock' )
+                self.__set_customer_data__( self.lines, customer.setAddressText, '.endblock' )
             elif line.startswith( '.email' ):
                 # this customer doesn't get added because they have an email.
                 hasEmail = True

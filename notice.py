@@ -2,7 +2,7 @@
 
 ###########################################################################
 #
-#    Copyright (C) 2022  Andrew Nisbet, Edmonton Public Library
+#    Copyright (C) 2023  Andrew Nisbet, Edmonton Public Library
 # The Edmonton Public Library respectfully acknowledges that we sit on
 # Treaty 6 territory, traditional lands of First Nations and Metis people.
 #
@@ -152,9 +152,10 @@ def main(argv):
     if not noticeReader:
         usage()
         sys.exit()
-    # print(noticeReader)
+
     fPrefix = noticeReader.getOutFileBaseName()
     rptDate = noticeReader.getReportDate()
+    print(f"TESTING: Report date = {rptDate}")
     if isPdfOutput:
         noticeFormatter = PdfFormatter(fileBaseName=fPrefix, configs=configsDict, reportDate=rptDate, debug=debugMode)
     else:

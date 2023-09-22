@@ -36,7 +36,7 @@ INCH = 72.0
 class Page:
     def __init__(self, pageNumber:int, configs:dict, debug:bool):
         self.debug           = debug
-        self.page            = ''
+        self.page            = []
         self.configDict      = configs
         self.font            = self.configDict.get('font')
         self.fontSize        = self.configDict.get('fontSize')
@@ -196,7 +196,7 @@ class Page:
 
     # The string version of this object.
     def __str__(self):
-        return self.page
+        return '\n'.join(self.page)
 
     # Adds folds, perferations, and registration marks for debugging. 
     def addRegistrationMarks(self):
@@ -208,7 +208,6 @@ class PdfPage(Page):
     # Configuration dict currently must contain font, fontsize, and kerning.
     def __init__(self, pageNumber:int, configs:dict, debug:bool=False):
         super().__init__(pageNumber, configs, debug)
-        self.page = []
         self.canvas = configs.get('canvas')
         if not self.canvas:
             print(f"*error, PdfPage expected canvas object to be a member of the configs dictionary.")
@@ -317,12 +316,14 @@ class PostScriptPage(Page):
         super().__init__(pageNumber, configs, debug)
         self.registration = ''
         if self.debug:
-            self.registration = f"pageborder\n"
-            self.page  = '%!PS-Adobe-3.0\n'
-            self.page += '/' + self.font + ' findfont\n' + str(self.fontSize) + ' scalefont\nsetfont\n'
-            self.page += self.__registration_functions__()
-            self.page += '%%Pages: 1\n'
-        self.page += '%%Page: ' + str(pageNumber) + ' ' + str(pageNumber) + '\n'
+            self.registration = f"pageborder"
+            self.page.append(f"%!PS-Adobe-3.0")
+            self.page.append(f"/{self.font} findfont")
+            self.page.append(f"{str(self.fontSize)} scalefont")
+            self.page.append(f"setfont")
+            self.page.append(self.__registration_functions__())
+            self.page.append(f"%%Pages: 1")
+        self.page.append(f"%%Page: {str(pageNumber)} {str(pageNumber)}")
         self.isIncomplete = True # marker that page is complete.
         
     # Writes a line of text to the location given. Origin (0,0) is at the
@@ -336,19 +337,23 @@ class PostScriptPage(Page):
     def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
         myFontSize = self.fontSize
         if fontSize or bold:
-            self.page += f"gsave\n"
+            self.page.append(f"gsave")
             if fontSize:
                 myFontSize = fontSize
             if bold:
-                self.page += f"/{self.font}-Bold findfont\n{str(myFontSize)} scalefont\nsetfont\n"
+                self.page.append(f"/{self.font}-Bold findfont")
+                self.page.append(f"{str(myFontSize)} scalefont")
+                self.page.append(f"setfont")
         x_s = str(x * INCH)
         y_s = str(y * INCH)
         # sanitize the line parens are special symbols in PS.
         line = line.replace('(', '\(')
         line = line.replace(')', '\)')
-        self.page += f"newpath\n{x_s} {y_s} moveto\n({line}) show\n"
+        self.page.append(f"newpath")
+        self.page.append(f"{x_s} {y_s} moveto")
+        self.page.append(f"({line}) show")
         if fontSize or bold:
-            self.page += f"grestore\n"
+            self.page.append(f"grestore")
         return y - (self.kerning / INCH) # convert points to inches to keep y in sync
     
     # Sets a list of strings at the appropriate location
@@ -360,12 +365,14 @@ class PostScriptPage(Page):
     # return: float - the y location of the last line printed.
     def __set_text_block__(self, lines:list, x:float, y:float, bold:bool=False) ->float:
         if bold:
-            self.page += 'gsave\n'
-            self.page += '/' + self.font + '-Bold findfont\n' + str(self.fontSize) + ' scalefont\nsetfont\n'
+            self.page.append(f"gsave")
+            self.page.append(f"/{self.font}-Bold findfont")
+            self.page.append(f"{str(self.fontSize)} scalefont")
+            self.page.append(f"setfont")
         for line in lines:
             y = self.__set_text__(line, x, y)
         if bold:
-            self.page += 'grestore\n'
+            self.page.append(f"grestore")
         return y
 
     # Default method that stringifies object.
@@ -373,66 +380,65 @@ class PostScriptPage(Page):
     # return: the postscript string of this object.
     def __str__(self):
         if self.debug:
-            self.page += self.registration
-        self.page += f"showpage"
-        return self.page
+            self.page.append(self.registration)
+        self.page.append(f"showpage")
+        return '\n'.join(self.page)
 
     # Adds folds, perferations, and registration marks for debugging. 
     def addRegistrationMarks(self):
-        return f"pageborder\n"
+        return f"pageborder"
 
     def __registration_functions__(self) ->str:
         myFunc = '''/inch {
-            72.0 mul
-        } def
-        /perfline {
-            [6 3] 3 setdash
-            stroke
-            newpath
-        } def
-        /fineperfline {
-            gsave
-            0.5 setgray
-            [4 2] 0 setdash
-            stroke
-            grestore
-            newpath
-        } def
-        /pageborder{
-            % Outline of the page
-            0.5 inch 0  inch moveto
-            0.5 inch 11 inch lineto
-            8   inch 0  inch moveto
-            8   inch 11 inch lineto
-            0.5 setlinewidth
-            perfline
-            % Lowest perferation line
-            0   inch 3.09375 inch moveto
-            8.5 inch 3.09375 inch lineto
-            0.25 setlinewidth
-            fineperfline
-            % Fold line lower 1/3
-            0   inch 3.5625 inch moveto
-            8.5 inch 3.5625 inch lineto
-            perfline
-            % Fine perforation above fold lower fold line.
-            0   inch 4.09375 inch moveto
-            8.5 inch 4.09375 inch lineto
-            fineperfline
-            % Fine perferation below top fold line.
-            0   inch 6.84375 inch moveto
-            8.5 inch 6.84375 inch lineto
-            fineperfline
-            % Top fold line
-            0   inch 7.275  inch moveto
-            8.5 inch 7.275  inch lineto
-            perfline
-            % Top-most tear line perferation.
-            0   inch 10.4375    inch moveto
-            8.5 inch 10.4375    inch lineto
-            fineperfline
-        } def
-        '''
+    72.0 mul
+} def
+/perfline {
+    [6 3] 3 setdash
+    stroke
+    newpath
+} def
+/fineperfline {
+    gsave
+    0.5 setgray
+    [4 2] 0 setdash
+    stroke
+    grestore
+    newpath
+} def
+/pageborder {
+    % Outline of the page
+    0.5 inch 0  inch moveto
+    0.5 inch 11 inch lineto
+    8   inch 0  inch moveto
+    8   inch 11 inch lineto
+    0.5 setlinewidth
+    perfline
+    % Lowest perferation line
+    0   inch 3.09375 inch moveto
+    8.5 inch 3.09375 inch lineto
+    0.25 setlinewidth
+    fineperfline
+    % Fold line lower 1/3
+    0   inch 3.5625 inch moveto
+    8.5 inch 3.5625 inch lineto
+    perfline
+    % Fine perforation above fold lower fold line.
+    0   inch 4.09375 inch moveto
+    8.5 inch 4.09375 inch lineto
+    fineperfline
+    % Fine perferation below top fold line.
+    0   inch 6.84375 inch moveto
+    8.5 inch 6.84375 inch lineto
+    fineperfline
+    % Top fold line
+    0   inch 7.275  inch moveto
+    8.5 inch 7.275  inch lineto
+    perfline
+    % Top-most tear line perferation.
+    0   inch 10.4375    inch moveto
+    8.5 inch 10.4375    inch lineto
+    fineperfline
+} def'''
         return myFunc
 
 if __name__ == "__main__":

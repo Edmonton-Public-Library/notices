@@ -212,7 +212,7 @@ class NoticeFormatter:
         return page
 
 class PdfFormatter(NoticeFormatter):
-    def __init__(self, fileBaseName:str, configs:dict={}, reportDate=None, debug=True):
+    def __init__(self, fileBaseName:str, configs:dict={}, reportDate:str=None, debug:bool=True):
         # This is a little convoluted, but create the PDF canvas object and add it to the 
         # config dict. This doesn't disturb the PS code and doesn't need the implementor 
         # to know anything about the details of how we do PDF.
@@ -238,7 +238,7 @@ class PdfFormatter(NoticeFormatter):
         return 'PDF formatter: ' + self.fileName
 
 class PostScriptFormatter(NoticeFormatter):
-    def __init__(self, fileBaseName:str, configs:dict={}, reportDate=None, debug=True):
+    def __init__(self, fileBaseName:str, configs:dict={}, reportDate:str=None, debug:bool=True):
         super().__init__(fileBaseName, configs=configs, reportDate=reportDate, debug=debug)
 
     # Finalizes all the pages into a single PS file.
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     baseFileName = 'testformatpage'
     configs = {'font': 'Courier', 'fontSize': 10.0, 'kerning': 12.0, 'leftMargin': 0.875}
     ### Test Postscript notice formatter. 
-    noticeFormatter = PostScriptFormatter(f"{baseFileName}PS", configs, debug=True)
+    noticeFormatter = PostScriptFormatter(f"{baseFileName}PS", configs, reportDate='May 01, 2007', debug=True)
     noticeFormatter.setGlobalTitle(f"Test Page")
     noticeFormatter.setGlobalHeader(f"Our records indicate that the following amount(s) is outstanding by more than 15 days.")
     noticeFormatter.setGlobalHeader(f"This may block your ability to borrow or to place holds or to renew materials online ")
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     noticeFormatter.outputNotices()
     print('=>' + str(customer.getPagesPrinted()))
     ### Test the PDF notice formatter. 
-    noticeFormatter = PdfFormatter(f"{baseFileName}PDF", configs, debug=True) 
+    noticeFormatter = PdfFormatter(f"{baseFileName}PDF", configs, reportDate='May 01, 2007', debug=True) 
     noticeFormatter.setGlobalTitle(f"Test Page")
     noticeFormatter.setGlobalHeader(f"Our records indicate that the following amount(s) is outstanding by more than 15 days.")
     noticeFormatter.setGlobalHeader(f"This may block your ability to borrow or to place holds or to renew materials online ")
