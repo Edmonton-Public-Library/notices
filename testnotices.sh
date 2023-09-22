@@ -520,19 +520,19 @@ logit " "
 logit "TEST: compiling pre-lost notices"
 python ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} $X_ARGS >>${LOG_FILE}
 logit " "
-# logit "Cleaning up. The script can be run repeatedly."
-## remove the test_report and test_bulletin directories. They will be rebuilt next run.
-# rm "$BILLS"
-# # rm $HOLDS
-# rm "$OVERDUES"
-# rm "$PREREFERRAL"
-# rm "$PRELOST"
-# rm "${BULLETIN_DIR}/blankmessage"
-# rm "${BULLETIN_DIR}/eclosing"
-# rm "${BULLETIN_DIR}/eclosing8daysprint"
-# rm "${BULLETIN_DIR}/overdue8daysprint"
-# rm "${BULLETIN_DIR}/prelostoverdue1stprint"
-# rm "${BULLETIN_DIR}/prelostoverdueclosingprint"
-# rm "${BULLETIN_DIR}/prereferralbillclosing"
+logit "Cleaning up. The script can be run repeatedly."
+# remove the test_report and test_bulletin directories. They will be rebuilt next run.
+rm "$BILLS"
+# rm $HOLDS
+rm "$OVERDUES"
+rm "$PREREFERRAL"
+rm "$PRELOST"
+rm "${BULLETIN_DIR}/blankmessage"
+rm "${BULLETIN_DIR}/eclosing"
+rm "${BULLETIN_DIR}/eclosing8daysprint"
+rm "${BULLETIN_DIR}/overdue8daysprint"
+rm "${BULLETIN_DIR}/prelostoverdue1stprint"
+rm "${BULLETIN_DIR}/prelostoverdueclosingprint"
+rm "${BULLETIN_DIR}/prereferralbillclosing"
 deactivate
 logit "Done, check the $PRINT_DIR for results."
