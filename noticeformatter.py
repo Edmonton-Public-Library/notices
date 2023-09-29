@@ -230,8 +230,13 @@ class PdfFormatter(NoticeFormatter):
     # Finalizes all the pages into a single PS file.
     # return: None, but outputs the PDF file.
     def outputNotices(self):
-        for pages in self.customerNotices:
-            print(pages)
+        if not self.customerNotices:
+            page = PdfPage(0, self.configDict, debug=self.debug)
+            page.setItem(["Take a breather...", "Nothing to see here.", "This report does not contain mail-able customers."], page.xDate, page.yDate)
+            print(page)
+        else:
+            for pages in self.customerNotices:
+                print(pages)
         self.canvas.save()
 
     def __str__(self):

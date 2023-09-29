@@ -97,3 +97,16 @@ Holds
 True
 >>> report.getReportDate()
 'Friday, December 7, 2012'
+
+
+Seems like reports that don't contain customer data are creating corrupt PDFs.
+Let's see if that's true and fix it.
+
+Pre-referral No customers
+-------------------------
+>>> report = PreReferral('tests/refr_nocustomers.prn', 'tests/bulletin', 'tests/print')
+>>> report.parseReport()
+True
+>>> print(f"{report}")
+PreReferral Notice using: tests/refr_nocustomers.prn
+["address: ['Jacqueline Onasis', '403-12345 Saskatchewan Drive NW', 'Edmonton, AB', 'T6E 4R9'], snail: False, wellformed: True, itemcount: 2"]
