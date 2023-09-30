@@ -232,7 +232,7 @@ class PdfFormatter(NoticeFormatter):
     def outputNotices(self):
         if not self.customerNotices:
             page = PdfPage(0, self.configDict, debug=self.debug)
-            page.setItem(["Take a breather...", "Nothing to see here.", "This report does not contain mail-able customers."], page.xDate, page.yDate)
+            page.setItem(["Take a breather...", "Nothing to mail in this report."], page.xDate, page.yDate)
             print(page)
         else:
             for pages in self.customerNotices:
