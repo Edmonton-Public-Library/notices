@@ -30,7 +30,7 @@
 ###
 ### Edit this file to include new reports.
 ###
-VERSION="1.01.00"
+VERSION="1.01.01"
 HOST=$(hostname)
 
 # Activate the virtual environment.
@@ -39,7 +39,7 @@ if [ "$HOST" == 'ubuntu' ]; then
    LOCAL_DIR=/home/anisbet/EPL/Notices/notices
 else # or on production...
    . /home/ils/notices/venv/bin/activate
-   LOCAL_DIR=/home/ils/notices
+   LOCAL_DIR=/home/ils/notices/bin
 fi
 LOCAL_BIN_DIR="$LOCAL_DIR"
 X_ARGS=" -P -R"
