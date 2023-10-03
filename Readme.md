@@ -32,6 +32,9 @@ To deploy this application, change the destination server hostname and from the 
 make # Fires the default rule: 'production'.
      # Copies all the required files to the production server 
      # and renames 'Makefile.remote' to 'Makefile' on the remote server.
+     # To test ssh to the production server and type the following.
+make test
+make test_pdf
 ```
 
 # Customer Notices

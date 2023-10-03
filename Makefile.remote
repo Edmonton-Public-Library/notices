@@ -16,7 +16,7 @@
 #
 
 LOCAL=/home/ils/notices
-LOCAL_BIN=/home/ils/notices/bin
+LOCAL_BIN=${LOCAL}/bin
 APP=notice.py
 RELATED=${LOCAL_BIN}/customer.py ${LOCAL_BIN}/reportreader.py ${LOCAL_BIN}/page.py ${LOCAL_BIN}/noticeformatter.py ${LOCAL_BIN}/report.sh ${LOCAL_BIN}/bulletin.sh ${LOCAL_BIN}/pstopdf.sh ${LOCAL_BIN}/notices.sh
 PRINT_DIR=${LOCAL}/print
@@ -30,6 +30,7 @@ ARGS_BILLS= -b 10.0 --ifile=${BILLS}
 ARGS_OVERD= -o --ifile=${OVERDUES}
 ARGS_PREFR= -r --ifile=${PREREFR}
 ARGS_PLOST= -p --ifile=${PRELOST}
+TEST_ADDR=andrew.nisbet@epl.ca
 
 bills:
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_BILLS}
@@ -59,7 +60,13 @@ test: ${RELATED}
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_PREFR}
 	python3 ${LOCAL_BIN}/${APP} ${ARGS_PLOST}
 	
-pdf:
+test_pdf: ${RELATED}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_BILLS} -p -t ${TEST_ADDR}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_OVERD} -p -t ${TEST_ADDR}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PREFR} -p -t ${TEST_ADDR}
+	python3 ${LOCAL_BIN}/${APP} ${ARGS_PLOST} -p -t ${TEST_ADDR}
+
+convert:
 	${LOCAL_BIN}/pstopdf.sh
 	
 page:
@@ -79,3 +86,4 @@ clean:
 	
 proper: clean
 	-rm ${LOCAL_BIN}/*.pyc
+	-rm -rf ${LOCAL_BIN}/__pycache__
