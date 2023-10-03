@@ -5,7 +5,7 @@
 | Makefile.remote | No change. |
 | report.sh | Added `--reprint` and `--code` switches for printing reports from dates other than today. |
 | notice.py | Added `--pdf` and `--font` switches. |
-| reportreader.py | Cleaned code and added `PdfNoticeFormatter`. |
+| reportreader.py | Cleaned code and added `PdfNoticeFormatter`. Uses report date not current date. |
 | bulletin.sh | No change. |
 | Makefile | Added `test` and `clean` rules. |
 | pstopdf.sh | Made optional if using `notice.py --pdf`. |
@@ -24,12 +24,20 @@ There are several levels of tests that can be done on this application and its c
   5) `reportreader.py` has canned reports as dependencies. They can be found in `bin_tests.tar`. Just untar the file in the current directory to install them, then run `python reportreader.py`. 
   6) Optional: clean up these directories after checking the output. 
 
+## Deploying
+There are two `Makefile`s; one called `Makefile` which manages deployment to a remote production server. The other, `Makefile.remote` gets renamed and copied to production. Its job is to document and perform all tests. 
+
+To deploy this application, change the destination server hostname and from the command line type the following.
+```bash 
+make # Fires the default rule: 'production'.
+     # Copies all the required files to the production server 
+     # and renames 'Makefile.remote' to 'Makefile' on the remote server.
+```
+
 # Customer Notices
 **August 22, 2023**
 Added argument handling for `report.sh` to allow it to process a specific report by sched ID. See `--reprint` and `--code` in `report.sh`.
-
-# TODO:
-* Change the code in the report generator to use the report date, not the current date - Done.
+Changed the code in the report generator to use the report date, not the current date.
 
 **December 21, 2012**
 The process of running print notices is a series of steps, all of which have been automated with scripts in this directory.
