@@ -42,7 +42,7 @@ else # or on production...
    LOCAL_DIR=/home/ils/notices/bin
 fi
 LOCAL_BIN_DIR="$LOCAL_DIR"
-X_ARGS=" -P -R"
+X_ARGS=" -P -R --font=Helvetica"
 APP=notice.py
 PRINT_DIR=${LOCAL_DIR}/print
 REPORT_DIR=${LOCAL_DIR}/reports
@@ -421,7 +421,7 @@ Thursday, September 21, 2023
 .endblock
 
 .block
-  5   Big problemas / Juana Medina.
+  5   Nintendō Kabushiki Kaisha. 2017 [game] TEST.
       Medina, Juana, 1980-
       date billed:9/7/2023     bill reason:LOST         amount due:     \$7.48
 .endblock
@@ -512,16 +512,16 @@ EOF
 ## Run the tests
 logit "TEST SCRIPT: == Starting $0 version: $VERSION on $HOST"
 logit "TEST: compiling bill notices"
-python ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i${BILLS} $X_ARGS >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -s -b10.0 -i "$BILLS" $X_ARGS >>${LOG_FILE}
 logit " "
 logit "TEST: compiling overdue notices"
-python ${LOCAL_BIN_DIR}/${APP} -o -s     -i${OVERDUES} $X_ARGS >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -o -s     -i "$OVERDUES" $X_ARGS >>${LOG_FILE}
 logit " "
 logit "TEST: compiling pre-referral notices"
-python ${LOCAL_BIN_DIR}/${APP} -r -s     -i${PREREFERRAL} $X_ARGS >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -r -s     -i "$PREREFERRAL" $X_ARGS >>${LOG_FILE}
 logit " "
 logit "TEST: compiling pre-lost notices"
-python ${LOCAL_BIN_DIR}/${APP} -p -s     -i${PRELOST} $X_ARGS >>${LOG_FILE}
+python ${LOCAL_BIN_DIR}/${APP} -p -s     -i "$PRELOST" $X_ARGS >>${LOG_FILE}
 logit " "
 logit "Cleaning up. The script can be run repeatedly."
 # remove the test_report and test_bulletin directories. They will be rebuilt next run.
