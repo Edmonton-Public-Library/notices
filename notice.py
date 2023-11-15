@@ -49,7 +49,7 @@ from reportreader import Hold, Bill, Overdue, PreReferral, PreLost
 from noticeformatter import PostScriptFormatter, PdfFormatter
 # Test to see if fonts are available to both Ghostscript and reportlab 
 # before adding to this dictionary.
-FONTS = {'courier': 'Courier', 'helvetica': 'Helvetica', 'times': 'Times'}
+FONTS = {'courier': 'Courier', 'helvetica': 'Helvetica', 'times': 'Times', 'dejavusans': 'DejaVuSans'}
 LOCAL_BULLETIN_FOLDER = 'bulletins'
 LOCAL_PRINT_FOLDER    = 'print'
 
@@ -64,7 +64,7 @@ Usage:
     -b[n] --dollars=n - Produce bill notices using bill threshold 'n', as an integer
       dollar value, like '10' for $10.00.
     --font='font_name' - Sets a different font for notices. Currently supported:
-         Helvetica, Times, and Courier. Can be extended in the future.
+         Helvetica, Times, Courier, and DejaVuSans.
     -h - Produce hold notices. We don't send these by mail anymore.
     -i --ifile - Argument file shall contain the raw report data to consume.
     -o - Produce overdue report.
@@ -89,6 +89,7 @@ def main(argv):
     isPdfOutput = False
     configsDict = {}
     configsDict['font'] = 'Courier'
+    # configsDict['font'] = 'DejaVuSans'
     debugMode = False
     try:
         opts, args = getopt.getopt(argv, "ohb:f:i:rpPRs", [ "dollars=", "font=", "ifile=" ])

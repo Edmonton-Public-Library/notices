@@ -42,7 +42,11 @@ else # or on production...
    LOCAL_DIR=/home/ils/notices/bin
 fi
 LOCAL_BIN_DIR="$LOCAL_DIR"
-X_ARGS=" -P -R --font=Helvetica"
+# X_ARGS=" -P -R --font=Courier"
+# X_ARGS=" -P -R --font=Helvetica"
+# Unicode display.
+X_ARGS=" -P -R --font=DejaVuSans"
+
 APP=notice.py
 PRINT_DIR=${LOCAL_DIR}/print
 REPORT_DIR=${LOCAL_DIR}/reports
@@ -147,8 +151,8 @@ Thursday, September 21, 2023
 .read /software/EDPL/Unicorn/Notices/blankmessage
 
 .block
-  1   Incredible hockey records / by Tom Glave.
-      Glave, Tom.
+  1   Incredible hockey records / by Thích Nhất Hạnh.
+      Nhất Hạnh, Thích.
       date billed:9/6/2023     bill reason:LOST         amount due:    \$30.20
 .endblock
 
@@ -187,8 +191,8 @@ Thursday, September 21, 2023
 .read /software/EDPL/Unicorn/Notices/blankmessage
 
 .block
-  1   Layla's luck / Jo Rooks.
-      Rooks, Jo.
+  1   Layla's luck / Thích Nhất Hạnh.
+      Thích Nhất Hạnh.
       date billed:9/6/2023     bill reason:LOST         amount due:    \$21.12
 .endblock
 
@@ -246,7 +250,7 @@ Thursday, September 21, 2023
   1  call number:613.2 BUE                                 ID:31221122339448  
      The Blue Zones challenge : a 4-week plan for a longer, better life / Dan
      Buettner.
-     Buettner, Dan.
+     Thích Nhất Hạnh.
      due:9/13/2023,23:59 
 
   2  call number:613.25 PAS                                ID:31221108058897  
@@ -349,7 +353,7 @@ Thursday, September 21, 2023
 
 .block
   1   No one wins alone : a memoir / Mark Messier with Jimmy Roberts.
-      Messier, Mark, 1961-
+      Thích Nhất Hạnh, 1926-2022
       date billed:9/7/2023     bill reason:LOST         amount due:    \$31.59
 .endblock
 
@@ -421,7 +425,7 @@ Thursday, September 21, 2023
 .endblock
 
 .block
-  5   Nintendō Kabushiki Kaisha. 2017 [game] TEST.
+  5   Nintendō Kabushiki Kaisha. 2017 [game] TEST 'è'.
       Medina, Juana, 1980-
       date billed:9/7/2023     bill reason:LOST         amount due:     \$7.48
 .endblock
@@ -467,7 +471,7 @@ Thursday, September 21, 2023
 
   1  call number:CON                                       ID:31221320513224  
      Desert star / Michael Connelly.
-     Connelly, Michael, 1956-
+     Thích Nhất Hạnh, 1956-2022
      due:9/13/2023,23:59     price:\$29.83    
 
 .read /software/EDPL/Unicorn/Notices/prelostoverdueclosingprint

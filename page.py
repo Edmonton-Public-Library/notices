@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 ###########################################################################
 #
 #    Copyright (C) 2012 - 2023  Andrew Nisbet, Edmonton Public Library
@@ -26,8 +27,8 @@
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
 # Rev:     
-#          1.0 - Refactored classes to simplify interfaces and balance 
-#                method responsibilities.
+#  1.1 Added contextual adding other TTFonts for better Unicode display
+#      over Helvetica, Courier, and Times.
 ###########################################################################
 import sys
 from reportlab.pdfgen.canvas import Canvas
@@ -209,6 +210,16 @@ class PdfPage(Page):
     def __init__(self, pageNumber:int, configs:dict, debug:bool=False):
         super().__init__(pageNumber, configs, debug)
         self.canvas = configs.get('canvas')
+        # Replace 'DejaVuSans.ttf' with the path to a Unicode font file on your system
+        # Helvetica just cannot display the extended characters of Vietnamese so switch
+        # to DejaVuSans or other if required.
+        # pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
+        ### Warning this overrides any font selection set by the parameters which is 
+        if self.font != 'Courier' and self.font != 'Helvetica' and self.font != 'Times':
+            # Required for Unicode True Type Fonts.
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            pdfmetrics.registerFont(TTFont(self.font, f"{self.font}.ttf"))
         if not self.canvas:
             print(f"*error, PdfPage expected canvas object to be a member of the configs dictionary.")
             # Signal the shell there was a problem.
@@ -237,6 +248,11 @@ class PdfPage(Page):
                 tmpFontSize = round(fontSize)
             if bold:
                 tmpFont = f"{self.font}-Bold"
+                try:
+                    self.canvas.setFont(tmpFont, tmpFontSize)
+                except KeyError:
+                    # Go without bold.
+                    tmpFont = f"{self.font}"
         self.page.append(lambda: self.canvas.setFont(tmpFont, tmpFontSize))
         self.page.append(lambda: self.canvas.drawString(x * INCH, y * INCH, line))
         if fontSize or bold:
