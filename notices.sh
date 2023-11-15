@@ -25,6 +25,8 @@
 #
 # Author:  Andrew Nisbet, Edmonton Public Library
 # Date:    November 7, 2012
+# Rev:     1.07.00 Added -f flag to allow different fonts 
+#          for Unicode coverage.
 #
 ###########################################################################
 ###
@@ -39,7 +41,7 @@ export EXCEPTIONS=${LOCAL_DIR}/unmailable_customers.txt
 IS_TEST=false
 IS_PDF=false
 # Added --pdf switch.
-VERSION="1.06.00"
+VERSION="1.06.01"
 HOST=$(hostname)
 TEST_ACCOUNTS=''
 X_ARGS=''
@@ -72,6 +74,7 @@ usage()
   the mail clerks.
    
   Options:
+    -f, -font, --font="DejaVuSans" - Changes font of reports from default 'Courier'.
     -h, -help, --help - prints this help message and exits.
     -p, -pdf, --pdf - Prints output notices to PDF directly.
     -t, -test, --test[email@example.com] - Run notices in test mode, and
@@ -89,7 +92,7 @@ EOFU!
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -l "help,pdf,test:,version,xhelp" -o "hpt:vx" -a -- "$@")
+options=$(getopt -l "help,font:,pdf,test:,version,xhelp" -o "hf:pt:vx" -a -- "$@")
 if [ $? != 0 ] ; then echo "Failed to parse options...exiting." >&2 ; exit 1 ; fi
 # set --:
 # If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters
@@ -102,6 +105,11 @@ do
     -h|--help)
         usage
         exit 0
+        ;;
+    -f|--font)
+        shift
+        X_ARGS="$X_ARGS --font=$1"
+        logit "=== Font changed to $1"
         ;;
     -p|--pdf)
         export IS_PDF=true
