@@ -31,6 +31,7 @@
 #      over Helvetica, Courier, and Times.
 ###########################################################################
 import sys
+import re
 from reportlab.pdfgen.canvas import Canvas
 
 INCH = 72.0
@@ -66,8 +67,11 @@ class Page:
     # param: bold:bool - True if bold text to be used and false otherwise. 
     # param: fontSize:float - Optional if provided will set font size.  
     # return: y coordinate of the next line of text. 
-    def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
-        pass
+    def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None):
+        # Format section separators like '=========...' to not overrun the side of the page. 
+        if re.search("={5,}", line):
+            line = '     ' + '=' * 41
+        return line
 
     # Sets a list of strings at the appropriate location
     # param:  lines - array of strings to be laid out on the page
@@ -240,6 +244,7 @@ class PdfPage(Page):
     # param: fontSize:float - Optional if provided will set font size.  
     # return: y coordinate of the next line of text. 
     def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
+        line = super().__set_text__(line, x, y, bold, fontSize)
         tmpFontSize = round(self.fontSize)
         tmpFont = self.font
         if fontSize or bold:
@@ -351,6 +356,7 @@ class PostScriptPage(Page):
     # param: fontSize:float - Optional if provided will set font size.  
     # return: y coordinate of the next line of text. 
     def __set_text__(self, line:str, x:float, y:float, bold:bool=False, fontSize:float=None) ->float:
+        line = super().__set_text__(line, x, y, bold, fontSize)
         myFontSize = self.fontSize
         if fontSize or bold:
             self.page.append(f"gsave")
